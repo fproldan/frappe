@@ -778,6 +778,15 @@ frappe.views.QueryReport = class QueryReport extends frappe.views.BaseList {
 		frappe.breadcrumbs.add(ref_doctype.module);
 	}
 
+	get_filtered_and_ordered_data(){
+		const rows_in_order = this.datatable.datamanager.rowViewOrder.map(index => {
+			if (this.datatable.bodyRenderer.visibleRowIndices.includes(index)) {
+				return this.data[index];
+			}
+		}).filter(Boolean);
+		return rows_in_order;
+	}
+
 	print_report(print_settings) {
 		const custom_format = this.report_settings.html_format || null;
 		const filters_html = this.get_filters_html_for_print();
@@ -792,6 +801,7 @@ frappe.views.QueryReport = class QueryReport extends frappe.views.BaseList {
 			filters: this.get_filter_values(),
 			data: custom_format ? this.data : this.get_data_for_print(),
 			columns: custom_format ? this.columns : this.get_columns_for_print(),
+			ordered_data: get_filtered_and_ordered_data(),
 			report: this
 		});
 	}
@@ -916,8 +926,7 @@ frappe.views.QueryReport = class QueryReport extends frappe.views.BaseList {
 	}
 
 	get_data_for_print() {
-		const indices = this.datatable.datamanager.getFilteredRowIndices();
-		let rows = indices.map(i => this.data[i]);
+		let rows = get_filtered_and_ordered_data();
 		let totalRow = this.datatable.bodyRenderer.getTotalRow().reduce((row, cell) => {
 			row[cell.column.id] = cell.content;
 			return row;

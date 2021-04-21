@@ -518,8 +518,13 @@ def get_messages_from_file(path):
 	apps_path = get_bench_dir()
 	if os.path.exists(path):
 		with open(path, 'r') as sourcefile:
+			try:
+				file_contents = sourcefile.read()
+			except Exception:
+				print("Could not scan file for translation: {0}".format(path))
+				return []
 			data = [(os.path.relpath(path, apps_path), message, context, line) \
-				for line, message, context in  extract_messages_from_code(sourcefile.read())]
+				for line, message, context in extract_messages_from_code(file_contents)]
 			return data
 	else:
 		# print "Translate: {0} missing".format(os.path.abspath(path))
@@ -827,7 +832,7 @@ def get_all_languages(with_language_name=False):
 		return frappe.db.sql_list('select name from tabLanguage')
 
 	def get_all_language_with_name():
-		return frappe.db.get_all('language', ['language_code', 'language_name'])
+		return frappe.db.get_all('Language', ['language_code', 'language_name'])
 
 	if not frappe.db:
 		frappe.connect()

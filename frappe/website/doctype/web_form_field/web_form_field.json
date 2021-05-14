@@ -39,7 +39,7 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Fieldtype",
-   "options": "Attach\nAttach Image\nCheck\nCurrency\nData\nDate\nDatetime\nDuration\nFloat\nHTML\nInt\nLink\nRating\nSelect\nSmall Text\nText\nText Editor\nTable\nSection Break\nColumn Break"
+   "options": "Attach\nAttach Image\nCheck\nCurrency\nData\nDate\nDatetime\nDuration\nFloat\nHTML\nInt\nLink\nPassword\nRating\nSelect\nSmall Text\nText\nText Editor\nTable\nSection Break\nColumn Break"
   },
   {
    "fieldname": "label",

@@ -387,6 +387,8 @@ export default class Grid {
 			this.wrapper.find('.grid-footer').toggle(false);
 		}
 
+		this.wrapper.find('.grid-add-row, .grid-add-multiple-rows').toggle(this.is_editable());
+
 	}
 
 	truncate_rows() {
@@ -908,6 +910,10 @@ export default class Grid {
 
 	update_docfield_property(fieldname, property, value) {
 		// update the docfield of each row
+		if (!this.grid_rows) {
+			return;
+		}
+
 		for (let row of this.grid_rows) {
 			let docfield = row.docfields.find(d => d.fieldname === fieldname);
 			if (docfield) {

@@ -7,7 +7,8 @@ export default class GridRow {
 		$.extend(this, opts);
 		if (this.doc && this.parent_df.options) {
 			frappe.meta.make_docfield_copy_for(this.parent_df.options, this.doc.name, this.docfields);
-			this.docfields = frappe.meta.get_docfields(this.parent_df.options, this.doc.name);
+			const docfields = frappe.meta.get_docfields(this.parent_df.options, this.doc.name);
+			this.docfields = docfields.length ? docfields : opts.docfields;
 		}
 		this.columns = {};
 		this.columns_list = [];
@@ -422,7 +423,7 @@ export default class GridRow {
 			field.$input
 				.addClass('input-sm')
 				.attr('data-col-idx', column.column_index)
-				.attr('placeholder', __(df.label));
+				.attr('placeholder', __(df.placeholder || df.label));
 			// flag list input
 			if (this.columns_list && this.columns_list.slice(-1)[0]===column) {
 				field.$input.attr('data-last-input', 1);
@@ -557,13 +558,10 @@ export default class GridRow {
 		this.row.toggle(false);
 		// this.form_panel.toggle(true);
 
-		if (this.grid.cannot_add_rows || (this.grid.df && this.grid.df.cannot_add_rows)) {
-			this.wrapper.find('.grid-insert-row-below, .grid-insert-row, .grid-duplicate-row')
-				.addClass('hidden');
-		} else {
-			this.wrapper.find('.grid-insert-row-below, .grid-insert-row, .grid-duplicate-row')
-				.removeClass('hidden');
-		}
+		let cannot_add_rows = this.grid.cannot_add_rows || (this.grid.df && this.grid.df.cannot_add_rows);
+		this.wrapper
+			.find('.grid-insert-row-below, .grid-insert-row, .grid-duplicate-row, .grid-append-row')
+			.toggle(!cannot_add_rows);
 
 		frappe.dom.freeze("", "dark");
 		if (cur_frm) cur_frm.cur_grid = this;

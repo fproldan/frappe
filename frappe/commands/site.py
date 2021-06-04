@@ -1,6 +1,7 @@
 # imports - standard imports
 import os
 import sys
+import shutil
 from six import text_type
 
 # imports - third party imports
@@ -203,9 +204,12 @@ def install_app(context, apps):
 
 
 @click.command("list-apps")
+@click.option("--format", "-f", type=click.Choice(["text", "json"]), default="text")
 @pass_context
-def list_apps(context):
+def list_apps(context, format):
 	"List apps in site"
+
+	summary_dict = {}
 
 	def fix_whitespaces(text):
 		if site == context.sites[-1]:
@@ -235,18 +239,23 @@ def list_apps(context):
 			]
 			applications_summary = "\n".join(installed_applications)
 			summary = f"{site_title}\n{applications_summary}\n"
+			summary_dict[site] = [app.app_name for app in apps]
 
 		else:
-			applications_summary = "\n".join(frappe.get_installed_apps())
+			installed_applications = frappe.get_installed_apps()
+			applications_summary = "\n".join(installed_applications)
 			summary = f"{site_title}\n{applications_summary}\n"
+			summary_dict[site] = installed_applications
 
 		summary = fix_whitespaces(summary)
 
-		if applications_summary and summary:
+		if format == "text" and applications_summary and summary:
 			print(summary)
 
 		frappe.destroy()
 
+	if format == "json":
+		click.echo(frappe.as_json(summary_dict))
 
 @click.command('add-system-manager')
 @click.argument('email')
@@ -548,7 +557,7 @@ def move(dest_dir, site):
 		site_dump_exists = os.path.exists(final_new_path)
 		count = int(count or 0) + 1
 
-	os.rename(old_path, final_new_path)
+	shutil.move(old_path, final_new_path)
 	frappe.destroy()
 	return final_new_path
 

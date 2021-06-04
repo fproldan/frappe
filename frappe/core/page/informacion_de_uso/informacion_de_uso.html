@@ -1,0 +1,82 @@
+<div>
+	{% if limits.upgrade_url %}
+	<div class="upgrade-message padding" style="border-bottom: 1px solid #d0d8dc;">
+		{% if limits.expiry %}
+			<h4>{{ __("You have {0} days left in your subscription", [days_to_expiry]) }}</h4>
+		{% else %}
+			<h4>{{ __("You have subscribed for one user free plan") }}</h4>
+		{% endif %}
+
+		<p>Upgrade to a premium plan with more users, storage and priority support.</p>
+		<button class="btn btn-primary btn-sm primary-action">Upgrade</button>
+	</div>
+	{% endif %}
+
+	{% if limits.users %}
+	    {% var users_percent = ((enabled_users / limits.users) * 100); %}
+		<div class="usage-info-section" style="margin: 30px;">
+			<h4>{{ "Usuarios" }}</h4>
+
+			<div class="progress" style="margin-bottom: 0;">
+				<div class="progress-bar progress-bar-{%= (users_percent < 75 ? "success" : "warning") %}" style="width: {{ users_percent }}%">
+				</div>
+			</div>
+
+			<p>{%= enabled_users %} de {%= limits.users %} habilitados</p>
+		</div>
+	{% endif %}
+
+	{% if limits.companies %}
+	    {% var companies_percent = ((enabled_companies / limits.companies) * 100); %}
+		<div class="usage-info-section" style="margin: 30px;">
+			<h4>{{ "Compañias" }}</h4>
+
+			<div class="progress" style="margin-bottom: 0;">
+				<div class="progress-bar progress-bar-{%= (companies_percent < 75 ? "success" : "warning") %}" style="width: {{ companies_percent }}%">
+				</div>
+			</div>
+
+			<p>{%= enabled_companies %} de {%= limits.companies %} habilitados</p>
+		</div>
+	{% endif %}
+
+	{% if limits.emails %}
+	<div class="usage-info-section" style="margin: 30px;">
+	    <h4>{{ "Emails" }}</h4>
+
+	    {% var email_percent = (( emails_sent / limits.emails ) * 100); %}
+	    {% var emails_remaining = (limits.emails - emails_sent) %}
+
+	    <div class="progress" style="margin-bottom: 0;">
+	        <div class="progress-bar progress-bar-{%= (email_percent < 75 ? "success" : "warning") %}" style="width: {{ email_percent }}%">
+	        </div>
+	    </div>
+
+		<p>{%= emails_sent %} de {%= limits.emails %} enviados este mes</p>
+	</div>
+	{% endif %}
+
+	{% if limits.space %}
+	<div class="usage-info-section" style="margin: 30px;">
+	    <h4>{{ "Espacio" }}</h4>
+
+	    <div class="progress" style="margin-bottom: 0;">
+	        <div class="progress-bar" style="width: {%= database_percent %}%; background-color: #5e64ff"></div>
+	        <div class="progress-bar" style="width: {%= files_percent %}%; background-color: #743ee2"></div>
+	        <div class="progress-bar" style="width: {%= backup_percent %}%; background-color: #7CD6FD"></div>
+	    </div>
+
+		<span class="indicator blue" style="margin-right: 20px;">
+			{{ "Tamaño de Base de Datos:" }} {%= limits.space_usage.database_size %} MB
+		</span>
+		<span class="indicator purple" style="margin-right: 20px;">
+			{{ "Tamaño de Archivos:" }} {%= limits.space_usage.files_size %} MB
+		</span>
+		<span class="indicator lightblue" style="margin-right: 20px;">
+			{{ "Tamaño de Backups" }} {%= limits.space_usage.backup_size %} MB
+		</span>
+
+		<p>{{ usage_message }}</p>
+	</div>
+	{% endif %}
+</div>

@@ -84,7 +84,8 @@ leaderboards = "frappe.desk.leaderboard.get_leaderboards"
 
 on_session_creation = [
 	"frappe.core.doctype.activity_log.feed.login_feed",
-	"frappe.core.doctype.user.user.notify_admin_access_to_system_manager"
+	"frappe.core.doctype.user.user.notify_admin_access_to_system_manager",
+	"frappe.limits.check_if_expired",
 ]
 
 # on_logout = "frappe.core.doctype.session_default_settings.session_default_settings.clear_session_defaults"
@@ -180,6 +181,9 @@ doc_events = {
 	"Page": {
 		"after_insert": "frappe.cache_manager.build_domain_restriced_page_cache",
 		"after_save": "frappe.cache_manager.build_domain_restriced_page_cache",
+	},
+	"Email Group Member": {
+		"validate": "frappe.email.doctype.email_group.email_group.restrict_email_group"
 	}
 }
 
@@ -207,7 +211,9 @@ scheduler_events = {
 		"frappe.deferred_insert.save_to_db",
 		"frappe.desk.form.document_follow.send_hourly_updates",
 		"frappe.integrations.doctype.google_calendar.google_calendar.sync",
-		"frappe.email.doctype.newsletter.newsletter.send_scheduled_email"
+		"frappe.email.doctype.newsletter.newsletter.send_scheduled_email",
+		"frappe.limits.update_space_usage",
+		"frappe.limits.update_site_usage",
 	],
 	"daily": [
 		"frappe.email.queue.set_expiry_for_email_queue",
@@ -285,6 +291,8 @@ setup_wizard_exception = [
 	"frappe.desk.page.setup_wizard.setup_wizard.email_setup_wizard_exception",
 	"frappe.desk.page.setup_wizard.setup_wizard.log_setup_wizard_exception"
 ]
+
+before_write_file = "frappe.limits.validate_space_limit"
 
 before_migrate = ['frappe.patches.v11_0.sync_user_permission_doctype_before_migrate.execute']
 after_migrate = ['frappe.website.doctype.website_theme.website_theme.after_migrate']

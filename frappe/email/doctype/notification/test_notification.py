@@ -7,7 +7,9 @@ import frappe, frappe.utils, frappe.utils.scheduler
 from frappe.desk.form import assign_to
 import unittest
 
-test_dependencies = ["User", "Notification"]
+test_records = frappe.get_test_records('Notification')
+
+test_dependencies = ["User"]
 
 class TestNotification(unittest.TestCase):
 	def setUp(self):

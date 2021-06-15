@@ -15,6 +15,7 @@ from frappe.model.document import Document
 from frappe.utils.background_jobs import get_jobs
 from frappe.utils.data import get_link_to_form, get_url
 from frappe.utils.password import get_decrypted_password
+from frappe.custom.doctype.custom_field.custom_field import create_custom_field
 
 
 class EventProducer(Document):
@@ -55,8 +56,8 @@ class EventProducer(Document):
 			self.reload()
 
 	def check_url(self):
-		valid_url_schemes = ("http", "https")
-		frappe.utils.validate_url(self.producer_url, throw=True, valid_schemes=valid_url_schemes)
+		if not frappe.utils.validate_url(self.producer_url):
+			frappe.throw(_('Invalid URL'))
 
 		# remove '/' from the end of the url like http://test_site.com/
 		# to prevent mismatch in get_url() results

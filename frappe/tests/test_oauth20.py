@@ -2,12 +2,13 @@
 # MIT License. See license.txt
 
 import unittest
-from urllib.parse import parse_qs, urljoin, urlparse
-
-import jwt
 import requests
+import jwt
+from six.moves.urllib.parse import urlparse, parse_qs, urljoin
+from urllib.parse import urlencode, quote
 
 import frappe
+from frappe.test_runner import make_test_records
 from frappe.integrations.oauth2 import encode_params
 from frappe.test_runner import make_test_records
 

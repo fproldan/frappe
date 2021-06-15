@@ -1,13 +1,13 @@
-import base64
-import datetime
+import pytz
+import jwt
 import hashlib
 import re
-from http import cookies
-from urllib.parse import unquote, urlparse
+import base64
+import datetime
 
-import jwt
-import pytz
+from http import cookies
 from oauthlib.openid import RequestValidator
+from urllib.parse import urlparse, unquote
 
 import frappe
 from frappe.auth import LoginManager
@@ -599,10 +599,16 @@ def get_client_scopes(client_id):
 def get_userinfo(user):
 	picture = None
 	frappe_server_url = get_server_url()
+<<<<<<< HEAD
 	valid_url_schemes = ("http", "https", "ftp", "ftps")
 
 	if user.user_image:
 		if frappe.utils.validate_url(user.user_image, valid_schemes=valid_url_schemes):
+=======
+
+	if user.user_image:
+		if frappe.utils.validate_url(user.user_image):
+>>>>>>> tags/v13.4.1
 			picture = user.user_image
 		else:
 			picture = frappe_server_url + "/" + user.user_image

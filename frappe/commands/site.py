@@ -207,55 +207,56 @@ def install_app(context, apps):
 @click.option("--format", "-f", type=click.Choice(["text", "json"]), default="text")
 @pass_context
 def list_apps(context, format):
-    "List apps in site"
+	"List apps in site"
 
-    summary_dict = {}
+	summary_dict = {}
 
-    def fix_whitespaces(text):
-        if site == context.sites[-1]:
-            text = text.rstrip()
-        if len(context.sites) == 1:
-            text = text.lstrip()
-        return text
+	def fix_whitespaces(text):
+		if site == context.sites[-1]:
+			text = text.rstrip()
+		if len(context.sites) == 1:
+			text = text.lstrip()
+		return text
 
-    for site in context.sites:
-        frappe.init(site=site)
-        frappe.connect()
-        site_title = (
-            click.style(f"{site}", fg="green") if len(context.sites) > 1 else ""
-        )
-        apps = frappe.get_single("Installed Applications").installed_applications
+	for site in context.sites:
+		frappe.init(site=site)
+		frappe.connect()
+		site_title = (
+			click.style(f"{site}", fg="green") if len(context.sites) > 1 else ""
+		)
+		apps = frappe.get_single("Installed Applications").installed_applications
 
-        if apps:
-            name_len, ver_len = [
-                max([len(x.get(y)) for x in apps])
-                for y in ["app_name", "app_version"]
-            ]
-            template = "{{0:{0}}} {{1:{1}}} {{2}}".format(name_len, ver_len)
+		if apps:
+			name_len, ver_len = [
+				max([len(x.get(y)) for x in apps])
+				for y in ["app_name", "app_version"]
+			]
+			template = "{{0:{0}}} {{1:{1}}} {{2}}".format(name_len, ver_len)
 
-            installed_applications = [
-                template.format(app.app_name, app.app_version, app.git_branch)
-                for app in apps
-            ]
-            applications_summary = "\n".join(installed_applications)
-            summary = f"{site_title}\n{applications_summary}\n"
-            summary_dict[site] = [app.app_name for app in apps]
+			installed_applications = [
+				template.format(app.app_name, app.app_version, app.git_branch)
+				for app in apps
+			]
+			applications_summary = "\n".join(installed_applications)
+			summary = f"{site_title}\n{applications_summary}\n"
+			summary_dict[site] = [app.app_name for app in apps]
 
-        else:
-            installed_applications = frappe.get_installed_apps()
-            applications_summary = "\n".join(installed_applications)
-            summary = f"{site_title}\n{applications_summary}\n"
-            summary_dict[site] = installed_applications
+		else:
+			installed_applications = frappe.get_installed_apps()
+			applications_summary = "\n".join(installed_applications)
+			summary = f"{site_title}\n{applications_summary}\n"
+			summary_dict[site] = installed_applications
 
-        summary = fix_whitespaces(summary)
+		summary = fix_whitespaces(summary)
 
-        if format == "text" and applications_summary and summary:
-            print(summary)
+		if format == "text" and applications_summary and summary:
+			print(summary)
 
-        frappe.destroy()
+		frappe.destroy()
 
-    if format == "json":
-        click.echo(frappe.as_json(summary_dict))
+	if format == "json":
+		click.echo(frappe.as_json(summary_dict))
+
 
 @click.command('add-system-manager')
 @click.argument('email')
@@ -557,9 +558,9 @@ def move(dest_dir, site):
         site_dump_exists = os.path.exists(final_new_path)
         count = int(count or 0) + 1
 
-    shutil.move(old_path, final_new_path)
-    frappe.destroy()
-    return final_new_path
+	shutil.move(old_path, final_new_path)
+	frappe.destroy()
+	return final_new_path
 
 
 @click.command('set-admin-password')

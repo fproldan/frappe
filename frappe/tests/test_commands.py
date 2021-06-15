@@ -367,7 +367,7 @@ class TestCommands(BaseTestCommands):
 
 		# test 3: parse json format
 		self.execute("bench --site all list-apps --format json")
-		self.assertEqual(self.returncode, 0)
+		self.assertEquals(self.returncode, 0)
 		self.assertIsInstance(json.loads(self.stdout), dict)
 
 		self.execute("bench --site {site} list-apps --format json")
@@ -379,7 +379,7 @@ class TestCommands(BaseTestCommands):
 	def test_show_config(self):
 		# test 1: sanity check for command
 		self.execute("bench --site all show-config")
-		self.assertEqual(self.returncode, 0)
+		self.assertEquals(self.returncode, 0)
 
 		# test 2: test keys in table text
 		self.execute(
@@ -387,13 +387,13 @@ class TestCommands(BaseTestCommands):
 			{"second_order": json.dumps({"test_key": "test_value"})},
 		)
 		self.execute("bench --site {site} show-config")
-		self.assertEqual(self.returncode, 0)
+		self.assertEquals(self.returncode, 0)
 		self.assertIn("test_key.test_key", self.stdout.split())
 		self.assertIn("test_value", self.stdout.split())
 
 		# test 3: parse json format
 		self.execute("bench --site all show-config --format json")
-		self.assertEqual(self.returncode, 0)
+		self.assertEquals(self.returncode, 0)
 		self.assertIsInstance(json.loads(self.stdout), dict)
 
 		self.execute("bench --site {site} show-config --format json")

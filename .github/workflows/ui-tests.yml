@@ -11,9 +11,23 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-       containers: [1, 2]
+       include:
+        - DB: "mariadb"
+          TYPE: "server"
+          JOB_NAME: "Python MariaDB"
+          RUN_COMMAND: bench --site test_site run-tests
 
-    name: UI Tests (Cypress)
+        - DB: "postgres"
+          TYPE: "server"
+          JOB_NAME: "Python PostgreSQL"
+          RUN_COMMAND: bench --site test_site run-tests
+
+        - DB: "mariadb"
+          TYPE: "ui"
+          JOB_NAME: "UI MariaDB"
+          RUN_COMMAND:  bench --site test_site run-ui-tests frappe --headless
+
+    name: ${{ matrix.JOB_NAME }}
 
     services:
       mysql:
@@ -101,5 +115,17 @@ jobs:
       - name: Site Setup
         run: cd ~/frappe-bench/ && bench --site test_site execute frappe.utils.install.complete_setup_wizard
 
+<<<<<<< HEAD:.github/workflows/ui-tests.yml
       - name: UI Tests
         run: cd ~/frappe-bench/ && bench --site test_site run-ui-tests frappe --headless --parallel --ci-build-id $GITHUB_RUN_ID
+=======
+      - name: Setup tmate session
+        if: contains(github.event.pull_request.labels.*.name, 'debug-gha')
+        uses: mxschmitt/action-tmate@v3
+
+      - name: Run Tests
+        run: cd ~/frappe-bench/ && ${{ matrix.RUN_COMMAND }}
+        env:
+          DB: ${{ matrix.DB }}
+          TYPE: ${{ matrix.TYPE }}
+>>>>>>> tags/v13.4.1:.github/workflows/ci-tests.yml

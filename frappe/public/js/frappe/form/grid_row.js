@@ -320,7 +320,7 @@ export default class GridRow {
 				</div>
 				<p class='help-box small text-muted hidden-xs'>
 					<a class='add-new-fields text-muted'>
-						+ Add / Remove Columns
+						+ Añadir / Quitar Columnas
 					</a>
 				</p>
 			</div>
@@ -390,14 +390,14 @@ export default class GridRow {
 				fields += `
 					<div class='control-input flex align-center form-control fields_order sortable-handle sortable'
 						style='display: block; margin-bottom: 5px; cursor: pointer;' data-fieldname='${docfield.fieldname}'
-						data-label='${docfield.label}' data-type='${docfield.fieldtype}'>
+						data-label='${__(docfield.label)}' data-type='${docfield.fieldtype}'>
 
 						<div class='row'>
 							<div class='col-md-1'>
 								<a style='cursor: grabbing;'>${frappe.utils.icon('drag', 'xs')}</a>
 							</div>
 							<div class='col-md-7' style='padding-left:0px;'>
-								${docfield.label}
+								${__(docfield.label)}
 							</div>
 							<div class='col-md-3' style='padding-left:0px;margin-top:-2px;' title='${__('Columns')}'>
 								<input class='form-control column-width input-xs text-right'

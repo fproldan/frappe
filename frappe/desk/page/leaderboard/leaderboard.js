@@ -47,7 +47,8 @@ class Leaderboard {
 			// For translation. Do not remove this
 			// __("This Week"), __("This Month"), __("This Quarter"), __("This Year"),
 			//	__("Last Week"), __("Last Month"), __("Last Quarter"), __("Last Year"),
-			//	__("All Time"), __("Select From Date")
+			//	__("All Time"), __("Select From Date"), __("Total Sales Amount"), __("Total Qty Sold")
+			// __("Total Purchase Amount"), __("Total Qty Purchased"), __("Available Stock Qty"), __("Available Stock Value")
 			this.timespans = [
 				"This Week", "This Month", "This Quarter", "This Year",
 				"Last Week", "Last Month", "Last Quarter", "Last Year",

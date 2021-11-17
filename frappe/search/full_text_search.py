@@ -131,7 +131,7 @@ class FullTextSearch:
 			fieldboosts[field] = 1.0 / idx
 
 		with ix.searcher() as searcher:
-			parser = MultifieldParser(["title", "content"], ix.schema, termclass=FuzzyTermExtended)
+			parser = MultifieldParser(search_fields, ix.schema, termclass=FuzzyTermExtended, fieldboosts=fieldboosts)
 			parser.remove_plugin_class(FieldsPlugin)
 			parser.remove_plugin_class(WildcardPlugin)
 			query = parser.parse(text)

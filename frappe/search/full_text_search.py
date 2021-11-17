@@ -23,6 +23,9 @@ class FullTextSearch:
 	def get_schema(self):
 		return Schema(name=ID(stored=True), content=TEXT(stored=True))
 
+	def get_fields_to_search(self):
+		return ["name", "content"]
+
 	def get_id(self):
 		return "name"
 
@@ -119,6 +122,13 @@ class FullTextSearch:
 
 		results = None
 		out = []
+
+		search_fields = self.get_fields_to_search()
+		fieldboosts = {}
+
+		# apply reducing boost on fields based on order. 1.0, 0.5, 0.33 and so on
+		for idx, field in enumerate(search_fields, start=1):
+			fieldboosts[field] = 1.0 / idx
 
 		with ix.searcher() as searcher:
 			parser = MultifieldParser(["title", "content"], ix.schema, termclass=FuzzyTermExtended)

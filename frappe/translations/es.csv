@@ -4983,3 +4983,6 @@ The total column width cannot be more than 10.,El ancho total de la tabla no pue
 Column width cannot be zero.,El ancho de la columna no puede ser cero.,
 At least one column is required to show in the grid.,La tabla debe tener al menos una columna.,
 Files,Archivos,
+days,días,
+minutes,minutos,
+seconds,segundos,

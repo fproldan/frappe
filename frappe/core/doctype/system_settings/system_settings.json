@@ -70,6 +70,8 @@
   "enable_chat",
   "document_naming_section",
   "use_original_name_for_amended_document"
+  "system_updates_section",
+  "disable_system_update_notification"
  ],
  "fields": [
   {
@@ -489,12 +491,25 @@
    "fieldtype": "Check",
    "label": "Use original name for amended document",
    "read_only_depends_on": "eval:doc.use_original_name_for_amended_document==1"
+  },
+  {
+   "fieldname": "system_updates_section",
+   "fieldtype": "Section Break",
+   "label": "System Updates",
+   "hidden": 1,
+  },
+  {
+   "default": "1",
+   "fieldname": "disable_system_update_notification",
+   "fieldtype": "Check",
+   "label": "Disable System Update Notification",
+   "hidden": 1,
   }
  ],
  "icon": "fa fa-cog",
  "issingle": 1,
  "links": [],
- "modified": "2021-08-11 09:04:43.856970",
+ "modified": "2021-11-27 01:17:05.228959",
  "modified_by": "Administrator",
  "module": "Core",
  "name": "System Settings",

@@ -493,6 +493,7 @@
    "read_only_depends_on": "eval:doc.use_original_name_for_amended_document==1"
   },
   {
+   "collapsible": 1,
    "fieldname": "system_updates_section",
    "fieldtype": "Section Break",
    "label": "System Updates",
@@ -509,7 +510,7 @@
  "icon": "fa fa-cog",
  "issingle": 1,
  "links": [],
- "modified": "2021-11-27 01:17:05.228959",
+ "modified": "2021-11-29 18:09:53.601629",
  "modified_by": "Administrator",
  "module": "Core",
  "name": "System Settings",

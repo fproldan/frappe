@@ -1,11 +1,14 @@
 from enum import Enum
-from typing import Any, Callable, Dict, get_type_hints
+from typing import Any, Callable, Dict, Union, get_type_hints
 from importlib import import_module
 
 from pypika import Query
+from pypika.queries import Column
 
 import frappe
+
 from .builder import MariaDB, Postgres
+from pypika.terms import PseudoColumn
 
 from frappe.query_builder.terms import NamedParameterWrapper
 
@@ -25,7 +28,7 @@ class BuilderIdentificationFailed(Exception):
 	def __init__(self):
 		super().__init__("Couldn't guess builder")
 
-def get_query_builder(type_of_db: str) -> Query:
+def get_query_builder(type_of_db: str) -> Union[Postgres, MariaDB]:
 	"""[return the query builder object]
 
 	Args:
@@ -42,6 +45,9 @@ def get_attr(method_string):
 	modulename = '.'.join(method_string.split('.')[:-1])
 	methodname = method_string.split('.')[-1]
 	return getattr(import_module(modulename), methodname)
+
+def DocType(*args, **kwargs):
+	return frappe.qb.DocType(*args, **kwargs)
 
 def patch_query_execute():
 	"""Patch the Query Builder with helper execute method
@@ -66,8 +72,6 @@ def patch_query_execute():
 		raise BuilderIdentificationFailed
 
 	builder_class.run = execute_query
-<<<<<<< HEAD
-=======
 	builder_class.walk = prepare_query
 
 
@@ -80,4 +84,3 @@ def patch_query_aggregation():
 	frappe.qb.min = _min
 	frappe.qb.avg = _avg
 	frappe.qb.sum = _sum
->>>>>>> 9fdacedfc8 (feat: sanitise frappe.qb)

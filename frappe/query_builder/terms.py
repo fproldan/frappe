@@ -1,11 +1,6 @@
-<<<<<<< HEAD
 from typing import Any, Dict, Optional
 
 from pypika.terms import Function, ValueWrapper
-=======
-from typing import Any, Optional, Dict
-from pypika.terms import ValueWrapper
->>>>>>> a574c1ba88 (chore: patching ValueWrapper)
 from pypika.utils import format_alias_sql
 
 
@@ -14,17 +9,10 @@ class NamedParameterWrapper():
 		self.parameters = parameters
 
 	def update_parameters(self, param_key: Any, param_value: Any, **kwargs):
-<<<<<<< HEAD
 		self.parameters[param_key[2:-2]] = param_value
 
 	def get_sql(self, **kwargs):
 		return f'%(param{len(self.parameters) + 1})s'
-=======
-		self.parameters[param_key[1:]] = param_value
-
-	def get_sql(self, **kwargs):
-		return f'@param{len(self.parameters) + 1}'
->>>>>>> a574c1ba88 (chore: patching ValueWrapper)
 
 
 class ParameterizedValueWrapper(ValueWrapper):
@@ -33,7 +21,6 @@ class ParameterizedValueWrapper(ValueWrapper):
 			sql = self.get_value_sql(quote_char=quote_char, secondary_quote_char=secondary_quote_char, **kwargs)
 			return format_alias_sql(sql, self.alias, quote_char=quote_char, **kwargs)
 		else:
-<<<<<<< HEAD
 			value_sql = self.get_value_sql(quote_char=quote_char, **kwargs) if not isinstance(self.value,int) else self.value
 			param_sql = param_wrapper.get_sql(**kwargs)
 			param_wrapper.update_parameters(param_key=param_sql, param_value=value_sql, **kwargs)
@@ -60,10 +47,3 @@ class ParameterizedFunction(Function):
 			return format_alias_sql(function_sql, self.alias, quote_char=quote_char, **kwargs)
 
 		return function_sql
-=======
-			value_sql = self.get_value_sql(quote_char=quote_char, **kwargs)
-			param_sql = param_wrapper.get_sql(**kwargs)
-			param_wrapper.update_parameters(param_key=param_sql, param_value=value_sql, **kwargs)
-
-			return format_alias_sql(param_sql, self.alias, quote_char=quote_char, **kwargs)
->>>>>>> a574c1ba88 (chore: patching ValueWrapper)

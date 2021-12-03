@@ -2,6 +2,17 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Number Card', {
+	setup: function(frm) {
+		frm.set_query('document_type', function() {
+			return {
+				filters: {
+					'issingle': false,
+					'restrict_to_domain': ['in', frappe.boot.active_domains],
+					'module': ['not in', ["Healthcare", "Manufacturing", "Education", "Payroll", "HR", "Agriculture", "Non Profit"]]
+				}
+			};
+		});
+	},
 	refresh: function(frm) {
 		if (!frappe.boot.developer_mode && frm.doc.is_standard) {
 			frm.disable_form();
@@ -16,6 +27,10 @@ frappe.ui.form.on('Number Card', {
 
 		if (frm.doc.type == 'Report' && frm.doc.report_name) {
 			frm.trigger('set_report_filters');
+		}
+
+		if (!frappe.user.has_role('Administrator')) {
+			frm.set_df_property('type', 'options', ['Document Type', 'Report']);
 		}
 
 		if (frm.doc.type == 'Custom') {
@@ -131,13 +146,6 @@ frappe.ui.form.on('Number Card', {
 	},
 
 	document_type: function(frm) {
-		frm.set_query('document_type', function() {
-			return {
-				filters: {
-					'issingle': false
-				}
-			};
-		});
 		frm.set_value('filters_json', '[]');
 		frm.set_value('dynamic_filters_json', '[]');
 		frm.set_value('aggregate_function_based_on', '');

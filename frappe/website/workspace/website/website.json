@@ -172,16 +172,6 @@
    "type": "Link"
   },
   {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 1,
-   "label": "Analítica Web",
-   "link_to": "Website Analytics",
-   "link_type": "Report",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
    "hidden": 0,
    "icon": "website",
    "is_query_report": 0,
@@ -228,7 +218,7 @@
    "type": "Link"
   }
  ],
- "modified": "2020-12-02 13:38:39.556588",
+ "modified": "2020-12-03 13:38:39.556588",
  "modified_by": "Administrator",
  "module": "Website",
  "name": "Website",
@@ -270,6 +260,11 @@
    "label": "Website Settings",
    "link_to": "Website Settings",
    "type": "DocType"
+  },
+  {
+   "label": "Analítica Web",
+   "link_to": "Website Analytics",
+   "type": "Report"
   }
  ]
 }

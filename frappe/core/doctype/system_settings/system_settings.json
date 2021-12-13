@@ -492,7 +492,7 @@
    "fieldname": "use_original_name_for_amended_document",
    "fieldtype": "Check",
    "label": "Use original name for amended document",
-   "read_only_depends_on": "eval:doc.use_original_name_for_amended_document==1"
+   "read_only": 1
   },
   {
    "collapsible": 1,
@@ -512,7 +512,11 @@
  "icon": "fa fa-cog",
  "issingle": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2022-08-16 12:32:23.736407",
+=======
+ "modified": "2021-12-13 12:07:26.860735",
+>>>>>>> d564b7b527 (revert: set amended docname to original docname-1)
  "modified_by": "Administrator",
  "module": "Core",
  "name": "System Settings",

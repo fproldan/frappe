@@ -194,6 +194,32 @@ class TestDB(unittest.TestCase):
 			frappe.delete_doc(test_doctype, doc)
 		clear_custom_fields(test_doctype)
 
+<<<<<<< HEAD
+=======
+
+	def test_savepoints(self):
+		frappe.db.rollback()
+		save_point = "todonope"
+
+		created_docs = []
+		failed_docs = []
+
+		for _ in range(5):
+			frappe.db.savepoint(save_point)
+			doc_gone = frappe.get_doc(doctype="ToDo", description="nope").save()
+			failed_docs.append(doc_gone.name)
+			frappe.db.rollback(save_point=save_point)
+			doc_kept = frappe.get_doc(doctype="ToDo", description="nope").save()
+			created_docs.append(doc_kept.name)
+		frappe.db.commit()
+
+		for d in failed_docs:
+			self.assertFalse(frappe.db.exists("ToDo", d))
+		for d in created_docs:
+			self.assertTrue(frappe.db.exists("ToDo", d))
+
+
+>>>>>>> 1c0de77634 (feat: SQL savepoints)
 @run_only_if(db_type_is.MARIADB)
 class TestDDLCommandsMaria(unittest.TestCase):
 	test_table_name = "TestNotes"
@@ -288,3 +314,19 @@ class TestDDLCommandsPost(unittest.TestCase):
 		)
 		self.assertGreater(len(check_change), 0)
 		self.assertIn("character varying", check_change[0])
+<<<<<<< HEAD
+=======
+
+	def test_add_index(self) -> None:
+		index_name = "test_index"
+		frappe.db.add_index(self.test_table_name, ["id", "content(50)"], index_name)
+		indexs_in_table = frappe.db.sql(
+			f"""
+			SELECT indexname
+			FROM pg_indexes
+			WHERE tablename = 'tab{self.test_table_name}'
+			AND indexname = '{index_name}' ;
+			""",
+		)
+		self.assertEquals(len(indexs_in_table), 1)
+>>>>>>> 1c0de77634 (feat: SQL savepoints)

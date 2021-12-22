@@ -43,7 +43,7 @@
    "fieldname": "split",
    "fieldtype": "Select",
    "label": "División de columnas",
-   "options": "3 columns - 9 columns\n4 columns - 8 columns\n5 columns - 7 columns\n6 columns - 6 columns\n7 columns - 5 columns\n8 columns - 4 columns\n9 columns - 3 columns",
+   "options": "3 columnas - 9 columnas\n4 columnas - 8 columnas\n5 columnas - 7 columnas\n6 columnas - 6 columnas\n7 columnas - 5 columnas\n8 columnas - 4 columnas\n9 columnas - 3 columnas",
    "reqd": 0
   },
   {
@@ -56,7 +56,7 @@
   }
  ],
  "idx": 0,
- "modified": "2020-10-28 17:40:25.068819",
+ "modified": "2020-10-29 17:45:25.068819",
  "modified_by": "Administrator",
  "module": "Website",
  "name": "Sección dividida con imagen",

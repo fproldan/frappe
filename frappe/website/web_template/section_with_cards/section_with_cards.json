@@ -6,39 +6,39 @@
   {
    "fieldname": "title",
    "fieldtype": "Data",
-   "label": "Title",
+   "label": "Título",
    "reqd": 0
   },
   {
    "fieldname": "subtitle",
    "fieldtype": "Data",
-   "label": "Subtitle",
+   "label": "Subtítulo",
    "reqd": 0
   },
   {
    "default": "Medium",
    "fieldname": "card_size",
    "fieldtype": "Select",
-   "label": "Card Size",
+   "label": "Tamaño de la tarjeta",
    "options": "Small\nMedium\nLarge",
    "reqd": 0
   },
   {
    "fieldname": "card_1",
    "fieldtype": "Section Break",
-   "label": "Card 1",
+   "label": "Tarjeta 1",
    "reqd": 0
   },
   {
    "fieldname": "card_1_title",
    "fieldtype": "Data",
-   "label": "Title",
+   "label": "Título",
    "reqd": 0
   },
   {
    "fieldname": "card_1_content",
    "fieldtype": "Small Text",
-   "label": "Content",
+   "label": "Contenido",
    "reqd": 0
   },
   {
@@ -50,19 +50,19 @@
   {
    "fieldname": "card_2",
    "fieldtype": "Section Break",
-   "label": "Card 2",
+   "label": "Tarjeta 2",
    "reqd": 0
   },
   {
    "fieldname": "card_2_title",
    "fieldtype": "Data",
-   "label": "Title",
+   "label": "Título",
    "reqd": 0
   },
   {
    "fieldname": "card_2_content",
    "fieldtype": "Small Text",
-   "label": "Content",
+   "label": "Contenido",
    "reqd": 0
   },
   {
@@ -74,19 +74,19 @@
   {
    "fieldname": "card_3",
    "fieldtype": "Section Break",
-   "label": "Card 3",
+   "label": "Tarjeta 3",
    "reqd": 0
   },
   {
    "fieldname": "card_3_title",
    "fieldtype": "Data",
-   "label": "Title",
+   "label": "Título",
    "reqd": 0
   },
   {
    "fieldname": "card_3_content",
    "fieldtype": "Small Text",
-   "label": "Content",
+   "label": "Contenido",
    "reqd": 0
   },
   {
@@ -98,19 +98,19 @@
   {
    "fieldname": "card_4",
    "fieldtype": "Section Break",
-   "label": "Card 4",
+   "label": "Tarjeta 4",
    "reqd": 0
   },
   {
    "fieldname": "card_4_title",
    "fieldtype": "Data",
-   "label": "Title",
+   "label": "Título",
    "reqd": 0
   },
   {
    "fieldname": "card_4_content",
    "fieldtype": "Small Text",
-   "label": "Content",
+   "label": "Contenido",
    "reqd": 0
   },
   {
@@ -122,19 +122,19 @@
   {
    "fieldname": "card_5",
    "fieldtype": "Section Break",
-   "label": "Card 5",
+   "label": "Tarjeta 5",
    "reqd": 0
   },
   {
    "fieldname": "card_5_title",
    "fieldtype": "Data",
-   "label": "Title",
+   "label": "Título",
    "reqd": 0
   },
   {
    "fieldname": "card_5_content",
    "fieldtype": "Small Text",
-   "label": "Content",
+   "label": "Contenido",
    "reqd": 0
   },
   {
@@ -146,19 +146,19 @@
   {
    "fieldname": "card_6",
    "fieldtype": "Section Break",
-   "label": "Card 6",
+   "label": "Tarjeta 6",
    "reqd": 0
   },
   {
    "fieldname": "card_6_title",
    "fieldtype": "Data",
-   "label": "Title",
+   "label": "Título",
    "reqd": 0
   },
   {
    "fieldname": "card_6_content",
    "fieldtype": "Small Text",
-   "label": "Content",
+   "label": "Contenido",
    "reqd": 0
   },
   {
@@ -170,19 +170,19 @@
   {
    "fieldname": "card_7",
    "fieldtype": "Section Break",
-   "label": "Card 7",
+   "label": "Tarjeta 7",
    "reqd": 0
   },
   {
    "fieldname": "card_7_title",
    "fieldtype": "Data",
-   "label": "Title",
+   "label": "Título",
    "reqd": 0
   },
   {
    "fieldname": "card_7_content",
    "fieldtype": "Small Text",
-   "label": "Content",
+   "label": "Contenido",
    "reqd": 0
   },
   {
@@ -194,19 +194,19 @@
   {
    "fieldname": "card_8",
    "fieldtype": "Section Break",
-   "label": "Card 8",
+   "label": "Tarjeta 8",
    "reqd": 0
   },
   {
    "fieldname": "card_8_title",
    "fieldtype": "Data",
-   "label": "Title",
+   "label": "Título",
    "reqd": 0
   },
   {
    "fieldname": "card_8_content",
    "fieldtype": "Small Text",
-   "label": "Content",
+   "label": "Contenido",
    "reqd": 0
   },
   {
@@ -218,19 +218,19 @@
   {
    "fieldname": "card_9",
    "fieldtype": "Section Break",
-   "label": "Card 9",
+   "label": "Tarjeta 9",
    "reqd": 0
   },
   {
    "fieldname": "card_9_title",
    "fieldtype": "Data",
-   "label": "Title",
+   "label": "Título",
    "reqd": 0
   },
   {
    "fieldname": "card_9_content",
    "fieldtype": "Small Text",
-   "label": "Content",
+   "label": "Contenido",
    "reqd": 0
   },
   {
@@ -241,10 +241,10 @@
   }
  ],
  "idx": 0,
- "modified": "2020-10-26 17:42:53.356024",
+ "modified": "2020-10-28 17:42:53.356024",
  "modified_by": "Administrator",
  "module": "Website",
- "name": "Section with Cards",
+ "name": "Sección con tarjetas",
  "owner": "Administrator",
  "standard": 1,
  "type": "Section"

@@ -12,14 +12,14 @@
   {
    "fieldname": "description",
    "fieldtype": "Data",
-   "label": "Description",
+   "label": "Descripción",
    "reqd": 0
   }
  ],
  "idx": 0,
- "modified": "2020-09-11 15:52:40.656939",
+ "modified": "2020-09-13 15:52:40.656939",
  "modified_by": "Administrator",
- "name": "Full Width Image",
+ "name": "Imagen de ancho completo",
  "owner": "Administrator",
  "standard": 1,
  "template": "",

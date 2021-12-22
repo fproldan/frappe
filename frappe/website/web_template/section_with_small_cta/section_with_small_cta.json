@@ -6,32 +6,32 @@
   {
    "fieldname": "title",
    "fieldtype": "Data",
-   "label": "Title",
+   "label": "Título",
    "reqd": 0
   },
   {
    "fieldname": "subtitle",
    "fieldtype": "Small Text",
-   "label": "Subtitle",
+   "label": "Subtítulo",
    "reqd": 0
   },
   {
    "fieldname": "cta_label",
    "fieldtype": "Data",
-   "label": "CTA Label",
+   "label": "Etiqueta de CTA",
    "reqd": 0
   },
   {
    "fieldname": "cta_url",
    "fieldtype": "Data",
-   "label": "CTA URL",
+   "label": "URL de CTA",
    "reqd": 0
   }
  ],
  "idx": 0,
- "modified": "2020-09-11 15:52:40.588688",
+ "modified": "2020-09-13 15:52:40.588688",
  "modified_by": "Administrator",
- "name": "Section with Small CTA",
+ "name": "Sección con CTA pequeño",
  "owner": "Administrator",
  "standard": 1,
  "type": "Section"

@@ -6,47 +6,47 @@
   {
    "fieldname": "title",
    "fieldtype": "Data",
-   "label": "Title",
+   "label": "Título",
    "reqd": 0
   },
   {
    "fieldname": "subtitle",
    "fieldtype": "Data",
-   "label": "Subtitle",
+   "label": "Subtítulo",
    "reqd": 0
   },
   {
    "default": "Left",
    "fieldname": "align",
    "fieldtype": "Select",
-   "label": "Align",
+   "label": "Alinear",
    "options": "Left\nCenter",
    "reqd": 0
   },
   {
    "fieldname": "items",
    "fieldtype": "Table Break",
-   "label": "Items",
+   "label": "Elementos",
    "reqd": 0
   },
   {
    "fieldname": "title",
    "fieldtype": "Data",
-   "label": "Title",
+   "label": "Título",
    "reqd": 0
   },
   {
    "fieldname": "content",
    "fieldtype": "Markdown Editor",
-   "label": "Content",
+   "label": "Contenido",
    "reqd": 0
   }
  ],
  "idx": 0,
- "modified": "2020-10-26 17:40:20.365936",
+ "modified": "2020-10-28 17:40:20.365936",
  "modified_by": "Administrator",
  "module": "Website",
- "name": "Section with Collapsible Content",
+ "name": "Sección con contenido colapsable",
  "owner": "Administrator",
  "standard": 1,
  "template": "",

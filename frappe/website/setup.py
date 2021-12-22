@@ -12,7 +12,6 @@ def add_dashboard():
         {
             "chart_name": "Website Analytics",
             "chart_type": "Report",
-            "custom_options": "{\"type\": \"line\", \"lineOptions\": {\"regionFill\": 1}, \"axisOptions\": {\"shortenYAxisNumbers\": 1}, \"tooltipOptions\": {}}",
             "doctype": "Dashboard Chart",
             "filters_json": "{}",
             "group_by_type": "Count",

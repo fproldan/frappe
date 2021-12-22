@@ -29,6 +29,8 @@ def add_dashboard():
     ]
 
     for widget in dashboard_charts_and_number_cards:
+        if frappe.db.exists(widget['doctype'], widget['chart_name']):
+            continue
         doc = frappe.new_doc(widget['doctype'])
         doc.update(widget)
         try:

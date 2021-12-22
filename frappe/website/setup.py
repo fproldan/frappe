@@ -24,7 +24,8 @@ def add_dashboard():
             "time_interval": "Yearly",
             "timeseries": 0,
             "timespan": "Last Year",
-            "type": "Line"
+            "type": "Line",
+            "use_report_chart": 1,
         }
     ]
 

@@ -51,12 +51,12 @@
    "fieldname": "vertical_align",
    "fieldtype": "Select",
    "label": "Alineación vertical",
-   "options": "Top\nMiddle",
+   "options": "Arriba\nCentro",
    "reqd": 0
   }
  ],
  "idx": 0,
- "modified": "2020-10-29 17:45:25.068819",
+ "modified": "2020-10-30 17:45:25.068819",
  "modified_by": "Administrator",
  "module": "Website",
  "name": "Sección dividida con imagen",

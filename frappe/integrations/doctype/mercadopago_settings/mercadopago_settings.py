@@ -88,6 +88,19 @@ class MercadopagoSettings(Document):
 @frappe.whitelist(allow_guest=True, xss_safe=True)
 def ipn(**args):
     """
-    /api/method/frappe.integrations.doctype.mercadopago_settings.mercadopago_settings.ipn
+    /api/method/frappe.integrations.doctype.mercadopago_settings.mercadopago_settings.ipn?topic=payment&id=123456789
     """
-    return "IPNeado"
+    topic = args['topic']
+    topic_id = args['id']
+
+    mercadopago_settings = get_payment_gateway_controller("Mercadopago")
+    mp = mercadopago.SDK(mercadopago_settings.access_token)
+
+    if topic == "payment":
+        payment = mp.payment().get(topic_id)
+        print(payment)
+
+    return {
+        "topic": topic,
+        "topic_id": topic_id
+    }

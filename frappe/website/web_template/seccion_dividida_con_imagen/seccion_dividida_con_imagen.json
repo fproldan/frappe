@@ -18,7 +18,7 @@
   {
    "fieldname": "image",
    "fieldtype": "Attach Image",
-   "label": "Image",
+   "label": "Imagen",
    "reqd": 0
   },
   {
@@ -56,10 +56,10 @@
   }
  ],
  "idx": 0,
- "modified": "2020-10-30 17:46:25.068819",
+ "modified": "2020-10-30 18:46:25.068819",
  "modified_by": "Administrator",
  "module": "Website",
- "name": "Sección dividida con imagen",
+ "name": "Seccion dividida con imagen",
  "owner": "Administrator",
  "standard": 1,
  "template": "",

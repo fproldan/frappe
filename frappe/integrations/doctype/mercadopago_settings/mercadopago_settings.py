@@ -55,6 +55,8 @@ class MercadopagoSettings(Document):
                 "pending": get_url()
             },
             "auto_return": "approved",
+            "notification_url": "{}/api/method/frappe.integrations.doctype.mercadopago_settings.mercadopago_settings.ipn".format(get_url()),
+            "external_reference": payment_request.name,
             # "payer": {
             #     "name": "Charles",
             #     "surname": "Luevano",
@@ -67,6 +69,11 @@ class MercadopagoSettings(Document):
             #         "type": "DNI",
             #         "number": "12345678"
             #     },
+            #     "address": {
+            #         "street_name": "Street",
+            #         "street_number": 123,
+            #         "zip_code": "5700"
+            #     }
             # }
         }
 
@@ -76,3 +83,11 @@ class MercadopagoSettings(Document):
         if mercadopago_settings.sandbox:
             return preference['sandbox_init_point']
         return preference['init_point']
+
+
+@frappe.whitelist(allow_guest=True, xss_safe=True)
+def ipn(**args):
+    """
+    /api/method/frappe.integrations.doctype.mercadopago_settings.mercadopago_settings.ipn
+    """
+    return "IPNeado"

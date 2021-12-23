@@ -24,7 +24,7 @@
   {
    "fieldname": "image_description",
    "fieldtype": "Data",
-   "label": "Image Description",
+   "label": "Descripción de la imagen",
    "reqd": 0
   },
   {
@@ -37,7 +37,7 @@
   }
  ],
  "idx": 0,
- "modified": "2020-10-29 18:40:11.558331",
+ "modified": "2020-10-29 19:40:11.558331",
  "modified_by": "Administrator",
  "module": "Website",
  "name": "Seccion con imagen",

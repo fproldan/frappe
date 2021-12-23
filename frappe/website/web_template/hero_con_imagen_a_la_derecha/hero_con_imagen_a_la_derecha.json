@@ -30,7 +30,7 @@
   {
    "fieldname": "primary_action_label",
    "fieldtype": "Data",
-   "label": "PEtiqueta de acción primaria",
+   "label": "Etiqueta de acción primaria",
    "reqd": 0
   },
   {
@@ -42,7 +42,7 @@
   {
    "fieldname": "secondary_action_label",
    "fieldtype": "Data",
-   "label": "Etiqueta de acción secundarial",
+   "label": "Etiqueta de acción secundaria",
    "reqd": 0
   },
   {
@@ -53,7 +53,7 @@
   }
  ],
  "idx": 0,
- "modified": "2020-09-18 11:43:00.556847",
+ "modified": "2020-09-19 12:43:00.556847",
  "modified_by": "Administrator",
  "name": "Hero con imagen a la derecha",
  "owner": "Administrator",

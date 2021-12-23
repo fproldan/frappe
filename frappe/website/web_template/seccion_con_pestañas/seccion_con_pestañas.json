@@ -84,12 +84,12 @@
   {
    "fieldname": "tab_6_content",
    "fieldtype": "Markdown Editor",
-   "label": "TContenido de la pestaña 6",
+   "label": "Contenido de la pestaña 6",
    "reqd": 0
   }
  ],
  "idx": 0,
- "modified": "2020-09-14 15:52:40.687774",
+ "modified": "2020-09-15 15:52:40.687774",
  "modified_by": "Administrator",
  "name": "Seccion con pestañas",
  "owner": "Administrator",

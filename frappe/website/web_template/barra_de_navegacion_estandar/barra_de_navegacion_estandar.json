@@ -4,9 +4,9 @@
  "doctype": "Web Template",
  "fields": [],
  "idx": 0,
- "modified": "2020-08-20 17:50:44.342765",
+ "modified": "2020-08-22 17:50:44.342765",
  "modified_by": "Administrator",
- "name": "Barra de navegación estándar",
+ "name": "Barra de navegacion estandar",
  "owner": "Administrator",
  "standard": 1,
  "type": "Navbar"

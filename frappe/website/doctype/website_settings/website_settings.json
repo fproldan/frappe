@@ -383,7 +383,7 @@
    "options": "JSON"
   },
   {
-   "depends_on": "eval:doc.navbar_template && doc.navbar_template !== 'Standard Navbar'",
+   "depends_on": "eval:doc.navbar_template && doc.navbar_template !== 'Barra de navegacion estandar'",
    "fieldname": "edit_navbar_template_values",
    "fieldtype": "Button",
    "label": "Edit Values"
@@ -402,7 +402,7 @@
    "options": "JSON"
   },
   {
-   "depends_on": "eval:doc.footer_template && doc.footer_template !== 'Standard Footer'",
+   "depends_on": "eval:doc.footer_template && doc.footer_template !== 'Pie de pagina estandar'",
    "fieldname": "edit_footer_template_values",
    "fieldtype": "Button",
    "label": "Edit Values"
@@ -433,7 +433,7 @@
  "issingle": 1,
  "links": [],
  "max_attachments": 10,
- "modified": "2021-12-22 09:15:13.848934",
+ "modified": "2021-12-23 09:15:13.848934",
  "modified_by": "Administrator",
  "module": "Website",
  "name": "Website Settings",

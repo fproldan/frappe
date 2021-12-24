@@ -15,7 +15,7 @@ class MercadopagoSettings(Document):
 
     def validate_transaction_currency(self, currency):
         if currency not in self.supported_currencies:
-            frappe.throw(_("Please select another payment method. Pagos360 does not support transactions in currency '{0}'").format(currency))
+            frappe.throw(_("Please select another payment method. Mercadopago does not support transactions in currency '{0}'").format(currency))
 
     def validate(self):
         create_payment_gateway("Mercadopago")
@@ -32,7 +32,9 @@ class MercadopagoSettings(Document):
             frappe.throw(_("Invalid payment gateway credentials"))
 
     def get_payment_url(self, **kwargs):
-        """Url para solicitudes de pago"""
+        """
+        Url para solicitudes de pago
+        """
         mercadopago_settings = get_payment_gateway_controller("Mercadopago")
         mp = mercadopago.SDK(mercadopago_settings.access_token)
         payment_request = frappe.get_doc(kwargs["reference_doctype"], kwargs["reference_docname"])
@@ -49,13 +51,13 @@ class MercadopagoSettings(Document):
                     "unit_price": item.rate,  # really?
                 } for item in reference_doc.items
             ],
-            "back_urls": {  # TODO: configurables?
-                "success": get_url(),
-                "failure": get_url(),
-                "pending": get_url()
+            "back_urls": {
+                "success": mercadopago_settings.success_url or get_url(),
+                "failure": mercadopago_settings.failure_url or get_url(),
+                "pending": mercadopago_settings.pending_url or get_url()
             },
             "auto_return": "approved",
-            "notification_url": "{}/api/method/frappe.integrations.doctype.mercadopago_settings.mercadopago_settings.ipn".format(get_url()),
+            "notification_url": f"{get_url()}/api/method/frappe.integrations.doctype.mercadopago_settings.mercadopago_settings.ipn",
             "external_reference": payment_request.name,
             # "payer": {
             #     "name": "Charles",
@@ -98,7 +100,10 @@ def ipn(**args):
 
     if topic == "payment":
         payment = mp.payment().get(topic_id)
-        print(payment)
+
+        if payment['status'] == "approved" and payment["status_detail"] == "accredited":
+            payment_request = frappe.get_doc("Payment Request", payment['external_reference'])
+            payment_request.run_method("on_payment_authorized", "Completed")
 
     return {
         "topic": topic,

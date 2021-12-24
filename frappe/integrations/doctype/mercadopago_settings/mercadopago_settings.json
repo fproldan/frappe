@@ -6,26 +6,44 @@
  "engine": "InnoDB",
  "field_order": [
   "access_token",
-  "sandbox"
+  "sandbox",
+  "success_url",
+  "failure_url",
+  "pending_url"
  ],
  "fields": [
+  {
+   "fieldname": "access_token",
+   "fieldtype": "Data",
+   "label": "Access Token"
+  },
+  {
+   "fieldname": "success_url",
+   "fieldtype": "Data",
+   "label": "URL Pago Exitoso"
+  },
+  {
+   "fieldname": "failure_url",
+   "fieldtype": "Data",
+   "label": "URL Pago Pendiente"
+  },
+  {
+   "fieldname": "pending_url",
+   "fieldtype": "Data",
+   "label": "URL Pago Fallido"
+  },
   {
    "default": "0",
    "fieldname": "sandbox",
    "fieldtype": "Check",
    "label": "Sandbox"
-  },
-  {
-   "fieldname": "access_token",
-   "fieldtype": "Data",
-   "label": "Access Token"
   }
  ],
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-12-23 10:42:48.815385",
+ "modified": "2021-12-24 08:37:17.716930",
  "modified_by": "Administrator",
  "module": "Integrations",
  "name": "Mercadopago Settings",

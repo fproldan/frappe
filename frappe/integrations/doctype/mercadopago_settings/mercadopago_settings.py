@@ -11,7 +11,7 @@ import mercadopago
 
 class MercadopagoSettings(Document):
 
-    supported_currencies = ["ARS"]
+    supported_currencies = ["ARS", "USD"]
 
     def validate_transaction_currency(self, currency):
         if currency not in self.supported_currencies:
@@ -38,18 +38,21 @@ class MercadopagoSettings(Document):
         mercadopago_settings = get_payment_gateway_controller("Mercadopago")
         mp = mercadopago.SDK(mercadopago_settings.access_token)
         payment_request = frappe.get_doc(kwargs["reference_doctype"], kwargs["reference_docname"])
-        reference_doc = frappe.get_doc(payment_request.reference_doctype, payment_request.reference_name)
+        notification_url = get_url("/api/method/frappe.integrations.doctype.mercadopago_settings.mercadopago_settings.ipn")
+
+        if mercadopago_settings.sandbox:
+            notification_url = "https://webhook.site/c5bc1aba-2504-4919-8b4b-b0a6c9c73180"
 
         preference_data = {
             "items": [
                 {
-                    "title": item.item_code,
-                    "description": item.description,
-                    "category_id": "otros",  # https://api.mercadopago.com/item_categories
-                    "quantity": item.qty,
-                    "currency_id": reference_doc.currency,
-                    "unit_price": item.rate,  # really?
-                } for item in reference_doc.items
+                    "id": kwargs["reference_docname"],
+                    "title": kwargs["title"].decode("utf-8"),
+                    "description": kwargs["description"].decode("utf-8"),
+                    "quantity": 1,
+                    "currency_id": kwargs["currency"].decode("utf-8"),
+                    "unit_price": kwargs["amount"],
+                }
             ],
             "back_urls": {
                 "success": mercadopago_settings.success_url or get_url(),
@@ -57,8 +60,12 @@ class MercadopagoSettings(Document):
                 "pending": mercadopago_settings.pending_url or get_url()
             },
             "auto_return": "approved",
-            "notification_url": f"{get_url()}/api/method/frappe.integrations.doctype.mercadopago_settings.mercadopago_settings.ipn",
+            "notification_url": notification_url,
             "external_reference": payment_request.name,
+            "payer": {
+                "name": kwargs["payer_name"].decode("utf-8"),
+                "email": kwargs["payer_email"]
+            },
             # "payer": {
             #     "name": "Charles",
             #     "surname": "Luevano",
@@ -78,7 +85,6 @@ class MercadopagoSettings(Document):
             #     }
             # }
         }
-
         preference_response = mp.preference().create(preference_data)
         preference = preference_response["response"]
 
@@ -87,25 +93,61 @@ class MercadopagoSettings(Document):
         return preference['init_point']
 
 
+def crear_notificacion_mercadopago(payment):
+    import json
+    notificacion = frappe.get_doc({
+        "doctype": "Notificacion Mercadopago",
+        "payment_id": payment.get('id', 0),
+    })
+
+    payer = payment.get("payer", {})
+    transaction_details = payment.get("transaction_details", {})
+
+    notificacion.payment_external_reference = payment.get("external_reference", "")
+    notificacion.payment_status = payment.get("status", "")
+    notificacion.payment_status_detail = payment.get("status_detail", "")
+    notificacion.payment_description = payment.get("description", "")
+    notificacion.payment_date_created = payment.get("date_created", "")
+    notificacion.payment_date_approved = payment.get("date_approved", "")
+
+    notificacion.payment_currency_id = payment.get("currency_id", "")
+    notificacion.payment_transaction_amount = payment.get("transaction_amount", 0)
+    notificacion.payment_total_paid_amount = transaction_details.get("total_paid_amount", 0)
+    notificacion.payment_net_received_amount = transaction_details.get("net_received_amount", 0)
+    notificacion.payment_installments = payment.get("installments", 0)
+    notificacion.payment_installment_amount = transaction_details.get("installment_amount", 0)
+
+    notificacion.payer_id = payer.get("id", 0)
+    notificacion.payer_email = payer.get("email", "")
+    notificacion.payer_identification_type = payer.get("identification", {}).get("type", "")
+    notificacion.payer_identification_number = payer.get("identification", {}).get("number", "")
+
+    notificacion.data_json = json.dumps(payment)
+    notificacion.save(ignore_permissions=True)
+    frappe.db.commit()
+
+
 @frappe.whitelist(allow_guest=True, xss_safe=True)
 def ipn(**args):
     """
     /api/method/frappe.integrations.doctype.mercadopago_settings.mercadopago_settings.ipn?topic=payment&id=123456789
     """
-    topic = args['topic']
-    topic_id = args['id']
+    webhook_type = args['type']
+    webhook_topic_id = args["data"]["id"]
 
     mercadopago_settings = get_payment_gateway_controller("Mercadopago")
     mp = mercadopago.SDK(mercadopago_settings.access_token)
 
-    if topic == "payment":
-        payment = mp.payment().get(topic_id)
+    if webhook_type == "payment":
+        payment = mp.payment().get(webhook_topic_id)['response']
 
         if payment['status'] == "approved" and payment["status_detail"] == "accredited":
             payment_request = frappe.get_doc("Payment Request", payment['external_reference'])
             payment_request.run_method("on_payment_authorized", "Completed")
 
+        crear_notificacion_mercadopago(payment)
+
     return {
-        "topic": topic,
-        "topic_id": topic_id
+        "webhook_type": webhook_type,
+        "webhook_topic_id": webhook_topic_id
     }

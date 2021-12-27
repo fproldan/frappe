@@ -69,7 +69,7 @@
   "chat",
   "enable_chat",
   "document_naming_section",
-  "use_original_name_for_amended_document"
+  "use_original_name_for_amended_document",
   "system_updates_section",
   "disable_system_update_notification"
  ],
@@ -497,14 +497,14 @@
    "fieldname": "system_updates_section",
    "fieldtype": "Section Break",
    "label": "System Updates",
-   "hidden": 1,
+   "hidden": 1
   },
   {
    "default": "1",
    "fieldname": "disable_system_update_notification",
    "fieldtype": "Check",
    "label": "Disable System Update Notification",
-   "hidden": 1,
+   "hidden": 1
   }
  ],
  "icon": "fa fa-cog",

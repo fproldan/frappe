@@ -38,7 +38,7 @@ class MercadopagoSettings(Document):
         mercadopago_settings = get_payment_gateway_controller("Mercadopago")
         mp = mercadopago.SDK(mercadopago_settings.access_token)
         payment_request = frappe.get_doc(kwargs["reference_doctype"], kwargs["reference_docname"])
-        notification_url = get_url("/api/method/frappe.integrations.doctype.mercadopago_settings.mercadopago_settings.ipn")
+        notification_url = get_url("/api/method/frappe.integrations.doctype.mercadopago_settings.mercadopago_settings.ipn")  # ?source_news=webhook
 
         if mercadopago_settings.sandbox:
             notification_url = "https://webhook.site/c5bc1aba-2504-4919-8b4b-b0a6c9c73180"

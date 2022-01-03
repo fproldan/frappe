@@ -65,25 +65,7 @@ class MercadopagoSettings(Document):
             "payer": {
                 "name": kwargs["payer_name"].decode("utf-8"),
                 "email": kwargs["payer_email"]
-            },
-            # "payer": {
-            #     "name": "Charles",
-            #     "surname": "Luevano",
-            #     "email": "charles@hotmail.com",
-            #     "phone": {
-            #         "area_code": "",
-            #         "number": "949 128 866"
-            #     },
-            #     "identification": {
-            #         "type": "DNI",
-            #         "number": "12345678"
-            #     },
-            #     "address": {
-            #         "street_name": "Street",
-            #         "street_number": 123,
-            #         "zip_code": "5700"
-            #     }
-            # }
+            }
         }
         preference_response = mp.preference().create(preference_data)
         preference = preference_response["response"]

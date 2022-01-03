@@ -755,6 +755,31 @@ export default class Grid {
 		}
 	}
 
+	update_default_colsize(df) {
+		var colsize = 2;
+		switch (df.fieldtype) {
+			case "Text": break;
+			case "Small Text": colsize = 3; break;
+			case "Check": colsize = 1;
+		}
+		df.colsize = colsize;
+	}
+
+	setup_user_defined_columns() {
+		if (this.frm) {
+			let user_settings = frappe.get_user_settings(this.frm.doctype, 'GridView');
+			if (user_settings && user_settings[this.doctype] && user_settings[this.doctype].length) {
+				this.user_defined_columns = user_settings[this.doctype].map(row => {
+					let column = frappe.meta.get_docfield(this.doctype, row.fieldname);
+					if (column) {
+						column.in_list_view = 1;
+						column.columns = row.columns;
+						return column;
+					}
+				});
+			}
+		}
+	}
 
 	is_editable() {
 		return this.display_status == "Write" && !this.static_rows;

@@ -6,7 +6,6 @@
  "engine": "InnoDB",
  "field_order": [
   "access_token",
-  "user_id",
   "sandbox",
   "success_url",
   "failure_url",
@@ -38,18 +37,13 @@
    "fieldname": "sandbox",
    "fieldtype": "Check",
    "label": "Sandbox"
-  },
-  {
-   "fieldname": "user_id",
-   "fieldtype": "Data",
-   "label": "User ID"
   }
  ],
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2022-01-03 10:37:10.368270",
+ "modified": "2022-01-03 11:07:09.168991",
  "modified_by": "Administrator",
  "module": "Integrations",
  "name": "Mercadopago Settings",

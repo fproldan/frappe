@@ -31,6 +31,12 @@ class MercadopagoSettings(Document):
         except Exception:
             frappe.throw(_("Invalid payment gateway credentials"))
 
+    def get_user_id(self):
+        if not self.access_token:
+            return None
+
+        return self.access_token.split('-')[-1]
+
     def get_payment_url(self, **kwargs):
         """
         Url para solicitudes de pago
@@ -192,7 +198,7 @@ def get_sucursales():
     """
     mercadopago_settings = get_payment_gateway_controller("Mercadopago")
     mp = mercadopago.SDK(mercadopago_settings.access_token)
-    response = mp.http_client.get(url=f"https://api.mercadopago.com/users/{mercadopago_settings.user_id}/stores/search", headers={"Authorization": f"Bearer {mercadopago_settings.access_token}"})
+    response = mp.http_client.get(url=f"https://api.mercadopago.com/users/{mercadopago_settings.get_user_id()}/stores/search", headers={"Authorization": f"Bearer {mercadopago_settings.access_token}"})
 
     if response.get('status') != 200:
         return

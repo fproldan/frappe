@@ -37,6 +37,9 @@ class MercadopagoSettings(Document):
 
         return self.access_token.split('-')[-1]
 
+    def get_notification_url(self):
+        return get_url("/api/method/frappe.integrations.doctype.mercadopago_settings.mercadopago_settings.ipn")  # ?source_news=webhook
+
     def get_payment_url(self, **kwargs):
         """
         Url para solicitudes de pago
@@ -44,7 +47,6 @@ class MercadopagoSettings(Document):
         mercadopago_settings = get_payment_gateway_controller("Mercadopago")
         mp = mercadopago.SDK(mercadopago_settings.access_token)
         payment_request = frappe.get_doc(kwargs["reference_doctype"], kwargs["reference_docname"])
-        notification_url = get_url("/api/method/frappe.integrations.doctype.mercadopago_settings.mercadopago_settings.ipn")  # ?source_news=webhook
 
         if mercadopago_settings.sandbox:
             notification_url = "https://webhook.site/c5bc1aba-2504-4919-8b4b-b0a6c9c73180"
@@ -66,7 +68,7 @@ class MercadopagoSettings(Document):
                 "pending": mercadopago_settings.pending_url or get_url()
             },
             "auto_return": "approved",
-            "notification_url": notification_url,
+            "notification_url": mercadopago_settings.get_notification_url(),
             "external_reference": payment_request.name,
             "payer": {
                 "name": kwargs["payer_name"].decode("utf-8"),
@@ -248,7 +250,7 @@ def get_cajas():
     """
     mercadopago_settings = get_payment_gateway_controller("Mercadopago")
     mp = mercadopago.SDK(mercadopago_settings.access_token)
-    response = mp.http_client.get(url=f"https://api.mercadopago.com/pos", headers={"Authorization": f"Bearer {mercadopago_settings.access_token}"})
+    response = mp.http_client.get(url="https://api.mercadopago.com/pos", headers={"Authorization": f"Bearer {mercadopago_settings.access_token}"})
 
     if response.get('status') != 200:
         return
@@ -256,3 +258,38 @@ def get_cajas():
     paging = response['response']['paging']
     results = response['response']['results']
     return results
+
+
+def create_order():
+    mercadopago_settings = get_payment_gateway_controller("Mercadopago")
+    mp = mercadopago.SDK(mercadopago_settings.access_token)
+    external_store_id = "44253934"
+    external_pos_id = "38991493"
+    url = f"https://api.mercadopago.com/instore/qr/seller/collectors/{mercadopago_settings.get_user_id()}/stores/{external_store_id}/pos/{external_pos_id}/orders"
+    data = {
+        "external_reference": 12345,
+        "title": "Product order",
+        "notification_url": mercadopago_settings.get_notification_url(),
+        "total_amount": 100,
+        "items": [
+            {
+                "sku_number": "A123K9191938",
+                "category": "marketplace",
+                "title": "Point Mini",
+                "description": "This is the Point Mini",
+                "unit_price": 100,
+                "quantity": 1,
+                "unit_measure": "unit",
+                "total_amount": 100
+            }
+        ],
+        "taxes": [
+            {
+                "value": 19,
+                "type": "IVA"
+            }
+        ],
+        "sponsor": {"id": 446566691},
+        "cash_out": {}
+    }
+    response = mp.http_client.post(url=url, data=data, headers={"Authorization": f"Bearer {mercadopago_settings.access_token}"})

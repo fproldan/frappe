@@ -43,7 +43,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2022-01-03 11:07:09.168991",
+ "modified": "2022-01-04 11:07:09.168991",
  "modified_by": "Administrator",
  "module": "Integrations",
  "name": "Mercadopago Settings",
@@ -81,7 +81,7 @@
   }
  ],
  "read_only": 1,
- "restrict_to_domain": "Pagos360",
+ "restrict_to_domain": "Mercadopago",
  "sort_field": "modified",
  "sort_order": "DESC",
  "track_changes": 1

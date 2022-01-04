@@ -144,60 +144,6 @@ def ipn(**args):
 
 
 def get_sucursales():
-    """
-    {
-        "paging":{
-            "total":1,
-            "offset":0,
-            "limit":50
-        },
-        "results":[
-            {
-                "id":"44253934",
-                "name":"Casa Central",
-                "date_creation":"2022-01-03T13:12:04.972Z",
-                "business_hours":{
-                    "monday":[
-                        {
-                            "open":"09:00",
-                            "close":"18:00"
-                        }
-                    ],
-                    "tuesday":[
-                        {
-                            "open":"09:00",
-                            "close":"18:00"
-                        }
-                    ],
-                    "wednesday":[
-                        {
-                            "open":"09:00",
-                            "close":"18:00"
-                        }
-                    ],
-                    "thursday":[
-                        {
-                            "open":"09:00",
-                            "close":"18:00"
-                        }
-                    ],
-                    "friday":[
-                        {
-                            "open":"09:00",
-                            "close":"18:00"
-                        }
-                    ]
-                },
-                "location":{
-                    "address_line":"Bv. Presidente Julio A. Roca 882, Rafaela, Santa Fe",
-                    "reference":"Oficina 5",
-                    "latitude":-31.2509236,
-                    "longitude":-61.5011729
-                }
-            }
-        ]
-    }
-    """
     mercadopago_settings = get_payment_gateway_controller("Mercadopago")
     mp = mercadopago.SDK(mercadopago_settings.access_token)
     response = mp.http_client.get(url=f"https://api.mercadopago.com/users/{mercadopago_settings.get_user_id()}/stores/search", headers={"Authorization": f"Bearer {mercadopago_settings.access_token}"})
@@ -205,49 +151,10 @@ def get_sucursales():
     if response.get('status') != 200:
         return
 
-    paging = response['response']['paging']
-    results = response['response']['results']
-    return results
+    return response['response']['results']
 
 
 def get_cajas():
-    """
-    {
-        "paging":{
-            "total":2,
-            "offset":0,
-            "limit":30
-        },
-        "results":[
-            {
-                "user_id":1046842243,
-                "name":"Caja 1",
-                "store_id":"44253934",
-                "id":38991493,
-                "qr":{
-                    "image":"https://www.mercadopago.com/instore/merchant/qr/38991493/bc1583fc667c4dfea916c1b07e169ce639b41f415b6646f9bc688e7d61125de8.png",
-                    "template_document":"https://www.mercadopago.com/instore/merchant/qr/38991493/template_bc1583fc667c4dfea916c1b07e169ce639b41f415b6646f9bc688e7d61125de8.pdf",
-                    "template_image":"https://www.mercadopago.com/instore/merchant/qr/38991493/template_bc1583fc667c4dfea916c1b07e169ce639b41f415b6646f9bc688e7d61125de8.png"
-                },
-                "date_created":"2022-01-03T09:12:05.000-04:00",
-                "date_last_updated":"2022-01-03T09:12:05.000-04:00"
-            },
-            {
-                "user_id":1046842243,
-                "name":"Caja 2",
-                "store_id":"44253934",
-                "id":38991494,
-                "qr":{
-                    "image":"https://www.mercadopago.com/instore/merchant/qr/38991494/cee583fc58584c09b5e8ca66d558d80f30b947e1aa3d40bda51b1ba38cad616b.png",
-                    "template_document":"https://www.mercadopago.com/instore/merchant/qr/38991494/template_cee583fc58584c09b5e8ca66d558d80f30b947e1aa3d40bda51b1ba38cad616b.pdf",
-                    "template_image":"https://www.mercadopago.com/instore/merchant/qr/38991494/template_cee583fc58584c09b5e8ca66d558d80f30b947e1aa3d40bda51b1ba38cad616b.png"
-                },
-                "date_created":"2022-01-03T09:12:21.000-04:00",
-                "date_last_updated":"2022-01-03T09:12:21.000-04:00"
-            }
-        ]
-    }
-    """
     mercadopago_settings = get_payment_gateway_controller("Mercadopago")
     mp = mercadopago.SDK(mercadopago_settings.access_token)
     response = mp.http_client.get(url="https://api.mercadopago.com/pos", headers={"Authorization": f"Bearer {mercadopago_settings.access_token}"})
@@ -255,22 +162,44 @@ def get_cajas():
     if response.get('status') != 200:
         return
 
-    paging = response['response']['paging']
-    results = response['response']['results']
-    return results
+    return response['response']['results']
 
 
-def create_order():
+@frappe.whitelist()
+def get_cajas_and_sucursales():
     mercadopago_settings = get_payment_gateway_controller("Mercadopago")
     mp = mercadopago.SDK(mercadopago_settings.access_token)
-    external_store_id = "44253934"
-    external_pos_id = "38991493"
+    cajas = mp.http_client.get(url="https://api.mercadopago.com/pos", headers={"Authorization": f"Bearer {mercadopago_settings.access_token}"})
+    sucursales = mp.http_client.get(url=f"https://api.mercadopago.com/users/{mercadopago_settings.get_user_id()}/stores/search", headers={"Authorization": f"Bearer {mercadopago_settings.access_token}"})
+
+    if cajas.get('status') != 200 or sucursales.get('status') != 200:
+        return
+
+    cajas = cajas['response']['results']
+    sucursales = sucursales['response']['results']
+
+    for caja in cajas:
+        caja['store_name'] = [sucursal['name'] for sucursal in sucursales if caja['store_id'] == sucursal['id']][0]
+
+    return [{"label": 'Sucursal: {} - Caja: {}'.format(caja['store_name'], caja['name']), "value": '{}-{}'.format(caja['store_id'], caja['id'])} for caja in cajas]
+
+
+@frappe.whitelist()
+def create_order(doctype, docname, caja):
+    import json
+    mercadopago_settings = get_payment_gateway_controller("Mercadopago")
+    mp = mercadopago.SDK(mercadopago_settings.access_token)
+    external_store_id, external_pos_id = caja.split('-')
     url = f"https://api.mercadopago.com/instore/qr/seller/collectors/{mercadopago_settings.get_user_id()}/stores/{external_store_id}/pos/{external_pos_id}/orders"
+
+    doc = frappe.get_doc(doctype, docname)
+
     data = {
-        "external_reference": 12345,
+        "external_reference": f"{doctype}-{docname}",
         "title": "Product order",
         "notification_url": mercadopago_settings.get_notification_url(),
-        "total_amount": 100,
+        "total_amount": doc.grand_total,
+        "description": "dale vieja",
         "items": [
             {
                 "sku_number": "A123K9191938",
@@ -283,13 +212,13 @@ def create_order():
                 "total_amount": 100
             }
         ],
-        "taxes": [
-            {
-                "value": 19,
-                "type": "IVA"
-            }
-        ],
-        "sponsor": {"id": 446566691},
-        "cash_out": {}
+        # "taxes": [
+        #     {
+        #         "value": 19,
+        #         "type": "IVA"
+        #     }
+        # ],
+        # "sponsor": {"id": 446566691},
     }
-    response = mp.http_client.post(url=url, data=data, headers={"Authorization": f"Bearer {mercadopago_settings.access_token}"})
+    response = mp.http_client.put(url=url, data=json.dumps(data), headers={"Authorization": f"Bearer {mercadopago_settings.access_token}"})
+    print(response)

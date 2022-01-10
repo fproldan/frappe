@@ -1,6 +1,7 @@
 # Copyright (c) 2021, Frappe Technologies and contributors
 # For license information, please see license.txt
 
+from uuid import uuid4
 import frappe
 from frappe.model.document import Document
 from frappe.integrations.utils import create_payment_gateway, get_payment_gateway_controller
@@ -30,6 +31,9 @@ class MercadopagoSettings(Document):
             mp.user().get()
         except Exception:
             frappe.throw(_("Invalid payment gateway credentials"))
+        else:
+            if not self.token:
+                self.token = str(uuid4())
 
     def get_user_id(self):
         if not self.access_token:
@@ -115,6 +119,71 @@ def crear_notificacion_mercadopago(payment):
     notificacion.data_json = json.dumps(payment)
     notificacion.save(ignore_permissions=True)
     frappe.db.commit()
+
+
+def get_ipn_url() -> str:
+    # La configuración debe cargarse de manera tardía.
+    return f"https://{frappe.get_site_config().get('MP_IPN_DOMAIN', '')}"
+
+
+@frappe.whitelist()
+def get_auth_url_whitelisted(account_name):
+    """
+    Devuelve la URL para autorizar una cuenta.
+    Args:
+        account_name: Nombre de la cuenta.
+    Returns:
+        La URL para autorizarse o un mensaje de error en caso de que exista algún inconveniente.
+    """
+    account = get_payment_gateway_controller("Mercadopago")
+
+    return {
+        "success": True,
+        "result": (
+            f"{get_ipn_url()}/mp/autorizar/"
+            f"?account_name={account_name}"
+            "&auth_url=https://auth.mercadopago.com.ar"
+            f"&token={account.token}"
+            f"&version=13"
+        ),
+    }
+
+
+@frappe.whitelist()
+def update_config_data_whitelisted(account_name: str, token: str, user_id: str, access_token: str, refresh_token: str):
+    """
+    Actualiza la configuración de la cuenta.
+    Esta función es llamada desde la IPN para cargar datos proporcionados por la API al momento de realizar la
+    autorización.
+    Args:
+        account_name: Nombre de la cuenta.
+        token: Token de seguridad.
+        user_id: ID de la cuenta.
+        access_token: Token de acceso.
+        refresh_token: Token de refresco.
+    """
+    account: CuentadeMercadopago = frappe.get_doc(
+        "Mercadopago Settings",
+        frappe.db.get_value("Mercadopago Settings", {"account_name": account_name, "token": token}),
+    )
+    account.user_id = user_id
+    account.access_token = access_token
+    account.refresh_token = refresh_token
+    account.save()
+
+
+@frappe.whitelist()
+def verify_whitelisted(account_name: str, token: str) -> bool:
+    """
+    Verifica si los datos pertenecen a una cuenta que existe.
+    Esta función se llama desde la IPN para validar que los datos que tiene guardados son válidos.
+    Args:
+        account_name: Nombre de la cuenta.
+        token: Token de seguridad.
+    Returns:
+        Booleano que indica si la cuenta existe.
+    """
+    return frappe.db.exists("Mercadopago Settings", {"account_name": account_name, "token": token})
 
 
 @frappe.whitelist(allow_guest=True, xss_safe=True)

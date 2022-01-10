@@ -18,7 +18,6 @@ frappe.ui.form.on("Sales Order", {
                             "options": get_cajas(),
                             "reqd": 1,
                         },
-                        
                     ],
                     primary_action: function() {
                         var data = d.get_values();

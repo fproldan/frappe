@@ -181,7 +181,7 @@ def get_cajas_and_sucursales():
     for caja in cajas:
         caja['store_name'] = [sucursal['name'] for sucursal in sucursales if caja['store_id'] == sucursal['id']][0]
 
-    return [{"label": 'Sucursal: {} - Caja: {}'.format(caja['store_name'], caja['name']), "value": '{}-{}'.format(caja['store_id'], caja['id'])} for caja in cajas]
+    return [{"label": 'Sucursal: {} - Caja: {}'.format(caja['store_name'], caja['name']), "value": '{}-{}'.format(caja.get('external_store_id'), caja.get('external_id'))} for caja in cajas]
 
 
 @frappe.whitelist()
@@ -202,14 +202,12 @@ def create_order(doctype, docname, caja):
         "description": "dale vieja",
         "items": [
             {
-                "sku_number": "A123K9191938",
-                "category": "marketplace",
-                "title": "Point Mini",
-                "description": "This is the Point Mini",
-                "unit_price": 100,
+                "title": "Compra",
+                "description": "Compra",
+                "unit_price": doc.grand_total,
                 "quantity": 1,
                 "unit_measure": "unit",
-                "total_amount": 100
+                "total_amount": doc.grand_total
             }
         ],
         # "taxes": [

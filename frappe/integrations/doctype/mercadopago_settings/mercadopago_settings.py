@@ -162,10 +162,10 @@ def update_config_data_whitelisted(account_name: str, token: str, user_id: str, 
         access_token: Token de acceso.
         refresh_token: Token de refresco.
     """
-    account: CuentadeMercadopago = frappe.get_doc(
-        "Mercadopago Settings",
-        frappe.db.get_value("Mercadopago Settings", {"account_name": account_name, "token": token}),
-    )
+    account = get_payment_gateway_controller("Mercadopago")
+    if account.account_name != account_name or account.token != token:
+        return
+
     account.user_id = user_id
     account.access_token = access_token
     account.refresh_token = refresh_token
@@ -183,7 +183,8 @@ def verify_whitelisted(account_name: str, token: str) -> bool:
     Returns:
         Booleano que indica si la cuenta existe.
     """
-    return frappe.db.exists("Mercadopago Settings", {"account_name": account_name, "token": token})
+    account = get_payment_gateway_controller("Mercadopago")
+    return account and account.account_name == account_name and account.token == token
 
 
 @frappe.whitelist(allow_guest=True, xss_safe=True)

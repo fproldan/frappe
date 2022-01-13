@@ -25,15 +25,18 @@ class MercadopagoSettings(Document):
             self.validate_mercadopago_credentials()
 
     def validate_mercadopago_credentials(self):
+        if not self.token:
+            self.token = str(uuid4())
+
+        mercadopago_settings = get_payment_gateway_controller("Mercadopago")
+        if not mercadopago_settings.access_token:
+            return
+
         try:
-            mercadopago_settings = get_payment_gateway_controller("Mercadopago")
             mp = mercadopago.SDK(mercadopago_settings.access_token)
             mp.user().get()
         except Exception:
             frappe.throw(_("Invalid payment gateway credentials"))
-        else:
-            if not self.token:
-                self.token = str(uuid4())
 
     def get_user_id(self):
         if not self.access_token:
@@ -163,6 +166,7 @@ def update_config_data_whitelisted(account_name: str, token: str, user_id: str, 
         refresh_token: Token de refresco.
     """
     account = get_payment_gateway_controller("Mercadopago")
+
     if account.account_name != account_name or account.token != token:
         return
 
@@ -170,6 +174,7 @@ def update_config_data_whitelisted(account_name: str, token: str, user_id: str, 
     account.access_token = access_token
     account.refresh_token = refresh_token
     account.save()
+    frappe.db.commit()
 
 
 @frappe.whitelist()

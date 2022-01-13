@@ -10,9 +10,10 @@
   "refresh_token",
   "token",
   "authentication_details_section",
-  "user_id",
   "account_name",
   "sandbox",
+  "column_break_7",
+  "user_id",
   "url_section",
   "success_url",
   "failure_url",
@@ -51,7 +52,8 @@
   },
   {
    "fieldname": "hidden_section",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "hidden": 1
   },
   {
    "fieldname": "refresh_token",
@@ -89,13 +91,17 @@
    "fieldname": "url_section",
    "fieldtype": "Section Break",
    "label": "Configuraci\u00f3n de URL"
+  },
+  {
+   "fieldname": "column_break_7",
+   "fieldtype": "Column Break"
   }
  ],
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2022-01-13 10:32:53.227424",
+ "modified": "2022-01-13 11:07:07.384259",
  "modified_by": "Administrator",
  "module": "Integrations",
  "name": "Mercadopago Settings",

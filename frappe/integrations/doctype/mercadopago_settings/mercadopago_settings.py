@@ -2,6 +2,7 @@
 # For license information, please see license.txt
 
 from uuid import uuid4
+import json
 import frappe
 from frappe.model.document import Document
 from frappe.integrations.utils import create_payment_gateway, get_payment_gateway_controller
@@ -21,22 +22,8 @@ class MercadopagoSettings(Document):
     def validate(self):
         create_payment_gateway("Mercadopago")
         call_hook_method('payment_gateway_enabled', gateway="Mercadopago")
-        if not self.flags.ignore_mandatory:
-            self.validate_mercadopago_credentials()
-
-    def validate_mercadopago_credentials(self):
         if not self.token:
             self.token = str(uuid4())
-
-        mercadopago_settings = get_payment_gateway_controller("Mercadopago")
-        if not mercadopago_settings.access_token:
-            return
-
-        try:
-            mp = mercadopago.SDK(mercadopago_settings.access_token)
-            mp.user().get()
-        except Exception:
-            frappe.throw(_("Invalid payment gateway credentials"))
 
     def get_user_id(self):
         if not self.access_token:
@@ -44,19 +31,12 @@ class MercadopagoSettings(Document):
 
         return self.access_token.split('-')[-1]
 
-    def get_notification_url(self):
-        return get_url("/api/method/frappe.integrations.doctype.mercadopago_settings.mercadopago_settings.ipn")  # ?source_news=webhook
-
     def get_payment_url(self, **kwargs):
         """
         Url para solicitudes de pago
         """
-        mercadopago_settings = get_payment_gateway_controller("Mercadopago")
-        mp = mercadopago.SDK(mercadopago_settings.access_token)
+        mp = mercadopago.SDK(self.access_token)
         payment_request = frappe.get_doc(kwargs["reference_doctype"], kwargs["reference_docname"])
-
-        if mercadopago_settings.sandbox:
-            notification_url = "https://webhook.site/c5bc1aba-2504-4919-8b4b-b0a6c9c73180"
 
         preference_data = {
             "items": [
@@ -70,12 +50,12 @@ class MercadopagoSettings(Document):
                 }
             ],
             "back_urls": {
-                "success": mercadopago_settings.success_url or get_url(),
-                "failure": mercadopago_settings.failure_url or get_url(),
-                "pending": mercadopago_settings.pending_url or get_url()
+                "success": self.success_url or get_url(),
+                "failure": self.failure_url or get_url(),
+                "pending": self.pending_url or get_url()
             },
             "auto_return": "approved",
-            "notification_url": mercadopago_settings.get_notification_url(),
+            "notification_url": get_url("/api/method/frappe.integrations.doctype.mercadopago_settings.mercadopago_settings.ipn"),  # ?source_news=webhook,
             "external_reference": payment_request.name,
             "payer": {
                 "name": kwargs["payer_name"].decode("utf-8"),
@@ -85,17 +65,13 @@ class MercadopagoSettings(Document):
         preference_response = mp.preference().create(preference_data)
         preference = preference_response["response"]
 
-        if mercadopago_settings.sandbox:
+        if self.sandbox:
             return preference['sandbox_init_point']
         return preference['init_point']
 
 
 def crear_notificacion_mercadopago(payment):
-    import json
-    notificacion = frappe.get_doc({
-        "doctype": "Notificacion Mercadopago",
-        "payment_id": payment.get('id', 0),
-    })
+    notificacion = frappe.get_doc({"doctype": "Notificacion Mercadopago", "payment_id": payment.get('id', 0)})
 
     payer = payment.get("payer", {})
     transaction_details = payment.get("transaction_details", {})
@@ -261,7 +237,6 @@ def get_cajas_and_sucursales():
 
 @frappe.whitelist()
 def create_order(doctype, docname, caja):
-    import json
     mercadopago_settings = get_payment_gateway_controller("Mercadopago")
     mp = mercadopago.SDK(mercadopago_settings.access_token)
     external_store_id, external_pos_id = caja.split('-')
@@ -272,7 +247,7 @@ def create_order(doctype, docname, caja):
     data = {
         "external_reference": f"{doctype}-{docname}",
         "title": "Product order",
-        "notification_url": mercadopago_settings.get_notification_url(),
+        "notification_url": get_url("/api/method/frappe.integrations.doctype.mercadopago_settings.mercadopago_settings.ipn"),
         "total_amount": doc.grand_total,
         "description": "dale vieja",
         "items": [

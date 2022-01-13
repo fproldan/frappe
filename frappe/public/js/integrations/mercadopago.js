@@ -6,7 +6,7 @@ frappe.ui.form.on("Sales Order", {
         
     },
     refresh: function(frm) {
-        if (frappe.boot.active_domains.includes("Mercadopago")) {
+        if (frappe.boot.active_domains.includes("Mercadopago") && frm.doc.docstatus == 1) {
             frm.add_custom_button('QR', function() {
                 var d = new frappe.ui.Dialog({
                     title: __('Seleccionar Caja'),

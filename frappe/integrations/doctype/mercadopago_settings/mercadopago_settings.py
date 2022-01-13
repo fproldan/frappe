@@ -25,12 +25,6 @@ class MercadopagoSettings(Document):
         if not self.token:
             self.token = str(uuid4())
 
-    def get_user_id(self):
-        if not self.access_token:
-            return None
-
-        return self.access_token.split('-')[-1]
-
     def get_payment_url(self, **kwargs):
         """
         Url para solicitudes de pago
@@ -192,81 +186,3 @@ def ipn(**args):
         "webhook_type": webhook_type,
         "webhook_topic_id": webhook_topic_id
     }
-
-
-def get_sucursales():
-    mercadopago_settings = get_payment_gateway_controller("Mercadopago")
-    mp = mercadopago.SDK(mercadopago_settings.access_token)
-    response = mp.http_client.get(url=f"https://api.mercadopago.com/users/{mercadopago_settings.get_user_id()}/stores/search", headers={"Authorization": f"Bearer {mercadopago_settings.access_token}"})
-
-    if response.get('status') != 200:
-        return
-
-    return response['response']['results']
-
-
-def get_cajas():
-    mercadopago_settings = get_payment_gateway_controller("Mercadopago")
-    mp = mercadopago.SDK(mercadopago_settings.access_token)
-    response = mp.http_client.get(url="https://api.mercadopago.com/pos", headers={"Authorization": f"Bearer {mercadopago_settings.access_token}"})
-
-    if response.get('status') != 200:
-        return
-
-    return response['response']['results']
-
-
-@frappe.whitelist()
-def get_cajas_and_sucursales():
-    mercadopago_settings = get_payment_gateway_controller("Mercadopago")
-    mp = mercadopago.SDK(mercadopago_settings.access_token)
-    cajas = mp.http_client.get(url="https://api.mercadopago.com/pos", headers={"Authorization": f"Bearer {mercadopago_settings.access_token}"})
-    sucursales = mp.http_client.get(url=f"https://api.mercadopago.com/users/{mercadopago_settings.get_user_id()}/stores/search", headers={"Authorization": f"Bearer {mercadopago_settings.access_token}"})
-
-    if cajas.get('status') != 200 or sucursales.get('status') != 200:
-        return
-
-    cajas = cajas['response']['results']
-    sucursales = sucursales['response']['results']
-
-    for caja in cajas:
-        caja['store_name'] = [sucursal['name'] for sucursal in sucursales if caja['store_id'] == sucursal['id']][0]
-
-    return [{"label": 'Sucursal: {} - Caja: {}'.format(caja['store_name'], caja['name']), "value": '{}-{}'.format(caja.get('external_store_id'), caja.get('external_id'))} for caja in cajas]
-
-
-@frappe.whitelist()
-def create_order(doctype, docname, caja):
-    mercadopago_settings = get_payment_gateway_controller("Mercadopago")
-    mp = mercadopago.SDK(mercadopago_settings.access_token)
-    external_store_id, external_pos_id = caja.split('-')
-    url = f"https://api.mercadopago.com/instore/qr/seller/collectors/{mercadopago_settings.get_user_id()}/stores/{external_store_id}/pos/{external_pos_id}/orders"
-
-    doc = frappe.get_doc(doctype, docname)
-
-    data = {
-        "external_reference": f"{doctype}-{docname}",
-        "title": "Product order",
-        "notification_url": get_url("/api/method/frappe.integrations.doctype.mercadopago_settings.mercadopago_settings.ipn"),
-        "total_amount": doc.grand_total,
-        "description": "dale vieja",
-        "items": [
-            {
-                "title": "Compra",
-                "description": "Compra",
-                "unit_price": doc.grand_total,
-                "quantity": 1,
-                "unit_measure": "unit",
-                "total_amount": doc.grand_total
-            }
-        ],
-        # "taxes": [
-        #     {
-        #         "value": 19,
-        #         "type": "IVA"
-        #     }
-        # ],
-        # "sponsor": {"id": 446566691},
-    }
-    response = mp.http_client.put(url=url, data=json.dumps(data), headers={"Authorization": f"Bearer {mercadopago_settings.access_token}"})
-    print(response)

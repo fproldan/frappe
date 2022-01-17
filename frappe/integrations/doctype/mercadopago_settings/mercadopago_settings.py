@@ -53,7 +53,7 @@ class MercadopagoSettings(Document):
             "external_reference": payment_request.name,
             "payer": {
                 "name": kwargs["payer_name"].decode("utf-8"),
-                "email": kwargs["payer_email"]
+                "email": kwargs.get("payer_email", "")
             }
         }
         preference_response = mp.preference().create(preference_data)

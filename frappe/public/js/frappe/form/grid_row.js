@@ -211,6 +211,7 @@ export default class GridRow {
 
 		this.setup_columns();
 		this.add_open_form_button();
+		this.add_column_configure_button();
 		this.refresh_check();
 
 		if(this.frm && this.doc) {
@@ -511,8 +512,8 @@ export default class GridRow {
 
 	setup_columns() {
 		this.focus_set = false;
-		this.grid.setup_visible_columns();
 
+		this.grid.setup_visible_columns();
 		this.grid.visible_columns.forEach((col, ci) => {
 			// to get update df for the row
 			let df = this.docfields.find(field => field.fieldname === col[0].fieldname);

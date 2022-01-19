@@ -1,0 +1,63 @@
+{
+ "creation": "2020-04-17 12:18:04.376273",
+ "docstatus": 0,
+ "doctype": "Web Template",
+ "fields": [
+  {
+   "fieldname": "title",
+   "fieldtype": "Data",
+   "label": "Título",
+   "reqd": 0
+  },
+  {
+   "fieldname": "subtitle",
+   "fieldtype": "Text",
+   "label": "Subtítulo",
+   "reqd": 0
+  },
+  {
+   "fieldname": "image",
+   "fieldtype": "Attach Image",
+   "label": "Imagen",
+   "reqd": 0
+  },
+  {
+   "fieldname": "contain_image",
+   "fieldtype": "Check",
+   "label": "Restringir imagen dentro del contenedor",
+   "reqd": 0
+  },
+  {
+   "fieldname": "primary_action_label",
+   "fieldtype": "Data",
+   "label": "Etiqueta de acción primaria",
+   "reqd": 0
+  },
+  {
+   "fieldname": "primary_action",
+   "fieldtype": "Data",
+   "label": "URL de acción primaria",
+   "reqd": 0
+  },
+  {
+   "fieldname": "secondary_action_label",
+   "fieldtype": "Data",
+   "label": "Etiqueta de acción secundaria",
+   "reqd": 0
+  },
+  {
+   "fieldname": "secondary_action",
+   "fieldtype": "Data",
+   "label": "URL de acción secundaria",
+   "reqd": 0
+  }
+ ],
+ "idx": 0,
+ "modified": "2020-09-19 12:43:00.556847",
+ "modified_by": "Administrator",
+ "name": "Hero con imagen a la derecha",
+ "owner": "Administrator",
+ "standard": 1,
+ "template": "",
+ "type": "Section"
+}

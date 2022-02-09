@@ -33,7 +33,7 @@ class WidgetDialog {
 	get_title() {
 		// DO NOT REMOVE: Comment to load translation
 		// __("New Chart") __("Add Chart") __("New Shortcut") __("Edit Chart") __("Edit Shortcut") __("Add Shortcut")
-
+		// __("Grey") __("Orange") __("Pink") __("Yellow") __("Cian")
 		let action = this.editing ? "Edit" : "Add";
 		let label = action = action + " " + frappe.model.unscrub(this.type);
 		return __(label);

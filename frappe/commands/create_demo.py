@@ -144,8 +144,11 @@ def create_demo():
     setear_fechas('Social Media Post', dates=['scheduled_time'])
     setear_fechas('Contract', dates=['start_date'])
 
-    #  Varios
+    # Varios
     setear_fechas('ToDo', dates=['date'])
 
     # Support
     setear_fechas('Issue', dates=['opening_date', 'creation', 'resolution_date', 'first_responded_on', 'response_by', 'resolution_by'])
+
+    # Assets
+    setear_fechas('Asset Maintenance Task', dates=['last_completion_date'])

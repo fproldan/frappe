@@ -33,7 +33,6 @@ class WidgetDialog {
 	get_title() {
 		// DO NOT REMOVE: Comment to load translation
 		// __("New Chart") __("Add Chart") __("New Shortcut") __("Edit Chart") __("Edit Shortcut") __("Add Shortcut")
-		// __("Grey") __("Orange") __("Pink") __("Yellow") __("Cian")
 		let action = this.editing ? "Edit" : "Add";
 		let label = action = action + " " + frappe.model.unscrub(this.type);
 		return __(label);
@@ -240,7 +239,16 @@ class ShortcutDialog extends WidgetDialog {
 				fieldtype: "Select",
 				fieldname: "color",
 				label: __("Color"),
-				options: ["Grey", "Green", "Red", "Orange", "Pink", "Yellow", "Blue", "Cyan"],
+				options: [
+					{"value": "Grey", "label": __("Grey")},
+					{"value": "Green", "label": __("Green")},
+					{"value": "Red", "label": __("Red")},
+					{"value": "Orange", "label": __("Orange")},
+					{"value": "Pink", "label": __("Pink")},
+					{"value": "Yellow", "label": __("Yellow")},
+					{"value": "Blue", "label": __("Blue")},
+					{"value": "Cyan", "label": __("Cyan")}
+				],
 				default: "Grey",
 				onchange: () => {
 					let color = this.dialog.fields_dict.color.value.toLowerCase();

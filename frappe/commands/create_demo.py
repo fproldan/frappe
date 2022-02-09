@@ -132,7 +132,7 @@ def create_demo():
     setear_fechas('Installation Note', dates=['inst_date'])
     setear_fechas('Pricing Rule', dates=['valid_from', 'valid_upto'])
 
-    #  Compras
+    # Compras
     setear_fechas('Request for Quotation', dates=['transaction_date'], child_dates={'Request for Quotation Item': 'schedule_date'})
     setear_fechas('Supplier Quotation', dates=['transaction_date', 'valid_till'], child_dates={'Supplier Quotation Item': 'expected_delivery_date'})
     setear_fechas('Purchase Order', dates=['transaction_date', 'schedule_date', 'order_confirmation_date'], child_dates={'Purchase Order Item': 'schedule_date', 'Payment Schedule': 'due_date'})
@@ -149,6 +149,16 @@ def create_demo():
 
     # Support
     setear_fechas('Issue', dates=['opening_date', 'creation', 'resolution_date', 'first_responded_on', 'response_by', 'resolution_by'])
+    setear_fechas('Warranty Claim', dates=['complaint_date', 'warranty_expiry_date'])
+    setear_fechas('Maintenance Schedule', dates=['transaction_date'], child_dates={'Maintenance Schedule Item': 'start_date', 'Maintenance Schedule Item': 'end_date', 'Maintenance Schedule Detail': 'scheduled_date'})
+    setear_fechas('Maintenance Visit', dates=['mntc_date'])
 
     # Assets
-    setear_fechas('Asset Maintenance Task', dates=['last_completion_date'])
+    setear_fechas('Asset Maintenance Task', dates=['start_date', 'next_due_date', 'last_completion_date'])
+    setear_fechas('Asset Repair', dates=['failure_date'])
+    setear_fechas('Asset Value Adjustment', dates=['date'])
+    setear_fechas('Asset Movement', dates=['transaction_date'])
+
+    # Projects
+    setear_fechas('Project', dates=['expected_start_date', 'expected_end_date', 'actual_start_date', 'actual_end_date'])
+    setear_fechas('Timesheet', dates=['start_date', 'start_date'], child_dates={'Timesheet Detail': 'from_time', 'Payment Schedule': 'to_time'})

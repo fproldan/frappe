@@ -89,6 +89,13 @@ def render(path=None, http_status_code=None):
 
 	return build_response(path, data, http_status_code or 200)
 
+def is_binary_file(path):
+	# ref: https://stackoverflow.com/a/7392391/10309266
+	textchars = bytearray({7,8,9,10,12,13,27} | set(range(0x20, 0x100)) - {0x7f})
+	with open(path, 'rb') as f:
+		content = f.read(1024)
+		return bool(content.translate(None, textchars))
+
 def is_static_file(path):
 	if ('.' not in path):
 		return False
@@ -98,7 +105,7 @@ def is_static_file(path):
 
 	for app in frappe.get_installed_apps():
 		file_path = frappe.get_app_path(app, 'www') + '/' + path
-		if os.path.exists(file_path):
+		if os.path.isfile(file_path) and (extn or is_binary_file(file_path)):
 			frappe.flags.file_path = file_path
 			return True
 

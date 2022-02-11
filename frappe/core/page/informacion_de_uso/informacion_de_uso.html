@@ -79,4 +79,19 @@
 		<p>{{ usage_message }}</p>
 	</div>
 	{% endif %}
+
+	{% if available_ecommerce_integrations %}
+		{% for integration_name in available_ecommerce_integrations %}
+			{% var publications_limit = limits[`${integration_name}_publications`]; %}
+			{% var enabled_publications = eval(`enabled_${integration_name}_publications`); %}
+			{% var publications_percent = ((enabled_publications / publications_limit) * 100); %}
+			<div class="usage-info-section" style="margin: 30px;">
+				<h4>{{ `Publicaciones de ${integration_name}` }}</h4>
+				<div class="progress" style="margin-bottom: 0;">
+					<div class="progress-bar progress-bar-{%= (publications_percent < 75 ? "success" : "warning") %}" style="width: {{ publications_percent }}%"></div>
+				</div>
+				<p>{%= enabled_publications %} de {%= publications_limit %} vinculadas</p>
+			</div>
+		{% endfor %}
+	{% endif %}
 </div>

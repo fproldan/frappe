@@ -746,11 +746,18 @@ def _set_limits(context, site, limits):
     with frappe.init_site(site):
         frappe.connect()
         new_limits = {}
-        for limit, value in limits:
-            if limit not in ('daily_emails', 'emails', 'space', 'users', 'email_group', 'currency',
+
+        available_limits = ['daily_emails', 'emails', 'space', 'users', 'email_group', 'currency',
                 'expiry', 'support_email', 'support_chat', 'upgrade_url', 'subscription_id',
                 'subscription_type', 'current_plan', 'subscription_base_price', 'upgrade_plan',
-                'upgrade_base_price', 'cancellation_url', 'companies'):
+                'upgrade_base_price', 'cancellation_url', 'companies']
+
+        if 'ecommerce_integrations' in frappe.get_installed_apps():
+            from ecommerce_integrations.base.utils import AVAILABLE_INTEGRATIONS
+            available_limits.extend((f'{integration_name}_publications' for integration_name in AVAILABLE_INTEGRATIONS))
+
+        for limit, value in limits:
+            if limit not in available_limits:
                 frappe.throw(_('Invalid limit {0}').format(limit))
 
             if limit=='expiry' and value:

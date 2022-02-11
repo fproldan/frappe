@@ -34,11 +34,29 @@ frappe.pages['informacion-de-uso'].on_page_load = function(wrapper) {
 				usage_message = __('{0} disponible de {1}', [(available + ' MB').bold(), (limits.space + ' MB').bold()]);
 			}
 
+			let available_ecommerce_integrations;
+			frappe.call({
+				async: false,
+				method: 'frappe.core.doctype.module_def.module_def.get_installed_apps',
+				callback: function (response) {
+					if (JSON.parse(response.message).indexOf("ecommerce_integrations") != -1) {
+						frappe.call({
+							async: false,
+							method: 'ecommerce_integrations.base.whitelist.get_available_integrations_whitelisted',
+							callback: function (response) {
+								available_ecommerce_integrations = response.message;
+							},
+						});
+					}
+				},
+			});
+
 			$(frappe.render_template("informacion_de_uso", Object.assign(usage_info, {
 				database_percent,
 				files_percent,
 				backup_percent,
-				usage_message
+				usage_message,
+				available_ecommerce_integrations,
 			}))).appendTo(page.main);
 
 			var btn_text = usage_info.limits.users == 1 ? __("Ampliar") : __("Renovar / Ampliar");
@@ -47,5 +65,4 @@ frappe.pages['informacion-de-uso'].on_page_load = function(wrapper) {
 			});
 		}
 	});
-
-}
+};

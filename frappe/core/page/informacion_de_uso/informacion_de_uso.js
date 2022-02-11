@@ -9,10 +9,6 @@ frappe.pages['informacion-de-uso'].on_page_load = function(wrapper) {
 		method: "frappe.limits.get_usage_info",
 		callback: function(r) {
 			var usage_info = r.message;
-			if (!usage_info) {
-				return;
-			}
-
 			let limits = usage_info.limits;
 			let database_percent = (limits.space_usage.database_size / limits.space) * 100;
 			let files_percent = (limits.space_usage.files_size / limits.space) * 100;

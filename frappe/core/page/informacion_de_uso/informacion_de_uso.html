@@ -80,8 +80,8 @@
 	</div>
 	{% endif %}
 
-	{% if available_ecommerce_integrations %}
-		{% for integration_name in available_ecommerce_integrations %}
+	{% if limited_ecommerce_integrations %}
+		{% for integration_name in limited_ecommerce_integrations %}
 			{% var publications_limit = limits[`${integration_name}_publications`]; %}
 			{% var enabled_publications = eval(`enabled_${integration_name}_publications`); %}
 			{% var publications_percent = ((enabled_publications / publications_limit) * 100); %}

@@ -137,10 +137,6 @@ def get_usage_info():
     from frappe.email.queue import get_emails_sent_this_month
 
     limits = get_limits()
-    if not (limits and any([limits.users, limits.space, limits.emails, limits.expiry, limits.companies])):
-        # no limits!
-        return
-
     limits.space = (limits.space or 0) * 1024.0  # to MB
     if not limits.space_usage:
         # hack! to show some progress

@@ -34,7 +34,7 @@ frappe.pages['informacion-de-uso'].on_page_load = function(wrapper) {
 				usage_message = __('{0} disponible de {1}', [(available + ' MB').bold(), (limits.space + ' MB').bold()]);
 			}
 
-			let available_ecommerce_integrations;
+			let limited_ecommerce_integrations = [];
 			frappe.call({
 				async: false,
 				method: 'frappe.core.doctype.module_def.module_def.get_installed_apps',
@@ -44,7 +44,11 @@ frappe.pages['informacion-de-uso'].on_page_load = function(wrapper) {
 							async: false,
 							method: 'ecommerce_integrations.base.whitelist.get_available_integrations_whitelisted',
 							callback: function (response) {
-								available_ecommerce_integrations = response.message;
+								response.message.forEach(function (integration_name) {
+									if (`${integration_name}_publications` in limits) {
+										limited_ecommerce_integrations.push(integration_name);
+									}
+								});
 							},
 						});
 					}
@@ -56,7 +60,7 @@ frappe.pages['informacion-de-uso'].on_page_load = function(wrapper) {
 				files_percent,
 				backup_percent,
 				usage_message,
-				available_ecommerce_integrations,
+				limited_ecommerce_integrations,
 			}))).appendTo(page.main);
 
 			var btn_text = usage_info.limits.users == 1 ? __("Ampliar") : __("Renovar / Ampliar");

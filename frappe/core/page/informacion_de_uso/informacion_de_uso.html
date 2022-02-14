@@ -91,7 +91,13 @@
 					<div class="progress" style="margin-bottom: 0;">
 						<div class="progress-bar progress-bar-{%= (publications_percent < 75 ? "success" : "warning") %}" style="width: {{ publications_percent }}%"></div>
 					</div>
-					<p>{%= enabled_publications %} de {%= publications_limit %} vinculadas</p>
+					<p>
+						{%= enabled_publications %} de {%= publications_limit %} vinculadas
+						{% if publications_percent === 100 %}
+							<br>
+							Ha utilizado todas las Publicaciones de {{ integration_name }} que se le han asignado. Por favor, compre más Publicaciones en su suscripción.
+						{% endif %}
+					</p>
 				</div>
 			{% endif %}
 		{% endfor %}

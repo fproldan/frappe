@@ -93,7 +93,7 @@
 					</div>
 					<p>
 						{%= enabled_publications %} de {%= publications_limit %} vinculadas
-						{% if publications_percent === 100 %}
+						{% if publications_percent >= 100 %}
 							<br>
 							Ha utilizado todas las Publicaciones de {{ integration_name }} que se le han asignado. Por favor, compre más Publicaciones en su suscripción.
 						{% endif %}

@@ -162,3 +162,6 @@ def create_demo():
     # Projects
     setear_fechas('Project', dates=['expected_start_date', 'expected_end_date', 'actual_start_date', 'actual_end_date'])
     setear_fechas('Timesheet', dates=['start_date', 'start_date'], child_dates={'Timesheet Detail': 'from_time', 'Payment Schedule': 'to_time'})
+
+    # Website
+    setear_fechas('Blog Post', dates=['published_on'])

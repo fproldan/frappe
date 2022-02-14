@@ -35,19 +35,20 @@ frappe.pages['informacion-de-uso'].on_page_load = function(wrapper) {
 				async: false,
 				method: 'frappe.core.doctype.module_def.module_def.get_installed_apps',
 				callback: function (response) {
-					if (JSON.parse(response.message).indexOf("ecommerce_integrations") != -1) {
-						frappe.call({
-							async: false,
-							method: 'ecommerce_integrations.base.whitelist.get_available_integrations_whitelisted',
-							callback: function (response) {
-								response.message.forEach(function (integration_name) {
-									if (`${integration_name}_publications` in limits) {
-										limited_ecommerce_integrations.push(integration_name);
-									}
-								});
-							},
-						});
+					if (JSON.parse(response.message).indexOf("ecommerce_integrations") === -1) {
+						return;
 					}
+					frappe.call({
+						async: false,
+						method: 'ecommerce_integrations.base.whitelist.get_available_integrations_whitelisted',
+						callback: function (response) {
+							response.message.forEach(function (integration_name) {
+								if (`${integration_name}_publications` in limits) {
+									limited_ecommerce_integrations.push(integration_name);
+								}
+							});
+						},
+					});
 				},
 			});
 

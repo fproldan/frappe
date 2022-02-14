@@ -156,8 +156,8 @@ def get_usage_info():
     })
 
     if 'ecommerce_integrations' in frappe.get_installed_apps():
-        from ecommerce_integrations.base.limits import get_usage_info
-        usage_info.update(get_usage_info())
+        from ecommerce_integrations.base.limits import get_usage_info as get_ecommerce_integrations_usage_info
+        usage_info.update(get_ecommerce_integrations_usage_info())
 
     if limits.expiry:
         usage_info['expires_on'] = formatdate(limits.expiry)
@@ -209,8 +209,8 @@ def update_limits(limits_dict):
     update_site_config("limits", limits, validate=False)
 
     if 'ecommerce_integrations' in frappe.get_installed_apps():
-        from ecommerce_integrations.base.limits import handle_limits
-        handle_limits(limits)
+        from ecommerce_integrations.base.limits import handle_limits as handle_ecommerce_integrations_limits
+        handle_ecommerce_integrations_limits(limits)
 
     disable_users(limits)
 

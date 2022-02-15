@@ -149,19 +149,24 @@ def create_demo():
 
     # Support
     setear_fechas('Issue', dates=['opening_date', 'creation', 'resolution_date', 'first_responded_on', 'response_by', 'resolution_by'])
-    setear_fechas('Warranty Claim', dates=['complaint_date', 'warranty_expiry_date'])
-    setear_fechas('Maintenance Schedule', dates=['transaction_date'], child_dates={'Maintenance Schedule Item': 'start_date', 'Maintenance Schedule Item': 'end_date', 'Maintenance Schedule Detail': 'scheduled_date'})
-    setear_fechas('Maintenance Visit', dates=['mntc_date'])
+    setear_fechas('Warranty Claim', dates=['complaint_date', 'warranty_expiry_date', 'resolution_date'])
+    # setear_fechas('Maintenance Schedule', dates=['transaction_date'], child_dates={'Maintenance Schedule Item': 'start_date', 'Maintenance Schedule Item': 'end_date', 'Maintenance Schedule Detail': 'scheduled_date'})
+    # setear_fechas('Maintenance Visit', dates=['mntc_date'])
 
     # Assets
     setear_fechas('Asset Maintenance Task', dates=['start_date', 'next_due_date', 'last_completion_date'])
     setear_fechas('Asset Repair', dates=['failure_date'])
     setear_fechas('Asset Value Adjustment', dates=['date'])
     setear_fechas('Asset Movement', dates=['transaction_date'])
+    setear_fechas('Asset Category', dates=[], child_dates={'Asset Finance Book': 'depreciation_start_date'})
+    setear_fechas('Asset', dates=['available_for_use_date', 'purchase_date', 'insurance_start_date', 'insurance_end_date'], child_dates={'Asset Finance Book': 'depreciation_start_date', 'Depreciation Schedule': 'schedule_date'})
+    setear_fechas('Asset Maintenance Log', dates=['due_date', 'completion_date'])
 
     # Projects
     setear_fechas('Project', dates=['expected_start_date', 'expected_end_date', 'actual_start_date', 'actual_end_date'])
-    setear_fechas('Timesheet', dates=['start_date', 'start_date'], child_dates={'Timesheet Detail': 'from_time', 'Payment Schedule': 'to_time'})
+    setear_fechas('Project Update', dates=['date'])
+    setear_fechas('Task', dates=['expected_start_date', 'expected_end_date', 'act_start_date', 'act_end_date', 'completed_on'])
+    setear_fechas('Timesheet', dates=['start_date', 'start_date'], child_dates={'Timesheet Detail': 'from_time', 'Timesheet Detail': 'to_time'})
 
     # Website
     setear_fechas('Blog Post', dates=['published_on'])

@@ -114,7 +114,7 @@ def create_demo():
     setear_fechas('Delivery Note', dates=['posting_date', 'lr_date'], related_doctype='Stock Ledger Entry')
     setear_fechas('Purchase Receipt', dates=['posting_date'], related_doctype='Stock Ledger Entry')
     setear_fechas('Delivery Trip', dates=['departure_time'], child_dates={'Delivery Stop': 'estimated_arrival'})
-    setear_fechas('Batch', dates=['manufacturing_date'])
+    setear_fechas('Batch', dates=['manufacturing_date', 'expiry_date'])
     setear_fechas('Serial No', dates=['warranty_expiry_date', 'amc_expiry_date'])
     setear_fechas('Item', dates=['end_of_life'])
 
@@ -124,6 +124,7 @@ def create_demo():
     setear_fechas('Purchase Invoice', dates=['posting_date', 'due_date', 'bill_date'], child_dates={'Payment Schedule': 'due_date'}, related_doctype='GL Entry')
     setear_fechas('Period Closing Voucher', dates=['transaction_date', 'posting_date'])
     setear_fechas('Accounting Period', dates=['start_date', 'end_date'])
+    setear_fechas('Subscription', dates=['start_date', 'end_date', 'current_invoice_start', 'current_invoice_end', 'trial_period_start', 'trial_period_end'])
 
     # Sales
     setear_fechas('Quotation', dates=['transaction_date', 'valid_till'], child_dates={'Payment Schedule': 'due_date'})

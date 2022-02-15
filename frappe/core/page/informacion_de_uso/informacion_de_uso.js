@@ -66,5 +66,4 @@ frappe.pages['informacion-de-uso'].on_page_load = function(wrapper) {
 			});
 		}
 	});
-
 };

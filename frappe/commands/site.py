@@ -768,10 +768,10 @@ def _set_limits(context, site, limits):
                 except ValueError:
                     raise ValueError("Incorrect data format, should be YYYY-MM-DD")
 
-            elif limit in ('users', 'emails', 'email_group', 'daily_emails', 'companies', *ecommerce_integrations_limits):
+            elif limit in ('space', 'subscription_base_price', 'upgrade_base_price'):
                 value = float(value)
 
-            elif limit in ('users', 'emails', 'email_group', 'daily_emails', 'companies'):
+            elif limit in ('users', 'emails', 'email_group', 'daily_emails', 'companies', *ecommerce_integrations_limits):
                 value = int(value)
 
             new_limits[limit] = value

@@ -138,7 +138,7 @@ class Pagos360Settings(Document):
 
         if response["status"] == 200:
             return parser.parse(response["response"]).date()
-        return posting_date_3_days + timedelta(days=4)
+        return sales_invoice.posting_date + timedelta(days=4)
 
     def solicitar_debito(self, subscription, adhesion, sales_invoice, payment_request):
         from erpnext_argentina.pagos360 import pago360_log_error

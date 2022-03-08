@@ -81,7 +81,7 @@
    "description": "Los valores se obtienen de dolarsi.com",
    "fieldname": "exchange_rate_type",
    "fieldtype": "Select",
-   "label": "Tipo de cambio",
+   "label": "Tipo de d\u00f3lar",
    "options": "\nDolar Oficial\nDolar Blue\nDolar Contado con Liqui\nDolar Bolsa"
   }
  ],
@@ -89,7 +89,7 @@
  "idx": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-02-25 10:54:51.053900",
+ "modified": "2022-02-25 11:54:51.053900",
  "modified_by": "Administrator",
  "module": "Geo",
  "name": "Currency",

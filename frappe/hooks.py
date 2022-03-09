@@ -50,7 +50,7 @@ web_include_js = [
 	"website_script.js"
 ]
 
-web_include_css = []
+web_include_css = ["website_style.css"]
 
 website_route_rules = [
 	{"from_route": "/blog/<category>", "to_route": "Blog Post"},
@@ -77,8 +77,6 @@ email_append_to = ["Event", "ToDo", "Communication"]
 get_rooms = 'frappe.chat.doctype.chat_room.chat_room.get_rooms'
 
 calendars = ["Event"]
-
-leaderboards = "frappe.desk.leaderboard.get_leaderboards"
 
 # login
 

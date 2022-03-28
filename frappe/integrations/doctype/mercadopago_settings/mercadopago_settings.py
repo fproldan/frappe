@@ -29,6 +29,9 @@ class MercadopagoSettings(Document):
         """
         Url para solicitudes de pago
         """
+        if not self.access_token:
+            frappe.throw("Debe realizar la autorización en la configuración de la pasarela")
+
         mp = mercadopago.SDK(self.access_token)
         payment_request = frappe.get_doc(kwargs["reference_doctype"], kwargs["reference_docname"])
 

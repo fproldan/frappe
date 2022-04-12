@@ -36,7 +36,6 @@ def set_new_name(doc, set_draft_name=False):
 
 	doc.run_method("before_naming")
 
-
 	if set_draft_name:
 		doc.name = "({0})".format(make_autoname('hash', doc.doctype))
 		return

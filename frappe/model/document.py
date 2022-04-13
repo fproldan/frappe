@@ -19,6 +19,7 @@ from frappe.integrations.doctype.webhook import run_webhooks
 from frappe.desk.form.document_follow import follow_document
 from frappe.core.doctype.server_script.server_script_utils import run_server_script_for_doc_event
 from frappe.utils.data import get_absolute_url
+from frappe.model.rename_doc import rename_doc
 
 # once_only validation
 # methods
@@ -87,7 +88,7 @@ class Document(BaseDocument):
 		If DocType name and document name are passed, the object will load
 		all values (including child documents) from the database.
 		"""
-		self.doctype = self.name = None
+		self.doctype = self.name = self._draft_name = None
 		self._default_new_docs = {}
 		self.flags = frappe._dict()
 

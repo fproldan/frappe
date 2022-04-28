@@ -239,7 +239,7 @@ def add_standard_navbar_items():
 
 	standard_help_items = [
 		{
-			'item_label': 'Acerca de DiamoERP',
+			'item_label': 'Acerca de Grupo Gestión',
 			'item_type': 'Action',
 			'action': 'frappe.ui.toolbar.show_about()',
 			'is_standard': 1
@@ -258,12 +258,6 @@ def add_standard_navbar_items():
 		},
 		{
 			'item_type': 'Separator',
-			'is_standard': 1
-		},
-		{
-			'item_label': 'Crear un Ticket',
-			'item_type': 'Route',
-			'route': 'https://diamo.com.ar/soporte?new=1',
 			'is_standard': 1
 		},
 	]

@@ -1,18 +1,12 @@
 frappe.provide('frappe.ui.misc');
 frappe.ui.misc.about = function() {
 	if(!frappe.ui.misc.about_dialog) {
-		var d = new frappe.ui.Dialog({title: 'DiamoERP'});
+		var d = new frappe.ui.Dialog({title: 'Grupo Gestión'});
 
 		$(d.body).html(repl("<div>\
 		<p>El ERP definitivo</p>  \
 		<p><i class='fa fa-globe fa-fw'></i>\
-			Website: <a href='https://diamo.com.ar' target='_blank'>https://diamo.com.ar</a></p>\
-		<p><i class='fa fa-linkedin fa-fw'></i>\
-			LinkedIn: <a href='https://ar.linkedin.com/company/diamo' target='_blank'>https://ar.linkedin.com/company/diamo</a></p>\
-		<p><i class='fa fa-facebook fa-fw'></i>\
-			Facebook: <a href='https://facebook.com/diamo.argentina' target='_blank'>https://facebook.com/diamo.argentina</a></p>\
-		<p><i class='fa fa-twitter fa-fw'></i>\
-			Twitter: <a href='https://twitter.com/DiamoArgentina' target='_blank'>https://twitter.com/DiamoArgentina</a></p>\
+			Website: <a href='https://grupo-gestion.com.ar' target='_blank'>https://grupo-gestion.com.ar</a></p>\
 		<hr>\
 		<p class='text-muted'>&copy; Diamo </p> \
 		</div>", frappe.app));

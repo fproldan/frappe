@@ -19,6 +19,7 @@ from frappe.integrations.doctype.webhook import run_webhooks
 from frappe.desk.form.document_follow import follow_document
 from frappe.core.doctype.server_script.server_script_utils import run_server_script_for_doc_event
 from frappe.utils.data import get_absolute_url
+from frappe.model.rename_doc import rename_doc
 
 # once_only validation
 # methods
@@ -87,7 +88,7 @@ class Document(BaseDocument):
 		If DocType name and document name are passed, the object will load
 		all values (including child documents) from the database.
 		"""
-		self.doctype = self.name = None
+		self.doctype = self.name = self._draft_name = None
 		self._default_new_docs = {}
 		self.flags = frappe._dict()
 
@@ -230,7 +231,7 @@ class Document(BaseDocument):
 		self.check_if_latest()
 		self.run_method("before_insert")
 		self._validate_links()
-		self.set_new_name(set_name=set_name, set_child_names=set_child_names)
+		self.set_new_name(set_name=set_name, set_child_names=set_child_names, set_draft_name=getattr(self.meta, "set_name_after_submit", False))
 		self.set_parent_in_children()
 		self.validate_higher_perm_levels()
 
@@ -334,6 +335,12 @@ class Document(BaseDocument):
 			self.db_update()
 
 		self.update_children()
+
+		if self._action == "submit" and getattr(self.meta, "set_name_after_submit", False):
+			self._draft_name = self.name
+			self.set_new_name()
+			rename_doc(self.doctype, self._draft_name, self.name, ignore_permissions=True, force=True, show_alert=False)
+
 		self.run_post_save_methods()
 
 		# clear unsaved flag
@@ -405,10 +412,12 @@ class Document(BaseDocument):
 		previous = self.get_doc_before_save()
 		return previous.get(fieldname)!=self.get(fieldname) if previous else True
 
-	def set_new_name(self, force=False, set_name=None, set_child_names=True):
+	def set_new_name(self, force=False, set_name=None, set_child_names=True, set_draft_name=False):
 		"""Calls `frappe.naming.set_new_name` for parent and child docs."""
 
-		if self.flags.name_set and not force:
+		if set_draft_name and self.flags.draft_name_set and not force and not set_name:
+			return
+		elif not set_draft_name and self.flags.name_set and not force and not set_name:
 			return
 
 		# If autoname has set as Prompt (name)
@@ -420,14 +429,17 @@ class Document(BaseDocument):
 		if set_name:
 			self.name = set_name
 		else:
-			set_new_name(self)
+			set_new_name(self, set_draft_name=set_draft_name)
 
 		if set_child_names:
 			# set name for children
 			for d in self.get_all_children():
 				set_new_name(d)
 
-		self.flags.name_set = True
+		if set_draft_name:
+			self.flags.draft_name_set = True
+		else:
+			self.flags.name_set = True
 
 	def get_title(self):
 		"""Get the document title based on title_field or `title` or `name`"""

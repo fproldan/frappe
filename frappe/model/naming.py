@@ -22,7 +22,7 @@ from six import string_types
 from frappe.model import log_types
 
 
-def set_new_name(doc):
+def set_new_name(doc, set_draft_name=False):
 	"""
 	Sets the `name` property for the document based on various rules.
 
@@ -36,14 +36,17 @@ def set_new_name(doc):
 
 	doc.run_method("before_naming")
 
+	if set_draft_name:
+		doc.name = "({0})".format(make_autoname('hash', doc.doctype))
+		return
+
 	autoname = frappe.get_meta(doc.doctype).autoname or ""
 
 	if autoname.lower() != "prompt" and not frappe.flags.in_import:
 		doc.name = None
 
 	if getattr(doc, "amended_from", None):
-		doc.name = _get_amended_name(doc)
-		return
+		_set_amended_name(doc)
 
 	elif getattr(doc.meta, "issingle", False):
 		doc.name = doc.doctype

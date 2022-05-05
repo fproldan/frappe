@@ -6,9 +6,9 @@ frappe.ui.misc.about = function() {
 		$(d.body).html(repl("<div>\
 		<p>El ERP definitivo</p>  \
 		<p><i class='fa fa-globe fa-fw'></i>\
-			Website: <a href='https://grupo-gestion.com.ar' target='_blank'>https://grupo-gestion.com.ar</a></p>\
+			Website: <a href='https://www.grupo-gestion.com.ar' target='_blank'>https://www.grupo-gestion.com.ar</a></p>\
 		<hr>\
-		<p class='text-muted'>&copy; Diamo </p> \
+		<p class='text-muted'>&copy; Grupo Gestión </p> \
 		</div>", frappe.app));
 
 		frappe.ui.misc.about_dialog = d;

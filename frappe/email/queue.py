@@ -262,12 +262,12 @@ def check_email_limit(recipients):
 	if daily_email_limit:
 		# get count of sent mails in last 24 hours
 		if (get_emails_sent_today() + len(recipients)) > daily_email_limit:
-			frappe.throw('Lo sentimos, ha alcanzado el límite máximo de <b>{} emails</b> diarios para su suscripción. Puede contactar a <a href="https://grupo-gestion.com.ar" target="_blank">soporte</a> para descubrir extender el límite.'.format(daily_email_limit), EmailLimitCrossedError)
+			frappe.throw('Lo sentimos, ha alcanzado el límite máximo de <b>{} emails</b> diarios para su suscripción. Puede contactar a <a href="https://www.grupo-gestion.com.ar" target="_blank">soporte</a> para descubrir extender el límite.'.format(daily_email_limit), EmailLimitCrossedError)
 
 	if monthly_email_limit:
 		# get count of mails sent this month
 		if (get_emails_sent_this_month() + len(recipients)) > monthly_email_limit:
-			frappe.throw('Lo sentimos, ha alcanzado el límite máximo de <b>{} emails</b> mensuales para su suscripción. Puede contactar a <a href="https://grupo-gestion.com.ar" target="_blank">soporte</a> para descubrir extender el límite.'.format(monthly_email_limit), EmailLimitCrossedError)
+			frappe.throw('Lo sentimos, ha alcanzado el límite máximo de <b>{} emails</b> mensuales para su suscripción. Puede contactar a <a href="https://www.grupo-gestion.com.ar" target="_blank">soporte</a> para descubrir extender el límite.'.format(monthly_email_limit), EmailLimitCrossedError)
 
 
 def get_emails_sent_this_month():

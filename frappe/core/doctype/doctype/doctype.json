@@ -46,7 +46,6 @@
   "allow_auto_repeat",
   "view_settings",
   "title_field",
-  "show_title_field_in_link",
   "translate_link_fields",
   "search_fields",
   "default_print_format",
@@ -557,42 +556,6 @@
   {
    "fieldname": "column_break_51",
    "fieldtype": "Column Break"
-  },
-  {
-   "depends_on": "has_web_view",
-   "fieldname": "website_search_field",
-   "fieldtype": "Data",
-   "label": "Website Search Field"
-  },
-  {
-   "fieldname": "naming_rule",
-   "fieldtype": "Select",
-   "label": "Naming Rule",
-   "length": 40,
-   "options": "\nSet by user\nAutoincrement\nBy fieldname\nBy \"Naming Series\" field\nExpression\nExpression (old style)\nRandom\nBy script"
-  },
-  {
-   "fieldname": "migration_hash",
-   "fieldtype": "Data",
-   "hidden": 1
-  },
-  {
-   "fieldname": "states",
-   "fieldtype": "Table",
-   "label": "States",
-   "options": "DocType State"
-  },
-  {
-   "collapsible": 1,
-   "fieldname": "document_states_section",
-   "fieldtype": "Section Break",
-   "label": "Document States"
-  },
-  {
-   "default": "0",
-   "fieldname": "show_title_field_in_link",
-   "fieldtype": "Check",
-   "label": "Show Title in Link Fields"
   },
   {
    "default": "0",

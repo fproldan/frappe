@@ -66,7 +66,7 @@ frappe.ui.form.ControlLink = frappe.ui.form.ControlData.extend({
 		else {
 			return frappe.get_route && frappe.get_route()[0] === 'List' ? frappe.get_route()[1] : null;
 		}
-	},
+	}
 	setup_buttons: function() {
 		if(this.only_input && !this.with_link_btn) {
 			this.$input_area.find(".link-btn").remove();

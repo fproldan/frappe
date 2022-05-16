@@ -223,9 +223,11 @@ CREATE TABLE `tabDocType` (
   `email_append_to` int(1) NOT NULL DEFAULT 0,
   `subject_field` varchar(255) DEFAULT NULL,
   `sender_field` varchar(255) DEFAULT NULL,
-  PRIMARY KEY (`name`),
-  KEY `parent` (`parent`)
-) ENGINE=InnoDB ROW_FORMAT=COMPRESSED CHARACTER SET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  `show_title_field_in_link` int(1) NOT NULL DEFAULT 0,
+  `migration_hash` varchar(255) DEFAULT NULL,
+  `translate_link_fields` int(1) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`name`)
+) ENGINE=InnoDB ROW_FORMAT=DYNAMIC CHARACTER SET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Table structure for table `tabSeries`

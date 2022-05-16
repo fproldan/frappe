@@ -46,6 +46,8 @@
   "allow_auto_repeat",
   "view_settings",
   "title_field",
+  "show_title_field_in_link",
+  "translate_link_fields",
   "search_fields",
   "default_print_format",
   "sort_field",
@@ -555,6 +557,48 @@
   {
    "fieldname": "column_break_51",
    "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "has_web_view",
+   "fieldname": "website_search_field",
+   "fieldtype": "Data",
+   "label": "Website Search Field"
+  },
+  {
+   "fieldname": "naming_rule",
+   "fieldtype": "Select",
+   "label": "Naming Rule",
+   "length": 40,
+   "options": "\nSet by user\nAutoincrement\nBy fieldname\nBy \"Naming Series\" field\nExpression\nExpression (old style)\nRandom\nBy script"
+  },
+  {
+   "fieldname": "migration_hash",
+   "fieldtype": "Data",
+   "hidden": 1
+  },
+  {
+   "fieldname": "states",
+   "fieldtype": "Table",
+   "label": "States",
+   "options": "DocType State"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "document_states_section",
+   "fieldtype": "Section Break",
+   "label": "Document States"
+  },
+  {
+   "default": "0",
+   "fieldname": "show_title_field_in_link",
+   "fieldtype": "Check",
+   "label": "Show Title in Link Fields"
+  },
+  {
+   "default": "0",
+   "fieldname": "translate_link_fields",
+   "fieldtype": "Check",
+   "label": "Translate Link Fields"
   }
  ],
  "icon": "fa fa-bolt",
@@ -636,7 +680,8 @@
    "link_fieldname": "reference_doctype"
   }
  ],
- "modified": "2022-05-06 13:49:56.458719",
+ "modified": "2022-05-07 13:49:56.458719",
+ "modified": "2022-02-28 21:56:52.116915",
  "modified_by": "Administrator",
  "module": "Core",
  "name": "DocType",
@@ -660,5 +705,7 @@
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
- "track_changes": 1
+ "states": [],
+ "track_changes": 1,
+ "translate_link_fields": 1
 }

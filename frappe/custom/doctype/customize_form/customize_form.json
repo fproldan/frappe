@@ -27,6 +27,8 @@
   "autoname",
   "view_settings_section",
   "title_field",
+  "show_title_field_in_link",
+  "translate_link_fields",
   "image_field",
   "default_print_format",
   "column_break_29",
@@ -287,8 +289,22 @@
    "options": "Email Template"
   },
   {
-   "fieldname": "column_break_26",
-   "fieldtype": "Column Break"
+   "fieldname": "states",
+   "fieldtype": "Table",
+   "label": "States",
+   "options": "DocType State"
+  },
+  {
+   "default": "0",
+   "fieldname": "show_title_field_in_link",
+   "fieldtype": "Check",
+   "label": "Show Title in Link Fields"
+  },
+  {
+   "default": "0",
+   "fieldname": "translate_link_fields",
+   "fieldtype": "Check",
+   "label": "Translate Link Fields"
   }
  ],
  "hide_toolbar": 1,
@@ -297,7 +313,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-06-22 19:01:06.920663",
+ "modified": "2021-06-23 19:01:06.920663",
  "modified_by": "Administrator",
  "module": "Custom",
  "name": "Customize Form",

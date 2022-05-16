@@ -92,6 +92,8 @@ def get_bootinfo():
 	bootinfo.additional_filters_config = get_additional_filters_from_hooks()
 	bootinfo.desk_settings = get_desk_settings()
 	bootinfo.app_logo_url = get_app_logo()
+	bootinfo.link_title_doctypes = get_link_title_doctypes()
+	bootinfo.translatable_doctypes = get_translatable_doctypes()
 
 	return bootinfo
 
@@ -328,4 +330,36 @@ def get_desk_settings():
 	return desk_settings
 
 def get_notification_settings():
-	return frappe.get_cached_doc('Notification Settings', frappe.session.user)
+	return frappe.get_cached_doc("Notification Settings", frappe.session.user)
+
+
+def get_country_codes(bootinfo):
+	country_codes = get_all()
+	bootinfo.country_codes = frappe._dict(country_codes)
+
+
+@frappe.whitelist()
+def get_link_title_doctypes():
+	dts = frappe.get_all("DocType", {"show_title_field_in_link": 1})
+	custom_dts = frappe.get_all(
+		"Property Setter",
+		{"property": "show_title_field_in_link", "value": "1"},
+		["doc_type as name"],
+	)
+	return [d.name for d in dts + custom_dts if d]
+
+
+def set_time_zone(bootinfo):
+	bootinfo.time_zone = {
+		"system": get_time_zone(),
+		"user": bootinfo.get("user_info", {}).get(frappe.session.user, {}).get("time_zone", None)
+		or get_time_zone(),
+	}
+
+
+def get_translatable_doctypes():
+	dts = frappe.get_all("DocType", {"translate_link_fields": 1}, pluck="name")
+	custom_dts = frappe.get_all(
+		"Property Setter", {"property": "translate_link_fields", "value": "1"}, pluck="doc_type"
+	)
+	return dts + custom_dts

@@ -12,6 +12,7 @@
   "address_type",
   "address_line1",
   "address_line2",
+  "piso",
   "city",
   "county",
   "state",
@@ -147,12 +148,18 @@
    "fieldtype": "Table",
    "label": "Links",
    "options": "Dynamic Link"
+  },
+  {
+   "fieldname": "piso",
+   "fieldtype": "Data",
+   "label": "Piso",
+   "reqd": 1
   }
  ],
  "icon": "fa fa-map-marker",
  "idx": 5,
  "links": [],
- "modified": "2022-05-17 11:34:37.623527",
+ "modified": "2022-05-17 13:50:35.800558",
  "modified_by": "Administrator",
  "module": "Contacts",
  "name": "Address",

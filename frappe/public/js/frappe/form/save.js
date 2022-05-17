@@ -47,7 +47,6 @@ frappe.ui.form.save = function (frm, action, callback, btn) {
 			empty if the fields with `in_list_view: 1` are undefined or falsy because that's
 			what users also consider to be an empty row
 		*/
-		return
 		const docs = frappe.model.get_all_docs(frm.doc);
 
 		// we should only worry about table data

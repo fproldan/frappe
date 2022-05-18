@@ -617,9 +617,6 @@ frappe.ui.Page = Class.extend({
 		}
 	},
 
-<<<<<<< HEAD
-	add_inner_message: function(message) {
-=======
 	change_inner_button_type(label, group, type) {
 		let btn;
 
@@ -638,7 +635,6 @@ frappe.ui.Page = Class.extend({
 	}
 
 	add_inner_message(message) {
->>>>>>> 62a205fe2e (feat: change custom button type (#14074))
 		let $message = $(`<span class='inner-page-message text-muted small'>${message}</div>`);
 		this.inner_toolbar.find('.inner-page-message').remove();
 		this.inner_toolbar.removeClass("hide").prepend($message);

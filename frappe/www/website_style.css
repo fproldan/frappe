@@ -1,0 +1,7 @@
+.website-search .dropdown-menu{
+	min-width: 35rem !important;
+}
+
+.website-search .dropdown-menu .match{
+	background-color: none !important;
+}

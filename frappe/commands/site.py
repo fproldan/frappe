@@ -818,6 +818,21 @@ def create_demo(context, site):
     create_demo()
 
 
+@click.command('delete-sensitive-data')
+@click.option('--site', help='site name')
+@pass_context
+def delete_sensitive_data(context, site):
+    from frappe.commands.delete_sensitive_data import delete_sensitive_data
+
+    if not site:
+        site = get_site(context)
+
+    frappe.connect(site=site)
+    print('Eliminando datos sensibles en {}'.format(site))
+    delete_sensitive_data()
+
+
+
 commands = [
     add_system_manager,
     backup,
@@ -850,4 +865,5 @@ commands = [
     set_limits,
     clear_limits,
     create_demo,
+    delete_sensitive_data,
 ]

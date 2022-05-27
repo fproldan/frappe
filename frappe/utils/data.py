@@ -1457,6 +1457,17 @@ def strip(val, chars=None):
 	# \ufeff is no-width-break, \u200b is no-width-space
 	return (val or "").replace("\ufeff", "").replace("\u200b", "").strip(chars)
 
+
+def get_string_between(start, string, end):
+	if not string:
+		return ""
+
+	regex = "{0}(.*){1}".format(start, end)
+	out = re.search(regex, string)
+
+	return out.group(1) if out else string
+
+
 def to_markdown(html):
 	from html2text import html2text
 	from six.moves import html_parser as HTMLParser

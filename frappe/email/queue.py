@@ -17,7 +17,22 @@ from six import text_type, string_types, PY3
 from email.parser import Parser
 
 
-class EmailLimitCrossedError(frappe.ValidationError): pass
+import frappe
+from frappe import _, enqueue, msgprint, safe_decode, safe_encode
+from frappe.email.email_body import add_attachment, get_email, get_formatted_html
+from frappe.email.smtp import SMTPServer, get_outgoing_email_account
+from frappe.utils import (
+	add_days,
+	cint,
+	cstr,
+	get_hook_method,
+	get_string_between,
+	get_url,
+	now_datetime,
+	nowdate,
+	split_emails,
+)
+from frappe.utils.verified_command import get_signed_params, verify_request
 
 def send(recipients=None, sender=None, subject=None, message=None, text_content=None, reference_doctype=None,
 		reference_name=None, unsubscribe_method=None, unsubscribe_params=None, unsubscribe_message=None,
@@ -225,7 +240,7 @@ def get_email_queue(recipients, sender, subject, **kwargs):
 		if kwargs.get('in_reply_to'):
 			mail.set_in_reply_to(kwargs.get('in_reply_to'))
 
-		e.message_id = mail.msg_root["Message-Id"].strip(" <>")
+		e.message_id = get_string_between("<", mail.msg_root["Message-Id"], ">")
 		e.message = cstr(mail.as_string())
 		e.sender = mail.sender
 

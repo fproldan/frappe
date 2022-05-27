@@ -10,8 +10,20 @@ import socket
 import time
 from frappe import _, safe_encode
 from frappe.model.document import Document
-from frappe.utils import validate_email_address, cint, cstr, get_datetime, DATE_FORMAT, strip, comma_or, sanitize_html, add_days
-from frappe.utils.user import is_system_user
+from frappe.utils import (
+	DATE_FORMAT,
+	add_days,
+	cint,
+	comma_or,
+	cstr,
+	get_datetime,
+	get_string_between,
+	sanitize_html,
+	strip,
+	validate_email_address,
+)
+from frappe.utils.background_jobs import enqueue, get_jobs
+from frappe.utils.html_utils import clean_email_html
 from frappe.utils.jinja import render_template
 from frappe.email.smtp import SMTPServer
 from frappe.email.receive import EmailServer, Email
@@ -608,7 +620,8 @@ class EmailAccount(Document):
 
 		Message-ID is formatted as `{message_id}@{site}`'''
 		parent = None
-		in_reply_to = (email.mail.get("In-Reply-To") or "").strip(" <>")
+		in_reply_to = email.mail.get("In-Reply-To") or ""
+		in_reply_to = get_string_between("<", in_reply_to, ">")
 
 		if in_reply_to:
 			if "@{0}".format(frappe.local.site) in in_reply_to:

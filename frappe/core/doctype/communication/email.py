@@ -11,9 +11,17 @@ from frappe.core.utils import get_parent_doc
 from frappe.utils import (get_url, get_formatted_email, cint, list_to_str,
 	validate_email_address, split_emails, parse_addr, get_datetime)
 from frappe.email.email_body import get_message_id
-import frappe.email.smtp
-import time
-from frappe import _
+from frappe.utils import (
+	cint,
+	get_datetime,
+	get_formatted_email,
+	get_string_between,
+	get_url,
+	list_to_str,
+	parse_addr,
+	split_emails,
+	validate_email_address,
+)
 from frappe.utils.background_jobs import enqueue
 
 @frappe.whitelist()
@@ -55,27 +63,29 @@ def make(doctype=None, name=None, content=None, subject=None, sent_or_received =
 	cc = list_to_str(cc) if isinstance(cc, list) else cc
 	bcc = list_to_str(bcc) if isinstance(bcc, list) else bcc
 
-	comm = frappe.get_doc({
-		"doctype":"Communication",
-		"subject": subject,
-		"content": content,
-		"sender": sender,
-		"sender_full_name":sender_full_name,
-		"recipients": recipients,
-		"cc": cc or None,
-		"bcc": bcc or None,
-		"communication_medium": communication_medium,
-		"sent_or_received": sent_or_received,
-		"reference_doctype": doctype,
-		"reference_name": name,
-		"email_template": email_template,
-		"message_id":get_message_id().strip(" <>"),
-		"read_receipt":read_receipt,
-		"has_attachment": 1 if attachments else 0,
-		"communication_type": communication_type
-	}).insert(ignore_permissions=True)
-
-	comm.save(ignore_permissions=True)
+	comm = frappe.get_doc(
+		{
+			"doctype": "Communication",
+			"subject": subject,
+			"content": content,
+			"sender": sender,
+			"sender_full_name": sender_full_name,
+			"recipients": recipients,
+			"cc": cc or None,
+			"bcc": bcc or None,
+			"communication_medium": communication_medium,
+			"sent_or_received": sent_or_received,
+			"reference_doctype": doctype,
+			"reference_name": name,
+			"email_template": email_template,
+			"message_id": get_string_between("<", get_message_id(), ">"),
+			"read_receipt": read_receipt,
+			"has_attachment": 1 if attachments else 0,
+			"communication_type": communication_type,
+		}
+	)
+	comm.flags.skip_add_signature = not add_signature
+	comm.insert(ignore_permissions=True)
 
 	if isinstance(attachments, string_types):
 		attachments = json.loads(attachments)

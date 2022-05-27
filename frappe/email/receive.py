@@ -17,10 +17,21 @@ from email_reply_parser import EmailReplyParser
 
 import frappe
 from frappe import _, safe_decode, safe_encode
-from frappe.core.doctype.file.file import (MaxFileSizeReachedError,
-	get_random_filename)
-from frappe.utils import (cint, convert_utc_to_user_timezone, cstr,
-	extract_email_id, markdown, now, parse_addr, strip)
+from frappe.core.doctype.file.file import MaxFileSizeReachedError, get_random_filename
+from frappe.utils import (
+	cint,
+	convert_utc_to_user_timezone,
+	cstr,
+	extract_email_id,
+	get_string_between,
+	markdown,
+	now,
+	parse_addr,
+	strip,
+)
+
+# fix due to a python bug in poplib that limits it to 2048
+poplib._MAXLINE = 20480
 
 
 class EmailSizeExceededError(frappe.ValidationError): pass
@@ -377,7 +388,9 @@ class Email:
 		self.set_content_and_type()
 		self.set_subject()
 		self.set_from()
-		self.message_id = (self.mail.get('Message-ID') or "").strip(" <>")
+
+		message_id = self.mail.get("Message-ID") or ""
+		self.message_id = get_string_between("<", message_id, ">")
 
 		if self.mail["Date"]:
 			try:

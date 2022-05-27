@@ -1469,6 +1469,15 @@ def get_string_between(start, string, end):
 
 
 def to_markdown(html):
+	from html.parser import HTMLParser
+
+	regex = "{0}(.*){1}".format(start, end)
+	out = re.search(regex, string)
+
+	return out.group(1) if out else string
+
+
+def to_markdown(html):
 	from html2text import html2text
 	from six.moves import html_parser as HTMLParser
 

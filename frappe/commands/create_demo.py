@@ -63,7 +63,10 @@ def setear_fechas(doctype, dates=[], child_dates={}, related_doctype=''):
 
         frappe.db.commit()
 
-        doc = frappe.get_doc(doctype, doc_data['name'])
+        try:
+            doc = frappe.get_doc(doctype, doc_data['name'])
+        except Exception:
+            continue
 
         if doctype == 'Issue':
             try:
@@ -118,6 +121,7 @@ def create_demo():
     setear_fechas('Delivery Note', dates=['posting_date', 'lr_date'], related_doctype='Stock Ledger Entry')
     setear_fechas('Purchase Receipt', dates=['posting_date'], related_doctype='Stock Ledger Entry')
     setear_fechas('Delivery Trip', dates=['departure_time'], child_dates={'Delivery Stop': 'estimated_arrival'})
+
     setear_fechas('Batch', dates=['manufacturing_date', 'expiry_date'])
     setear_fechas('Serial No', dates=['warranty_expiry_date', 'amc_expiry_date'])
     setear_fechas('Item', dates=['end_of_life'])
@@ -155,8 +159,6 @@ def create_demo():
     # Support
     setear_fechas('Issue', dates=['opening_date', 'creation', 'resolution_date', 'first_responded_on', 'response_by', 'resolution_by'])
     setear_fechas('Warranty Claim', dates=['complaint_date', 'warranty_expiry_date', 'resolution_date'])
-    # setear_fechas('Maintenance Schedule', dates=['transaction_date'], child_dates={'Maintenance Schedule Item': 'start_date', 'Maintenance Schedule Item': 'end_date', 'Maintenance Schedule Detail': 'scheduled_date'})
-    # setear_fechas('Maintenance Visit', dates=['mntc_date'])
 
     # Assets
     setear_fechas('Asset Maintenance Task', dates=['start_date', 'next_due_date', 'last_completion_date'])

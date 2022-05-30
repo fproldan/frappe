@@ -126,37 +126,37 @@ frappe.Application = Class.extend({
 		// REDESIGN-TODO: Fix preview popovers
 		this.link_preview = new frappe.ui.LinkPreview();
 
-		if (!frappe.boot.developer_mode) {
-			setInterval(function() {
-				frappe.call({
-					method: 'frappe.core.page.background_jobs.background_jobs.get_scheduler_status',
-					callback: function(r) {
-						if (r.message[0] == __("Inactive")) {
-							frappe.call('frappe.utils.scheduler.activate_scheduler');
-						}
-					}
-				});
-			}, 300000); // check every 5 minutes
+		// if (!frappe.boot.developer_mode) {
+		// 	setInterval(function() {
+		// 		frappe.call({
+		// 			method: 'frappe.core.page.background_jobs.background_jobs.get_scheduler_status',
+		// 			callback: function(r) {
+		// 				if (r.message[0] == __("Inactive")) {
+		// 					frappe.call('frappe.utils.scheduler.activate_scheduler');
+		// 				}
+		// 			}
+		// 		});
+		// 	}, 300000); // check every 5 minutes
 
-			if (frappe.user.has_role("System Manager")) {
-				setInterval(function() {
-					frappe.call({
-						method: 'frappe.core.doctype.log_settings.log_settings.has_unseen_error_log',
-						args: {
-							user: frappe.session.user
-						},
-						callback: function(r) {
-							if (r.message.show_alert) {
-								frappe.show_alert({
-									indicator: 'red',
-									message: r.message.message
-								});
-							}
-						}
-					});
-				}, 600000); // check every 10 minutes
-			}
-		}
+		// 	if (frappe.user.has_role("System Manager")) {
+		// 		setInterval(function() {
+		// 			frappe.call({
+		// 				method: 'frappe.core.doctype.log_settings.log_settings.has_unseen_error_log',
+		// 				args: {
+		// 					user: frappe.session.user
+		// 				},
+		// 				callback: function(r) {
+		// 					if (r.message.show_alert) {
+		// 						frappe.show_alert({
+		// 							indicator: 'red',
+		// 							message: r.message.message
+		// 						});
+		// 					}
+		// 				}
+		// 			});
+		// 		}, 600000); // check every 10 minutes
+		// 	}
+		// }
 	},
 
 	set_route() {

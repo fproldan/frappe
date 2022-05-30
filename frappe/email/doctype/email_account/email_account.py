@@ -647,12 +647,13 @@ class EmailAccount(Document):
 							parent = frappe.get_doc(parent.reference_doctype,
 								parent.reference_name)
 			else:
-				comm = frappe.db.get_value('Communication',
-						dict(
-							message_id=in_reply_to,
-							creation=['>=', add_days(get_datetime(), -30)]),
-						['reference_doctype', 'reference_name'], as_dict=1)
-				if comm:
+				comm = frappe.db.get_value(
+					"Communication",
+					dict(message_id=in_reply_to, creation=[">=", add_days(get_datetime(), -30)]),
+					["reference_doctype", "reference_name"],
+					as_dict=1,
+				)
+				if comm and comm.reference_doctype and comm.reference_name:
 					parent = frappe._dict(doctype=comm.reference_doctype, name=comm.reference_name)
 
 		return parent

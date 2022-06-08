@@ -46,7 +46,8 @@ def set_new_name(doc, set_draft_name=False):
 		doc.name = None
 
 	if getattr(doc, "amended_from", None):
-		_set_amended_name(doc)
+		doc.name = _get_amended_name(doc)
+		return
 
 	elif getattr(doc.meta, "issingle", False):
 		doc.name = doc.doctype

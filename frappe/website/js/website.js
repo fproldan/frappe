@@ -444,7 +444,7 @@ frappe.setup_search = function (target, search_scope) {
 	}
 
 	let $search_input = $(`<div class="dropdown" id="dropdownMenuSearch">
-			<input type="search" class="form-control" placeholder="Buscar en la documentación (Pulse / para enfocar)" />
+			<input type="search" class="form-control" placeholder="Buscar en la documentación (pulse / para enfocar)" />
 			<div class="overflow-hidden shadow dropdown-menu w-100" aria-labelledby="dropdownMenuSearch">
 			</div>
 			<div class="search-icon">

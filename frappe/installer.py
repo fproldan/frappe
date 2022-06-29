@@ -501,7 +501,7 @@ def extract_sql_gzip(sql_gz_path):
 		decompressed_file = original_file.rstrip(".gz")
 		cmd = 'gzip -dvf < {0} > {1}'.format(original_file, decompressed_file)
 		subprocess.check_call(cmd, shell=True)
-	except:
+	except Exception:
 		raise
 
 	return decompressed_file
@@ -529,8 +529,8 @@ def extract_files(site_name, file_path):
 		if file_path.endswith(".tar"):
 			subprocess.check_output(['tar', 'xvf', tar_path, '--strip', '2'], cwd=abs_site_path)
 		elif file_path.endswith(".tgz"):
-			subprocess.check_output(['tar', 'zxvf', tar_path, '--strip', '2'], cwd=abs_site_path)
-	except:
+			subprocess.check_output(["tar", "zxvf", tar_path, "--strip", "2"], cwd=abs_site_path)
+	except Exception:
 		raise
 	finally:
 		frappe.destroy()

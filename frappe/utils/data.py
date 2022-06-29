@@ -670,8 +670,10 @@ def floor(s):
 		number representing the largest integer less than or equal to the specified number
 
 	"""
-	try: num = cint(math.floor(flt(s)))
-	except: num = 0
+	try:
+		num = cint(math.floor(flt(s)))
+	except Exception:
+		num = 0
 	return num
 
 def ceil(s):
@@ -689,8 +691,10 @@ def ceil(s):
 		smallest integer greater than or equal to the given number
 
 	"""
-	try: num = cint(math.ceil(flt(s)))
-	except: num = 0
+	try:
+		num = cint(math.ceil(flt(s)))
+	except Exception:
+		num = 0
 	return num
 
 def cstr(s, encoding='utf-8'):

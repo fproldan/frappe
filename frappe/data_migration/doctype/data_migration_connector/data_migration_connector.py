@@ -18,8 +18,8 @@ class DataMigrationConnector(Document):
 		if self.python_module:
 			try:
 				get_connection_class(self.python_module)
-			except:
-				frappe.throw(frappe._('Invalid module path'))
+			except Exception:
+				frappe.throw(frappe._("Invalid module path"))
 
 	def get_connection(self):
 		if self.python_module:

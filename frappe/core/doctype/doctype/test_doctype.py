@@ -239,9 +239,14 @@ class TestDocType(unittest.TestCase):
 
 			test_doctype.save()
 			test_doctype_json = frappe.get_file_json(path)
-			self.assertListEqual([f['fieldname'] for f in test_doctype_json['fields']], ['field_1', 'field_2', 'field_4', 'field_5'])
-			self.assertListEqual(test_doctype_json['field_order'], ['field_4', 'field_5', 'field_1', 'field_2'])
-		except:
+			self.assertListEqual(
+				[f["fieldname"] for f in test_doctype_json["fields"]],
+				["field_1", "field_2", "field_4", "field_5"],
+			)
+			self.assertListEqual(
+				test_doctype_json["field_order"], ["field_4", "field_5", "field_1", "field_2"]
+			)
+		except Exception:
 			raise
 		finally:
 			frappe.flags.allow_doctype_export = 0

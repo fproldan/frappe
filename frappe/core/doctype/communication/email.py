@@ -534,7 +534,7 @@ def sendmail(communication_name, print_html=None, print_format=None, attachments
 			else:
 				break
 
-	except:
+	except Exception:
 		traceback = frappe.log_error("frappe.core.doctype.communication.email.sendmail")
 		raise
 

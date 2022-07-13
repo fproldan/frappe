@@ -73,7 +73,7 @@ frappe.notification = {
 						});
 					// Add User and Email fields from parent into select dropdown
 					} else {
-						return d.options == 'Email' ||
+						return d.options == 'Email' || d.fieldname == 'email_id' || 
 							(d.options == 'User' && d.fieldtype == 'Link')
 							? get_select_options(d) : null;
 					}

@@ -93,7 +93,7 @@ frappe.ui.form.on('User', {
 			window.location.reload();
 		}
 
-		frm.toggle_display(['sb1', 'sb3', 'modules_access'], false);
+		frm.toggle_display(['sb1', 'modules_access'], false);
 
 		if(!frm.is_new()) {
 			if(has_access_to_edit_user()) {
@@ -109,7 +109,7 @@ frappe.ui.form.on('User', {
 					() => frappe.set_route('query-report', 'Permitted Documents For User',
 						{user: frm.doc.name}), __("Permissions"));
 
-				frm.toggle_display(['sb1', 'sb3', 'modules_access'], true);
+				frm.toggle_display(['sb1', 'modules_access'], true);
 			}
 
 			frm.add_custom_button(__("Reset Password"), function() {
@@ -221,7 +221,7 @@ frappe.ui.form.on('User', {
 	enabled: function(frm) {
 		var doc = frm.doc;
 		if(!frm.is_new() && has_access_to_edit_user()) {
-			frm.toggle_display(['sb1', 'sb3', 'modules_access'], doc.enabled);
+			frm.toggle_display(['sb1', 'modules_access'], doc.enabled);
 			frm.set_df_property('enabled', 'read_only', 0);
 		}
 

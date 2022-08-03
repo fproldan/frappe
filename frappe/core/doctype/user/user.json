@@ -335,7 +335,8 @@
    "collapsible": 1,
    "fieldname": "document_follow_notifications_section",
    "fieldtype": "Section Break",
-   "label": "Document Follow"
+   "label": "Document Follow",
+   "hidden": 1
   },
   {
    "default": "0",
@@ -395,7 +396,8 @@
    "fieldname": "sb_allow_modules",
    "fieldtype": "Section Break",
    "label": "Allow Modules",
-   "permlevel": 1
+   "permlevel": 1,
+   "hidden": 1
   },
   {
    "fieldname": "modules_html",
@@ -445,7 +447,8 @@
    "fieldtype": "Section Break",
    "label": "Security Settings",
    "oldfieldtype": "Section Break",
-   "read_only": 1
+   "read_only": 1,
+   "hidden": 1
   },
   {
    "default": "1",
@@ -544,7 +547,8 @@
    "fieldname": "third_party_authentication",
    "fieldtype": "Section Break",
    "label": "Third Party Authentication",
-   "permlevel": 1
+   "permlevel": 1,
+   "hidden": 1
   },
   {
    "fieldname": "social_logins",
@@ -556,7 +560,8 @@
    "collapsible": 1,
    "fieldname": "api_access",
    "fieldtype": "Section Break",
-   "label": "Api Access"
+   "label": "Api Access",
+   "hidden": 1
   },
   {
    "description": "API Key cannot be  regenerated",
@@ -672,7 +677,7 @@
   }
  ],
  "max_attachments": 5,
- "modified": "2021-08-06 08:46:38.549138",
+ "modified": "2022-07-26 09:11:38.549138",
  "modified_by": "Administrator",
  "module": "Core",
  "name": "User",

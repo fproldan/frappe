@@ -88,8 +88,8 @@ export default class WebForm extends frappe.ui.FieldGroup {
 
 		$('.web-form-footer').after(`
 			<div id="form-step-footer" class="text-right">
-				<button class="btn btn-default btn-previous btn-sm ml-2">${__("Previous")}</button>
-				<button class="btn btn-default btn-next btn-sm ml-2">${__("Next")}</button>
+				<button class="btn btn-default btn-previous btn-sm ml-2">${__("Anterior")}</button>
+				<button class="btn btn-default btn-next btn-sm ml-2">${__("Siguiente")}</button>
 			</div>
 		`);
 
@@ -184,12 +184,12 @@ export default class WebForm extends frappe.ui.FieldGroup {
 
 		let message = '';
 		if (invalid_values.length) {
-			message += __('Invalid values for fields:', null, 'Error message in web form');
+			message += __('Valores invalidos para los campos:', null, 'Error message in web form');
 			message += '<br><br><ul><li>' + invalid_values.join('<li>') + '</ul>';
 		}
 
 		if (errors.length) {
-			message += __('Mandatory fields required:', null, 'Error message in web form');
+			message += __('Los siguientes campos son obligatorios:', null, 'Error message in web form');
 			message += '<br><br><ul><li>' + errors.join('<li>') + '</ul>';
 		}
 
@@ -271,7 +271,7 @@ export default class WebForm extends frappe.ui.FieldGroup {
 	save() {
 		let is_new = this.is_new;
 		if (this.validate && !this.validate()) {
-			frappe.throw(__("Couldn't save, please check the data you have entered"), __("Validation Error"));
+			frappe.throw(__("No se ha podido guardar, por favor, compruebe los datos que ha introducido"), __("Validation Error"));
 		}
 
 		// validation hack: get_values will check for missing data
@@ -349,7 +349,7 @@ export default class WebForm extends frappe.ui.FieldGroup {
 		}
 
 		const success_message =
-			this.success_message || __("Submitted");
+			this.success_message || __("Enviado");
 
 		frappe.toast({message: success_message, indicator:'green'});
 

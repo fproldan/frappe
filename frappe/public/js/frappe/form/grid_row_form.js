@@ -44,21 +44,21 @@ export default class GridRowForm {
 			let template = `<div class="grid-form-heading">
 				<div class="toolbar grid-header-toolbar">
 					<span class="panel-title">
-						${ __("Editing Row") } #<span class="grid-form-row-index"></span></span>
+						${ __("Editando Fila") } #<span class="grid-form-row-index"></span></span>
 					<span class="row-actions">
 						<button class="btn btn-secondary btn-sm pull-right grid-collapse-row">
 							${frappe.utils.icon('down')}
 						</button>
 						<button class="btn btn-secondary btn-sm pull-right grid-move-row hidden-xs">
-							${ __("Move") }</button>
+							${ __("Mover") }</button>
 						<button class="btn btn-secondary btn-sm pull-right grid-duplicate-row hidden-xs">
 							${frappe.utils.icon('duplicate')}
-							${ __("Duplicate") }
+							${ __("Duplicar") }
 						</button>
 						<button class="btn btn-secondary btn-sm pull-right grid-insert-row hidden-xs">
-							${ __("Insert Above") }</button>
+							${ __("Agregar Arriba") }</button>
 						<button class="btn btn-secondary btn-sm pull-right grid-insert-row-below hidden-xs">
-							${ __("Insert Below") }</button>
+							${ __("Agregar Abajo") }</button>
 						<button class="btn btn-danger btn-sm pull-right grid-delete-row">
 							${frappe.utils.icon('delete')}
 						</button>
@@ -70,11 +70,11 @@ export default class GridRowForm {
 				<div class="grid-footer-toolbar hidden-xs flex justify-between">
 					<div class="grid-shortcuts">
 						<span> ${frappe.utils.icon("keyboard", "md")} </span>
-						<span class="text-medium"> ${ __("Shortcuts") }: </span>
+						<span class="text-medium"> ${ __("Atajos") }: </span>
 						<kbd>${ __("Ctrl + Up") }</kbd> . <kbd>${ __("Ctrl + Down") }</kbd> . <kbd>${ __("ESC") }</kbd>
 					</div>
 					<button class="btn btn-secondary btn-sm pull-right grid-append-row">
-						${ __("Insert Below") }
+						${ __("Agregar Abajo") }
 					</button>
 				</div>
 			</div>`;

@@ -66,7 +66,7 @@ export default class Grid {
 							alt="Grid Empty State"
 							class="grid-empty-illustration"
 						>
-						${__("No Data")}
+						${__("Sin Datos")}
 					</div>
 				</div>
 			</div>
@@ -76,30 +76,30 @@ export default class Grid {
 						<button class="btn btn-xs btn-danger grid-remove-rows hidden"
 							style="margin-right: 4px;"
 							data-action="delete_rows">
-							${__("Delete")}
+							${__("Eliminar")}
 						</button>
 						<button class="btn btn-xs btn-danger grid-remove-all-rows hidden"
 							style="margin-right: 4px;"
 							data-action="delete_all_rows">
-							${__("Delete All")}
+							${__("Eliminar Todo")}
 						</button>
 						<button class="grid-add-multiple-rows btn btn-xs btn-secondary hidden"
 							style="margin-right: 4px;">
-							${__("Add Multiple")}</a>
+							${__("Agregar Multiple")}</a>
 						</button>
 						<!-- hack to allow firefox include this in tabs -->
 						<button class="btn btn-xs btn-secondary grid-add-row">
-							${__("Add Row")}
+							${__("Agregar Fila")}
 						</button>
 					</div>
 					<div class="grid-pagination">
 					</div>
 					<div class="text-right">
 						<a href="#" class="grid-download btn btn-xs btn-secondary hidden">
-							${__("Download")}
+							${__("Descargar")}
 						</a>
 						<a href="#" class="grid-upload btn btn-xs btn-secondary hidden">
-							${__("Upload")}
+							${__("Subir")}
 						</a>
 					</div>
 				</div>
@@ -211,7 +211,7 @@ export default class Grid {
 	}
 
 	delete_all_rows() {
-		frappe.confirm(__("Are you sure you want to delete all rows?"), () => {
+		frappe.confirm(__("¿Está seguro de que quiere eliminar todas las filas?"), () => {
 			this.frm.doc[this.df.fieldname] = [];
 			$(this.parent).find('.rows').empty();
 			this.grid_rows = [];
@@ -977,7 +977,7 @@ export default class Grid {
 						});
 
 						me.frm.refresh_field(me.df.fieldname);
-						frappe.msgprint({ message: __('Table updated'), title: __('Success'), indicator: 'green' });
+						frappe.msgprint({ message: __('Tabla actualizada'), title: __('Exito'), indicator: 'green' });
 					}
 				});
 				return false;
@@ -990,12 +990,12 @@ export default class Grid {
 		$(this.wrapper).find(".grid-download").removeClass('hidden').on("click", () => {
 			var data = [];
 			var docfields = [];
-			data.push([__("Bulk Edit {0}", [title])]);
+			data.push([__("Edición masiva {0}", [title])]);
 			data.push([]);
 			data.push([]);
 			data.push([]);
-			data.push([__("The CSV format is case sensitive")]);
-			data.push([__("Do not edit headers which are preset in the template")]);
+			data.push([__("El formato CSV distingue entre mayúsculas y minúsculas")]);
+			data.push([__("No editar las cabeceras preestablecidas en la plantilla")]);
 			data.push(["------"]);
 			$.each(frappe.get_meta(this.df.options).fields, (i, df) => {
 				// don't include the read-only field in the template

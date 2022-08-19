@@ -42,7 +42,7 @@ from .utils.jinja import (
 )
 from .utils.lazy_loader import lazy_import
 
-__version__ = "14.0.2"
+__version__ = "14.3.0"
 __title__ = "Frappe Framework"
 
 controllers = {}
@@ -912,15 +912,26 @@ def only_has_select_perm(doctype, user=None, ignore_permissions=False):
 
 
 def has_permission(
-	doctype=None, ptype="read", doc=None, user=None, verbose=False, throw=False, parent_doctype=None
+	doctype=None,
+	ptype="read",
+	doc=None,
+	user=None,
+	verbose=False,
+	throw=False,
+	*,
+	parent_doctype=None,
 ):
-	"""Raises `frappe.PermissionError` if not permitted.
+	"""
+	Returns True if the user has permission `ptype` for given `doctype` or `doc`
+	Raises `frappe.PermissionError` if user isn't permitted and `throw` is truthy
 
 	:param doctype: DocType for which permission is to be check.
 	:param ptype: Permission type (`read`, `write`, `create`, `submit`, `cancel`, `amend`). Default: `read`.
 	:param doc: [optional] Checks User permissions for given doc.
 	:param user: [optional] Check for given user. Default: current user.
-	:param parent_doctype: Required when checking permission for a child DocType (unless doc is specified)."""
+	:param verbose: DEPRECATED, will be removed in a future release.
+	:param parent_doctype: Required when checking permission for a child DocType (unless doc is specified).
+	"""
 	import frappe.permissions
 
 	if not doctype and doc:
@@ -930,7 +941,6 @@ def has_permission(
 		doctype,
 		ptype,
 		doc=doc,
-		verbose=verbose,
 		user=user,
 		raise_exception=throw,
 		parent_doctype=parent_doctype,
@@ -2274,14 +2284,22 @@ def safe_eval(code, eval_globals=None, eval_locals=None):
 
 def get_website_settings(key):
 	if not hasattr(local, "website_settings"):
-		local.website_settings = db.get_singles_dict("Website Settings", cast=True)
+		try:
+			local.website_settings = get_cached_doc("Website Settings")
+		except DoesNotExistError:
+			clear_last_message()
+			return
 
 	return local.website_settings.get(key)
 
 
 def get_system_settings(key):
 	if not hasattr(local, "system_settings"):
-		local.system_settings = db.get_singles_dict("System Settings", cast=True)
+		try:
+			local.system_settings = get_cached_doc("System Settings")
+		except DoesNotExistError:  # possible during new install
+			clear_last_message()
+			return
 
 	return local.system_settings.get(key)
 

@@ -68,7 +68,7 @@ export default class Grid {
 							alt="Grid Empty State"
 							class="grid-empty-illustration"
 						>
-						${__("No Data")}
+						${__("No hay datos")}
 					</div>
 				</div>
 			</div>
@@ -78,12 +78,12 @@ export default class Grid {
 						<button class="btn btn-xs btn-danger grid-remove-rows hidden"
 							style="margin-right: 4px;"
 							data-action="delete_rows">
-							${__("Delete")}
+							${__("Eliminar")}
 						</button>
 						<button class="btn btn-xs btn-danger grid-remove-all-rows hidden"
 							style="margin-right: 4px;"
 							data-action="delete_all_rows">
-							${__("Delete All")}
+							${__("Eliminar Todo")}
 						</button>
 						<button class="grid-add-multiple-rows btn btn-xs btn-secondary hidden"
 							style="margin-right: 4px;">

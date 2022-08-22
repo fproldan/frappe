@@ -31,6 +31,7 @@ class EmailDomain(Document):
 					logger.info('Checking incoming IMAP email server {host}:{port} ssl={ssl}...'.format(
 						host=self.email_server, port=get_port(self), ssl=self.use_ssl))
 					if self.use_ssl:
+						self.use_starttls = 0
 						test = imaplib.IMAP4_SSL(self.email_server, port=get_port(self))
 					else:
 						test = imaplib.IMAP4(self.email_server, port=get_port(self))
@@ -44,9 +45,13 @@ class EmailDomain(Document):
 						test = poplib.POP3(self.email_server, port=get_port(self))
 
 			except Exception as e:
-				logger.warn('Incoming email account "{host}" not correct'.format(host=self.email_server), exc_info=e)
-				frappe.throw(title=_("Incoming email account not correct"),
-					msg='Error connecting IMAP/POP3 "{host}": {e}'.format(host=self.email_server, e=e))
+				logger.warning(
+					'Incoming email account "{host}" not correct'.format(host=self.email_server), exc_info=e
+				)
+				frappe.throw(
+					title=_("Incoming email account not correct"),
+					msg='Error connecting IMAP/POP3 "{host}": {e}'.format(host=self.email_server, e=e),
+				)
 
 			finally:
 				try:
@@ -74,16 +79,32 @@ class EmailDomain(Document):
 					sess = smtplib.SMTP(cstr(self.smtp_server or ""), cint(self.smtp_port) or None)
 				sess.quit()
 			except Exception as e:
-				logger.warn('Outgoing email account "{host}" not correct'.format(host=self.smtp_server), exc_info=e)
-				frappe.throw(title=_("Outgoing email account not correct"),
-					msg='Error connecting SMTP "{host}": {e}'.format(host=self.smtp_server, e=e))
+				logger.warning(
+					'Outgoing email account "{host}" not correct'.format(host=self.smtp_server), exc_info=e
+				)
+				frappe.throw(
+					title=_("Outgoing email account not correct"),
+					msg='Error connecting SMTP "{host}": {e}'.format(host=self.smtp_server, e=e),
+				)
 
 	def on_update(self):
 		"""update all email accounts using this domain"""
 		for email_account in frappe.get_all("Email Account", filters={"domain": self.name}):
 			try:
 				email_account = frappe.get_doc("Email Account", email_account.name)
-				for attr in ["email_server", "use_imap", "use_ssl", "use_tls", "attachment_limit", "smtp_server", "smtp_port", "use_ssl_for_outgoing", "append_emails_to_sent_folder", "incoming_port"]:
+				for attr in [
+					"email_server",
+					"use_imap",
+					"use_ssl",
+					"use_tls",
+					"use_starttls",
+					"attachment_limit",
+					"smtp_server",
+					"smtp_port",
+					"use_ssl_for_outgoing",
+					"append_emails_to_sent_folder",
+					"incoming_port",
+				]:
 					email_account.set(attr, self.get(attr, default=0))
 				email_account.save()
 

@@ -69,7 +69,12 @@ class EmailServer:
 			if cint(self.settings.use_ssl):
 				self.imap = Timed_IMAP4_SSL(self.settings.host, self.settings.incoming_port, timeout=frappe.conf.get("pop_timeout"))
 			else:
-				self.imap = Timed_IMAP4(self.settings.host, self.settings.incoming_port, timeout=frappe.conf.get("pop_timeout"))
+				self.imap = Timed_IMAP4(
+					self.settings.host, self.settings.incoming_port, timeout=frappe.conf.get("pop_timeout")
+				)
+				if self.settings.use_starttls:
+					self.imap.starttls()
+
 			self.imap.login(self.settings.username, self.settings.password)
 			# connection established!
 			return True

@@ -77,9 +77,14 @@ class EmailAccount(Document):
 		#if self.enable_incoming and not self.append_to:
 		#	frappe.throw(_("Append To is mandatory for incoming mails"))
 
-		if (not self.awaiting_password and not frappe.local.flags.in_install
-			and not frappe.local.flags.in_patch):
-			if self.password or self.smtp_server in ('127.0.0.1', 'localhost'):
+		self.use_starttls = cint(self.use_imap and self.use_starttls and not self.use_ssl)
+
+		if (
+			not self.awaiting_password
+			and not frappe.local.flags.in_install
+			and not frappe.local.flags.in_patch
+		):
+			if self.password or self.smtp_server in ("127.0.0.1", "localhost"):
 				if self.enable_incoming:
 					self.get_incoming_server()
 					self.no_failed = 0
@@ -152,10 +157,17 @@ class EmailAccount(Document):
 		try:
 			domain = email_id.split("@")
 			fields = [
-				"name as domain", "use_imap", "email_server",
-				"use_ssl", "smtp_server", "use_tls",
-				"smtp_port", "incoming_port", "append_emails_to_sent_folder",
-				"use_ssl_for_outgoing"
+				"name as domain",
+				"use_imap",
+				"email_server",
+				"use_ssl",
+				"use_starttls",
+				"smtp_server",
+				"use_tls",
+				"smtp_port",
+				"incoming_port",
+				"append_emails_to_sent_folder",
+				"use_ssl_for_outgoing",
 			]
 			return frappe.db.get_value("Email Domain", domain[1], fields, as_dict=True)
 		except Exception:
@@ -184,17 +196,20 @@ class EmailAccount(Document):
 		if frappe.cache().get_value("workers:no-internet") == True:
 			return None
 
-		args = frappe._dict({
-			"email_account": self.name,
-			"host": self.email_server,
-			"use_ssl": self.use_ssl,
-			"username": getattr(self, "login_id", None) or self.email_id,
-			"use_imap": self.use_imap,
-			"email_sync_rule": email_sync_rule,
-			"uid_validity": self.uidvalidity,
-			"incoming_port": get_port(self),
-			"initial_sync_count": self.initial_sync_count or 100
-		})
+		args = frappe._dict(
+			{
+				"email_account": self.name,
+				"host": self.email_server,
+				"use_ssl": self.use_ssl,
+				"use_starttls": self.use_starttls,
+				"username": getattr(self, "login_id", None) or self.email_id,
+				"use_imap": self.use_imap,
+				"email_sync_rule": email_sync_rule,
+				"uid_validity": self.uidvalidity,
+				"incoming_port": get_port(self),
+				"initial_sync_count": self.initial_sync_count or 100,
+			}
+		)
 
 		if self.password:
 			args.password = self.get_password()

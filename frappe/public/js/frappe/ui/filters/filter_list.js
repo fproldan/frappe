@@ -1,4 +1,4 @@
-frappe.ui.FilterGroup = class {
+ffrappe.ui.FilterGroup = class {
 	constructor(opts) {
 		$.extend(this, opts);
 		this.filters = [];
@@ -201,6 +201,7 @@ frappe.ui.FilterGroup = class {
 			parent: this.wrapper,
 			parent_doctype: this.doctype,
 			doctype: doctype,
+			_parent_doctype: this.parent_doctype,
 			fieldname: fieldname,
 			condition: condition,
 			value: value,

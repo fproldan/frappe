@@ -192,12 +192,12 @@ export default class WebForm extends frappe.ui.FieldGroup {
 
 		let message = "";
 		if (invalid_values.length) {
-			message += __("Invalid values for fields:", null, "Error message in web form");
+			message += __("Valores invalidos:", null, "Error message in web form");
 			message += "<br><br><ul><li>" + invalid_values.join("<li>") + "</ul>";
 		}
 
 		if (errors.length) {
-			message += __("Mandatory fields required:", null, "Error message in web form");
+			message += __("Campos requeridos:", null, "Error message in web form");
 			message += "<br><br><ul><li>" + errors.join("<li>") + "</ul>";
 		}
 

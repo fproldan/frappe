@@ -1,4 +1,4 @@
-ffrappe.ui.FilterGroup = class {
+frappe.ui.FilterGroup = class {
 	constructor(opts) {
 		$.extend(this, opts);
 		this.filters = [];

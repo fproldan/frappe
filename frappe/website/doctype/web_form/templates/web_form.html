@@ -13,7 +13,7 @@
 
 	{% if allow_edit and doc_name and not is_form_editable %}
 		<!-- edit button -->
-		<a href="/{{ route }}/{{ doc_name }}/edit" class="edit-button btn btn-primary btn-sm ml-2">{{ _("Edit", null, "Button in web form") }}</a>
+		<a href="/{{ route }}/{{ doc_name }}/edit" class="edit-button btn btn-primary btn-sm ml-2">{{ _("Editar", null, "Button in web form") }}</a>
 	{% endif %}
 {% endmacro %}
 
@@ -21,18 +21,18 @@
 	{% if is_new or is_form_editable %}
 		<div class="left-area">
 			<!-- clear button -->
-			<a href="/{{ path }}" class="clear-btn btn btn-light btn-md">
+			<!--<a href="/{{ path }}" class="clear-btn btn btn-light btn-md">
 				{% if is_form_editable %}
 					{{ _("Reset Form", null, "Button in web form") }}
 				{% else %}
 					{{ _("Clear Form", null, "Button in web form") }}
 				{% endif %}
-			</a>
+			</a>-->
 		</div>
 		<div class="center-area paging"></div>
 		<div class="right-area">
 			<!-- submit button -->
-			<button type="submit" class="submit-btn btn btn-primary btn-md ml-2">{{ button_label or _("Submit", null, "Button in web form") }}</button>
+			<button type="submit" class="submit-btn btn btn-primary btn-md ml-2">{{ button_label or _("Guardar", null, "Button in web form") }}</button>
 		</div>
 	{% endif %}
 {% endmacro %}
@@ -118,8 +118,8 @@
 		<svg class="icon">
 			<use href="#icon-solid-success"></use>
 		</svg>
-		<h2 class="success-title">{{ _(success_title) or _("Submitted") }}</h2>
-		<p class="success-message">{{ _(success_message) or _("Thank you for spending your valuable time to fill this form") }}</p>
+		<h2 class="success-title">{{ _(success_title) or _("Guardado") }}</h2>
+		<p class="success-message">{{ _(success_message) or _("Gracias por completar este formulario") }}</p>
 
 		{% if success_url %}
 			<div class="success_url_message">
@@ -133,10 +133,10 @@
 			</div>
 		{% else %}
 			{% if show_list %}
-				<a href="/{{ route }}/list" class="show-list-button btn btn-light btn-md mr-2">{{ _("See previous responses", null, "Button in web form") }}</a>
+				<a href="/{{ route }}/list" class="show-list-button btn btn-light btn-md mr-2">{{ _("Ver respuestas anteriores", null, "Button in web form") }}</a>
 			{% endif %}
 			{% if not login_required or allow_multiple %}
-				<a href="/{{ route }}/new" class="new-btn btn btn-light btn-md">{{ _("Submit another response", null, "Button in web form") }}</a>
+				<a href="/{{ route }}/new" class="new-btn btn btn-light btn-md">{{ _("Enviar otra respuesta", null, "Button in web form") }}</a>
 			{% endif %}
 		{% endif %}
 	</div>

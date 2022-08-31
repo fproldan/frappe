@@ -81,11 +81,11 @@ export default class WebForm extends frappe.ui.FieldGroup {
 		}
 
 		$(".web-form-footer .web-form-actions .left-area").prepend(`
-			<button class="btn btn-default btn-previous btn-md mr-2">${__("Previous")}</button>
+			<button class="btn btn-default btn-previous btn-md mr-2">${__("Anterior")}</button>
 		`);
 
 		$(".web-form-footer .web-form-actions .right-area").prepend(`
-			<button class="btn btn-default btn-next btn-md">${__("Next")}</button>
+			<button class="btn btn-default btn-next btn-md">${__("Siguiente")}</button>
 		`);
 
 		$(".btn-previous").on("click", function () {
@@ -247,11 +247,11 @@ export default class WebForm extends frappe.ui.FieldGroup {
 			this.$slide_progress.append($dot);
 		}
 
-		let paging_text = __("Page {0} of {1}", [
-			this.current_section + 1,
-			this.page_breaks.length + 1,
-		]);
-		$(".center-area.paging").append(`<div>${paging_text}</div>`);
+		// let paging_text = __("Page {0} of {1}", [
+		// 	this.current_section + 1,
+		// 	this.page_breaks.length + 1,
+		// ]);
+		// $(".center-area.paging").append(`<div>${paging_text}</div>`);
 	}
 
 	toggle_buttons() {

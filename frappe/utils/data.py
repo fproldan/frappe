@@ -5,6 +5,7 @@ from typing import Optional
 import frappe
 import operator
 import json
+import base64
 import re, datetime, math, time
 from six.moves.urllib.parse import quote, urljoin
 from six import iteritems, text_type, string_types, integer_types
@@ -1014,7 +1015,6 @@ def get_thumbnail_base64_for_image(src):
 	return cache().hget('thumbnail_base64', src, generator=_get_base64)
 
 def image_to_base64(image, extn):
-	import base64
 	from io import BytesIO
 
 	buffered = BytesIO()
@@ -1024,6 +1024,16 @@ def image_to_base64(image, extn):
 	img_str = base64.b64encode(buffered.getvalue())
 	return img_str
 
+def pdf_to_base64(filename):
+	from frappe.utils.file_manager import get_file_path
+	file_path = get_file_path(filename)
+	if not file_path:
+		return
+
+	with open(file_path, 'rb') as pdf_file:
+		base64_string = base64.b64encode(pdf_file.read())
+
+	return base64_string
 
 # from Jinja2 code
 _striptags_re = re.compile(r'(<!--.*?-->|<[^>]*>)')
@@ -1195,9 +1205,10 @@ def get_host_name():
 	return get_url().rsplit("//", 1)[-1]
 
 def get_link_to_form(doctype, name, label=None):
+	from frappe import _
 	if not label: label = name
 
-	return """<a href="{0}">{1}</a>""".format(get_url_to_form(doctype, name), label)
+	return """<a href="{0}">{1}</a>""".format(get_url_to_form(doctype, name), _(label))
 
 def get_link_to_report(name, label=None, report_type=None, doctype=None, filters=None):
 	if not label: label = name

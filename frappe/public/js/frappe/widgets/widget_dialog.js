@@ -302,7 +302,7 @@ class CardDialog extends WidgetDialog {
 				let row = idx + 1;
 
 				if (!item.link_type) {
-					message = "Following fields have missing values: <br><br><ul>";
+					message = "Los siguientes campos tienen valores faltantes: <br><br><ul>";
 					message += `<li>Link Type in Row ${row}</li>`;
 				}
 
@@ -318,7 +318,7 @@ class CardDialog extends WidgetDialog {
 			message += "</ul>";
 			frappe.throw({
 				message: __(message),
-				title: __("Missing Values Required"),
+				title: __("Valores faltantes requeridos"),
 				indicator: "orange",
 			});
 		}

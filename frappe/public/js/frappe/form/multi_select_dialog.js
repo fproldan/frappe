@@ -64,8 +64,7 @@ frappe.ui.form.MultiSelectDialog = class MultiSelectDialog {
 	}
 
 	make() {
-		let doctype_plural = this.doctype.plural();
-		let title = __("Select {0}", [this.for_select ? __("value") : __(doctype_plural)]);
+		let title = __("Select {0}", [this.for_select ? __("value") : __(this.doctype)]);
 
 		this.dialog = new frappe.ui.Dialog({
 			title: title,
@@ -162,7 +161,7 @@ frappe.ui.form.MultiSelectDialog = class MultiSelectDialog {
 
 	get_child_datatable_columns() {
 		const parent = this.doctype;
-		return [parent, ...this.child_columns].map(d => ({ name: frappe.unscrub(d), editable: false }));
+		return [parent, ...this.child_columns].map(d => ({ name: __(frappe.unscrub(d)), editable: false }));
 	}
 
 	get_child_datatable_rows() {
@@ -236,7 +235,7 @@ frappe.ui.form.MultiSelectDialog = class MultiSelectDialog {
 			this.child_doctype = frappe.meta.get_docfield(this.doctype, this.child_fieldname).options;
 			columns[0].push({
 				fieldtype: "Check",
-				label: __("Select {0}", [this.child_doctype]),
+				label: __("Select {0}", [__(this.child_doctype)]),
 				fieldname: "allow_child_item_selection",
 				onchange: this.toggle_child_selection.bind(this)
 			});

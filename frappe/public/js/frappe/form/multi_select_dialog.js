@@ -323,6 +323,28 @@ frappe.ui.form.MultiSelectDialog = class MultiSelectDialog {
 			}
 		});
 
+		this.$parent.find('.clear-filters').on('click', () => {
+			me.filter_group.clear_filters();
+			me.get_query().filters = {}
+			this.get_results();
+			if (this.is_child_selection_enabled()) {
+				this.show_child_results();
+			} else {
+				this.get_results();
+			}
+		});
+
+		this.$parent.find('.remove-filter').on('click', () => {
+			me.filter_group.clear_filters();
+			me.get_query().filters = {}
+			this.get_results();
+			if (this.is_child_selection_enabled()) {
+				this.show_child_results();
+			} else {
+				this.get_results();
+			}
+		});
+
 		this.$parent.find('[data-fieldtype="Data"]').on('input', () => {
 			var $this = $(this);
 			clearTimeout($this.data('timeout'));
@@ -402,7 +424,7 @@ frappe.ui.form.MultiSelectDialog = class MultiSelectDialog {
 		columns.forEach(function (column) {
 			contents += `<div class="list-item__content ellipsis">
 				${
-	head ? `<span class="ellipsis text-muted" title="${__(frappe.model.unscrub(column))}">${__(frappe.model.unscrub(column))}</span>`
+		head ? `<span class="ellipsis text-muted" title="${__(frappe.model.unscrub(column))}">${__(frappe.model.unscrub(column))}</span>`
 		: (column !== "name" ? `<span class="ellipsis result-row" title="${__(result[column] || '')}">${__(result[column] || '')}</span>`
 			: `<a href="${"/app/" + frappe.router.slug(me.doctype) + "/" + result[column] || ''}" class="list-id ellipsis" title="${__(result[column] || '')}">
 							${__(result[column] || '')}</a>`)}
@@ -469,7 +491,7 @@ frappe.ui.form.MultiSelectDialog = class MultiSelectDialog {
 
 	get_filters_from_setters() {
 		let me = this;
-		let filters = this.get_query ? this.get_query().filters : {} || {};
+		let filters = (this.get_query ? this.get_query().filters : {}) || {};
 		let filter_fields = [];
 
 		if ($.isArray(this.setters)) {

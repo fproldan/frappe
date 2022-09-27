@@ -129,20 +129,24 @@ frappe.ui.form.MultiSelectDialog = class MultiSelectDialog {
 		this.$results.append(this.make_list_row());
 	}
 
+	show_child_results() {
+		this.get_child_result().then((r) => {
+			this.child_results = r.message || [];
+			this.render_child_datatable();
+
+			this.$wrapper.addClass("hidden");
+			this.$child_wrapper.removeClass("hidden");
+			this.dialog.fields_dict.more_btn.$wrapper.hide();
+		});
+	}
+
 	is_child_selection_enabled() {
 		return this.dialog.fields_dict["allow_child_item_selection"].get_value();
 	}
 
 	toggle_child_selection() {
 		if (this.is_child_selection_enabled()) {
-			this.get_child_result().then(r => {
-				this.child_results = r.message || [];
-				this.render_child_datatable();
-	
-				this.$wrapper.addClass('hidden');
-				this.$child_wrapper.removeClass('hidden');
-				this.dialog.fields_dict.more_btn.$wrapper.hide();
-			});
+			this.show_child_results();
 		} else {
 			this.child_results = [];
 			this.get_results();

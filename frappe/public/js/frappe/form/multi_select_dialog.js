@@ -334,17 +334,6 @@ frappe.ui.form.MultiSelectDialog = class MultiSelectDialog {
 			}
 		});
 
-		this.$parent.find('.remove-filter').on('click', () => {
-			me.filter_group.clear_filters();
-			me.get_query().filters = {}
-			this.get_results();
-			if (this.is_child_selection_enabled()) {
-				this.show_child_results();
-			} else {
-				this.get_results();
-			}
-		});
-
 		this.$parent.find('[data-fieldtype="Data"]').on('input', () => {
 			var $this = $(this);
 			clearTimeout($this.data('timeout'));

@@ -457,7 +457,7 @@ frappe.ui.form.ControlLink = frappe.ui.form.ControlData.extend({
 			this.docname, value);
 	},
 	validate_link_and_fetch(df, options, docname, value) {
-		if (!value) return;
+		if (!options) return;
 
 		const fetch_map = this.get_fetch_map();
 		const columns_to_fetch = Object.values(fetch_map);

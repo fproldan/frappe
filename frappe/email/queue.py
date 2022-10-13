@@ -550,6 +550,7 @@ def prepare_message(email, recipient, recipients_list):
 		unsubscribe_url = get_unsubcribed_url(email.reference_doctype, email.reference_name, recipient,
 		email.unsubscribe_method, email.unsubscribe_params)
 		message = message.replace("<!--unsubscribe url-->", quopri.encodestring(unsubscribe_url.encode()).decode())
+		message = message.replace("<!--unsubscribe%20url-->", quopri.encodestring(unsubscribe_url.encode()).decode())
 
 	if email.expose_recipients == "header":
 		pass

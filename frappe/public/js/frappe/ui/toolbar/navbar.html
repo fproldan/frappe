@@ -4,12 +4,6 @@
 			<img class="app-logo" style="width: {{ navbar_settings.logo_width || 80 }}px" src="{{ frappe.boot.app_logo_url }}">
 		</a>
 
-		<ul class="nav navbar-nav d-none d-sm-flex">
-			<li class="nav-item">
-				<p id="navbar-default-company" style="padding-top: 10px;"></p>
-			</li>
-		</ul>
-
 		<ul class="nav navbar-nav d-none d-sm-flex" id="navbar-breadcrumbs"></ul>
 		<div class="collapse navbar-collapse justify-content-end">
 			<form class="form-inline fill-width justify-content-end" role="search" onsubmit="return false;">
@@ -115,6 +109,9 @@
 							{% } %}
 						{% endfor %}
 					</div>
+				</li>
+				<li class="nav-item" style="max-width: 150px;">
+					<p id="navbar-default-company" style="padding-top: 10px;word-break: break-word;"></p>
 				</li>
 			</ul>
 		</div>

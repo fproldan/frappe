@@ -579,6 +579,12 @@ frappe.ui.form.MultiSelectDialog = class MultiSelectDialog {
 					filters.push([filter[1], filter[2], filter[3]]);
 				}
 			});
+
+			if (this.child_filters) {
+				this.child_filters.forEach(filter => {
+					filters.push(filter);
+				});
+			}
 		}
 	}
 

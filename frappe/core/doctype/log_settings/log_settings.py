@@ -34,7 +34,6 @@ class LogSettings(Document):
 	def clear_access_log(self):
 		frappe.db.sql("""delete from `tabAccess Log` where creation< (NOW() - INTERVAL '{0}' DAY)""".format(30))
 
-
 def run_log_clean_up():
 	doc = frappe.get_doc("Log Settings")
 	doc.clear_logs()

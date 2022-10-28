@@ -33,10 +33,11 @@ login.bind_events = function () {
 		var args = {};
 		args.cmd = "frappe.core.doctype.user.user.sign_up";
 		args.email = ($("#signup_email").val() || "").trim();
+		args.company = ($("#signup_company").val() || "").trim();
 		args.redirect_to = frappe.utils.sanitise_redirect(frappe.utils.get_url_arg("redirect-to"));
 		args.full_name = frappe.utils.xss_sanitise(($("#signup_fullname").val() || "").trim());
-		if (!args.email || !validate_email(args.email) || !args.full_name) {
-			login.set_status('{{ _("Valid email and name required") }}', 'red');
+		if (!args.email || !validate_email(args.email) || !args.full_name || !args.company ) {
+			login.set_status('{{ _("Se requiere un email, nombre y empresa validos") }}', 'red');
 			return false;
 		}
 		login.call(args);

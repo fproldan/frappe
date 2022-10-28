@@ -822,7 +822,7 @@ def verify_password(password):
 
 
 @frappe.whitelist(allow_guest=True)
-def sign_up(email, full_name, redirect_to):
+def sign_up(email, full_name, company, redirect_to):
 	if is_signup_disabled():
 		frappe.throw(_("Sign Up is disabled"), title=_("Not Allowed"))
 
@@ -852,6 +852,7 @@ def sign_up(email, full_name, redirect_to):
 				"enabled": 1,
 				"new_password": random_string(10),
 				"user_type": "Website User",
+				"company": company
 			}
 		)
 		user.flags.ignore_permissions = True

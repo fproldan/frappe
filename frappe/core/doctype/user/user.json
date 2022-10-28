@@ -13,6 +13,7 @@
   "first_name",
   "middle_name",
   "last_name",
+  "company",
   "column_break0",
   "full_name",
   "username",
@@ -615,13 +616,13 @@
    "options": "Module Profile"
   },
   {
-    "description": "Stores the datetime when the last reset password key was generated.",
-    "fieldname": "last_reset_password_key_generated_on",
-    "fieldtype": "Datetime",
-    "hidden": 1,
-    "label": "Last Reset Password Key Generated On",
-    "read_only": 1
-   },
+   "description": "Stores the datetime when the last reset password key was generated.",
+   "fieldname": "last_reset_password_key_generated_on",
+   "fieldtype": "Datetime",
+   "hidden": 1,
+   "label": "Last Reset Password Key Generated On",
+   "read_only": 1
+  },
   {
    "fieldname": "column_break_75",
    "fieldtype": "Column Break"
@@ -648,18 +649,23 @@
    "label": "Auto follow documents that you Like"
   },
   {
-    "default": "0",
-    "depends_on": "eval:(doc.document_follow_notify== 1)",
-    "fieldname": "follow_shared_documents",
-    "fieldtype": "Check",
-    "label": "Auto follow documents that are shared with you"
-   },
+   "default": "0",
+   "depends_on": "eval:(doc.document_follow_notify== 1)",
+   "fieldname": "follow_shared_documents",
+   "fieldtype": "Check",
+   "label": "Auto follow documents that are shared with you"
+  },
   {
    "default": "0",
    "depends_on": "eval:(doc.document_follow_notify== 1)",
    "fieldname": "follow_assigned_documents",
    "fieldtype": "Check",
    "label": "Auto follow documents that are assigned to you"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Data",
+   "label": "Empresa"
   }
  ],
  "icon": "fa fa-user",
@@ -722,7 +728,7 @@
    "link_fieldname": "user"
   }
  ],
- "modified": "2022-05-25 01:00:51.345319",
+ "modified": "2022-10-28 10:11:08.308934",
  "modified_by": "Administrator",
  "module": "Core",
  "name": "User",

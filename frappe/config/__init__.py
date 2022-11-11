@@ -36,10 +36,10 @@ def get_modules_from_all_apps():
 	return modules_list
 
 def get_modules_from_app(app):
-	return frappe.get_all('Module Def',
+	return [{'module_name': _(m['module_name']), 'app': m['app']} for m in frappe.get_all('Module Def',
 		filters={'app_name': app},
 		fields=['module_name', 'app_name as app']
-	)
+	)]
 
 def get_all_empty_tables_by_module():
 	table_rows = frappe.qb.Field("table_rows")

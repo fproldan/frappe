@@ -37,10 +37,15 @@ def get_modules_from_all_apps():
 
 def get_modules_from_app(app):
 	active_domains = frappe.get_active_domains()
+	exclude = [
+		'Healthcare', 'Setup', 'Manufacturing', 'Restaurant', 'Hotels', 'Communication', 'E-commerce',
+		'Core', 'Email', 'Geo', 'Desk', 'Printing', 'Contacts', 'Data Migration', 'Chat', 'Social',
+		'ERPNext Integrations'
+	]
 	return [m for m in frappe.get_all('Module Def',
 		filters={'app_name': app},
 		fields=['module_name', 'app_name as app', 'restrict_to_domain']
-	) if m.get("restrict_to_domain") in active_domains]
+	) if m.get("restrict_to_domain") in active_domains or not m.get("restrict_to_domain") and m.get('module_name') not in exclude]
 
 def get_all_empty_tables_by_module():
 	table_rows = frappe.qb.Field("table_rows")

@@ -1227,10 +1227,11 @@ Object.assign(frappe.utils, {
 							if (r.message) {
 								let ref_doctype = r.message['ref_doctype'];
 								route = frappe.router.slug(ref_doctype) + "/view/report/" + item.name;
+							} else {
+								route = "/report/" + item.name;
 							}
 						}
 					});
-					//route = "/report/" + item.name;
 				} else {
 					route = frappe.router.slug(item.doctype) + "/view/report/" + item.name;
 				}

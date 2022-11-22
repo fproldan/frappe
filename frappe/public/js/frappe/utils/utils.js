@@ -1218,7 +1218,19 @@ Object.assign(frappe.utils, {
 				if (item.is_query_report) {
 					route = "query-report/" + item.name;
 				} else if (!item.doctype) {
-					route = "/report/" + item.name;
+					var route = '';
+					frappe.call({
+						method: "frappe.client.get_value",
+						async: false,
+						args: {doctype: "Report", filters: {"name": item.name}, fieldname: "ref_doctype"},
+						callback: function(r){
+							if (r.message) {
+								let ref_doctype = r.message['ref_doctype'];
+								route = frappe.router.slug(ref_doctype) + "/view/report/" + item.name;
+							}
+						}
+					});
+					//route = "/report/" + item.name;
 				} else {
 					route = frappe.router.slug(item.doctype) + "/view/report/" + item.name;
 				}

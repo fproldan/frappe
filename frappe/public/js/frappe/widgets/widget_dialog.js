@@ -302,13 +302,8 @@ class CardDialog extends WidgetDialog {
 				let row = idx + 1;
 
 				if (!item.link_type) {
-<<<<<<< HEAD
-					message = "Los siguientes campos tienen valores faltantes: <br><br><ul>";
-					message += `<li>Link Type in Row ${row}</li>`;
-=======
-					message = __("Following fields have missing values") + ": <br><br><ul>";
+					message = __("Los siguientes campos tienen valores faltantes:") + ": <br><br><ul>";
 					message += `<li>${__("Link Type in Row")} ${row}</li>`;
->>>>>>> upstream/version-14
 				}
 
 				if (!item.link_to) {

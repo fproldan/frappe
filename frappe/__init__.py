@@ -42,7 +42,7 @@ from .utils.jinja import (
 )
 from .utils.lazy_loader import lazy_import
 
-__version__ = "14.4.0"
+__version__ = "14.16.0"
 __title__ = "Frappe Framework"
 
 controllers = {}
@@ -89,7 +89,7 @@ def _(msg: str, lang: str | None = None, context: str | None = None) -> str:
 	        _('Change')
 	        _('Change', context='Coins')
 	"""
-	from frappe.translate import get_full_dict
+	from frappe.translate import get_all_translations
 	from frappe.utils import is_html, strip_html_tags
 
 	if not hasattr(local, "lang"):
@@ -107,14 +107,15 @@ def _(msg: str, lang: str | None = None, context: str | None = None) -> str:
 	msg = as_unicode(msg).strip()
 
 	translated_string = ""
+
+	all_translations = get_all_translations(lang)
 	if context:
 		string_key = f"{msg}:{context}"
-		translated_string = get_full_dict(lang).get(string_key)
+		translated_string = all_translations.get(string_key)
 
 	if not translated_string:
-		translated_string = get_full_dict(lang).get(msg)
+		translated_string = all_translations.get(msg)
 
-	# return lang_full_dict according to lang passed parameter
 	return translated_string or non_translated_string
 
 
@@ -203,6 +204,7 @@ def init(site: str, sites_path: str = ".", new_site: bool = False) -> None:
 			"mute_emails": False,
 			"has_dataurl": False,
 			"new_site": new_site,
+			"read_only": False,
 		}
 	)
 	local.rollback_observers = []
@@ -221,7 +223,6 @@ def init(site: str, sites_path: str = ".", new_site: bool = False) -> None:
 
 	local.conf = _dict(get_site_config())
 	local.lang = local.conf.lang or "en"
-	local.lang_full_dict = None
 
 	local.module_app = None
 	local.app_modules = None
@@ -238,8 +239,8 @@ def init(site: str, sites_path: str = ".", new_site: bool = False) -> None:
 	local.jloader = None
 	local.cache = {}
 	local.document_cache = {}
-	local.meta_cache = {}
 	local.form_dict = _dict()
+	local.preload_assets = {"style": [], "script": []}
 	local.session = _dict()
 	local.dev_server = _dev_server
 	local.qb = get_query_builder(local.conf.db_type or "mariadb")
@@ -283,9 +284,7 @@ def connect_replica():
 		user = local.conf.replica_db_name
 		password = local.conf.replica_db_password
 
-	local.replica_db = get_db(
-		host=local.conf.replica_host, user=user, password=password, port=port, read_only=True
-	)
+	local.replica_db = get_db(host=local.conf.replica_host, user=user, password=password, port=port)
 
 	# swap db connections
 	local.primary_db = local.db
@@ -454,7 +453,7 @@ def msgprint(
 	if as_list and type(msg) in (list, tuple):
 		out.as_list = 1
 
-	if sys.stdin.isatty():
+	if sys.stdin and sys.stdin.isatty():
 		msg = _strip_html_tags(out.message)
 
 	if flags.print_messages and out.message:
@@ -1020,19 +1019,15 @@ def get_precision(
 	return get_field_precision(get_meta(doctype).get_field(fieldname), doc, currency)
 
 
-def generate_hash(txt: str | None = None, length: int | None = None) -> str:
-	"""Generates random hash for given text + current timestamp + random string."""
-	import hashlib
-	import time
+def generate_hash(txt: str | None = None, length: int = 56) -> str:
+	"""Generate random hash using best available randomness source."""
+	import math
+	import secrets
 
-	from .utils import random_string
+	if not length:
+		length = 56
 
-	digest = hashlib.sha224(
-		((txt or "") + repr(time.time()) + repr(random_string(8))).encode()
-	).hexdigest()
-	if length:
-		digest = digest[:length]
-	return digest
+	return secrets.token_hex(math.ceil(length / 2))[:length]
 
 
 def reset_metadata_version():
@@ -1065,21 +1060,9 @@ def set_value(doctype, docname, fieldname, value=None):
 	return frappe.client.set_value(doctype, docname, fieldname, value)
 
 
-@overload
-def get_cached_doc(doctype, docname, _allow_dict=True) -> dict:
-	...
-
-
-@overload
 def get_cached_doc(*args, **kwargs) -> "Document":
-	...
-
-
-def get_cached_doc(*args, **kwargs):
-	allow_dict = kwargs.pop("_allow_dict", False)
-
 	def _respond(doc, from_redis=False):
-		if not allow_dict and isinstance(doc, dict):
+		if isinstance(doc, dict):
 			local.document_cache[key] = doc = get_doc(doc)
 
 		elif from_redis:
@@ -1103,6 +1086,12 @@ def get_cached_doc(*args, **kwargs):
 	if not key:
 		key = get_document_cache_key(doc.doctype, doc.name)
 
+	_set_document_in_cache(key, doc)
+
+	return doc
+
+
+def _set_document_in_cache(key: str, doc: "Document") -> None:
 	local.document_cache[key] = doc
 
 	# Avoid setting in local.cache since we're already using local.document_cache above
@@ -1111,8 +1100,6 @@ def get_cached_doc(*args, **kwargs):
 		cache().hset("document_cache", key, doc, cache_locally=False)
 	except Exception:
 		cache().hset("document_cache", key, doc.as_dict(), cache_locally=False)
-
-	return doc
 
 
 def can_cache_doc(args) -> str | None:
@@ -1125,7 +1112,7 @@ def can_cache_doc(args) -> str | None:
 		return
 
 	doctype = args[0]
-	name = doctype if len(args) == 1 else args[1]
+	name = doctype if len(args) == 1 or args[1] is None else args[1]
 
 	# Only cache if both doctype and name are strings
 	if isinstance(doctype, str) and isinstance(name, str):
@@ -1152,7 +1139,7 @@ def get_cached_value(
 	doctype: str, name: str, fieldname: str = "name", as_dict: bool = False
 ) -> Any:
 	try:
-		doc = get_cached_doc(doctype, name, _allow_dict=True)
+		doc = get_cached_doc(doctype, name)
 	except DoesNotExistError:
 		clear_last_message()
 		return
@@ -1188,13 +1175,9 @@ def get_doc(*args, **kwargs) -> "Document":
 
 	doc = frappe.model.document.get_doc(*args, **kwargs)
 
-	# Replace cache
-	if key := can_cache_doc(args):
-		if key in local.document_cache:
-			local.document_cache[key] = doc
-
-		if cache().hexists("document_cache", key):
-			cache().hset("document_cache", key, doc.as_dict())
+	# Replace cache if stale one exists
+	if (key := can_cache_doc(args)) and cache().hexists("document_cache", key):
+		_set_document_in_cache(key, doc)
 
 	return doc
 
@@ -1450,6 +1433,8 @@ def get_doc_hooks():
 
 @request_cache
 def _load_app_hooks(app_name: str | None = None):
+	import types
+
 	hooks = {}
 	apps = [app_name] if app_name else get_installed_apps(sort=True)
 
@@ -1465,9 +1450,13 @@ def _load_app_hooks(app_name: str | None = None):
 			if not request:
 				raise SystemExit
 			raise
-		for key in dir(app_hooks):
+
+		def _is_valid_hook(obj):
+			return not isinstance(obj, (types.ModuleType, types.FunctionType, type))
+
+		for key, value in inspect.getmembers(app_hooks, predicate=_is_valid_hook):
 			if not key.startswith("_"):
-				append_hook(hooks, key, getattr(app_hooks, key))
+				append_hook(hooks, key, value)
 	return hooks
 
 
@@ -2224,13 +2213,18 @@ def log_error(title=None, message=None, reference_doctype=None, reference_name=N
 	title = title or "Error"
 	traceback = as_unicode(traceback or get_traceback(with_context=True))
 
-	return get_doc(
+	error_log = get_doc(
 		doctype="Error Log",
 		error=traceback,
 		method=title,
 		reference_doctype=reference_doctype,
 		reference_name=reference_name,
-	).insert(ignore_permissions=True)
+	)
+
+	if flags.read_only:
+		error_log.deferred_insert()
+	else:
+		return error_log.insert(ignore_permissions=True)
 
 
 def get_desk_link(doctype, name):
@@ -2329,7 +2323,7 @@ def get_version(doctype, name, limit=None, head=False, raise_err=True):
 	"""
 	meta = get_meta(doctype)
 	if meta.track_changes:
-		names = db.get_all(
+		names = get_all(
 			"Version",
 			filters={
 				"ref_doctype": doctype,

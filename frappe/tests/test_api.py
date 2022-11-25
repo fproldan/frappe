@@ -1,5 +1,4 @@
 import sys
-import unittest
 from contextlib import contextmanager
 from random import choice
 from threading import Thread
@@ -10,6 +9,8 @@ from semantic_version import Version
 from werkzeug.test import TestResponse
 
 import frappe
+from frappe.installer import update_site_config
+from frappe.tests.utils import FrappeTestCase
 from frappe.utils import get_site_url, get_test_client
 
 try:
@@ -65,7 +66,7 @@ class ThreadWithReturnValue(Thread):
 		return self._return
 
 
-class FrappeAPITestCase(unittest.TestCase):
+class FrappeAPITestCase(FrappeTestCase):
 	SITE = frappe.local.site
 	SITE_URL = get_site_url(SITE)
 	RESOURCE_URL = f"{SITE_URL}/api/resource"
@@ -104,6 +105,7 @@ class TestResourceAPI(FrappeAPITestCase):
 
 	@classmethod
 	def setUpClass(cls):
+		super().setUpClass()
 		for _ in range(10):
 			doc = frappe.get_doc({"doctype": "ToDo", "description": frappe.mock("paragraph")}).insert()
 			cls.GENERATED_DOCUMENTS.append(doc.name)
@@ -268,3 +270,29 @@ class TestMethodAPI(FrappeAPITestCase):
 		self.assertEqual(response.json["message"], "Administrator")
 
 		authorization_token = None
+
+
+class TestReadOnlyMode(FrappeAPITestCase):
+	"""During migration if read only mode can be enabled.
+	Test if reads work well and writes are blocked"""
+
+	REQ_PATH = "/api/resource/ToDo"
+
+	@classmethod
+	def setUpClass(cls):
+		super().setUpClass()
+		update_site_config("allow_reads_during_maintenance", 1)
+		cls.addClassCleanup(update_site_config, "maintenance_mode", 0)
+		# XXX: this has potential to crumble rest of the test suite.
+		update_site_config("maintenance_mode", 1)
+
+	def test_reads(self):
+		response = self.get(self.REQ_PATH, {"sid": self.sid})
+		self.assertEqual(response.status_code, 200)
+		self.assertIsInstance(response.json, dict)
+		self.assertIsInstance(response.json["data"], list)
+
+	def test_blocked_writes(self):
+		response = self.post(self.REQ_PATH, {"description": frappe.mock("paragraph"), "sid": self.sid})
+		self.assertEqual(response.status_code, 503)
+		self.assertEqual(response.json["exc_type"], "InReadOnlyMode")

@@ -455,10 +455,10 @@ class DatabaseQuery:
 		)
 
 	def check_read_permission(self, doctype):
-		ptype = "select" if frappe.only_has_select_perm(doctype) else "read"
-
 		if not self.flags.ignore_permissions and not frappe.has_permission(
-			doctype, ptype=ptype, parent_doctype=self.doctype
+			doctype,
+			ptype="select" if frappe.only_has_select_perm(doctype) else "read",
+			parent_doctype=self.doctype,
 		):
 			frappe.flags.error_message = _("Insufficient Permission for {0}").format(frappe.bold(doctype))
 			raise frappe.PermissionError(doctype)
@@ -612,6 +612,12 @@ class DatabaseQuery:
 			)
 
 		elif f.operator.lower() in ("in", "not in"):
+			# if values contain '' or falsy values then only coalesce column
+			# for `in` query this is only required if values contain '' or values are empty.
+			# for `not in` queries we can't be sure as column values might contain null.
+			if f.operator.lower() == "in":
+				can_be_null = not f.value or any(v is None or v == "" for v in f.value)
+
 			values = f.value or ""
 			if isinstance(values, str):
 				values = values.split(",")
@@ -636,7 +642,7 @@ class DatabaseQuery:
 				f.value = date_range
 				fallback = f"'{FallBackDateTimeStr}'"
 
-			if f.operator in (">", "<") and (f.fieldname in ("creation", "modified")):
+			if f.operator in (">", "<", ">=", "<=") and (f.fieldname in ("creation", "modified")):
 				value = cstr(f.value)
 				fallback = f"'{FallBackDateTimeStr}'"
 

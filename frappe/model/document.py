@@ -15,6 +15,7 @@ from frappe.model import optional_fields, table_fields
 from frappe.model.base_document import BaseDocument, get_controller
 from frappe.model.docstatus import DocStatus
 from frappe.model.naming import set_new_name, validate_name
+from frappe.model.utils import is_virtual_doctype
 from frappe.model.workflow import set_workflow_state_on_action, validate_workflow
 from frappe.utils import cstr, date_diff, file_lock, flt, get_datetime_str, now
 from frappe.utils.data import get_absolute_url
@@ -128,6 +129,7 @@ class Document(BaseDocument):
 	def load_from_db(self):
 		"""Load document and children from database and create properties
 		from fields"""
+		self.flags.ignore_children = True
 		if not getattr(self, "_metaclass", False) and self.meta.issingle:
 			single_doc = frappe.db.get_singles_dict(self.doctype, for_update=self.flags.for_update)
 			if not single_doc:
@@ -149,16 +151,13 @@ class Document(BaseDocument):
 				)
 
 			super().__init__(d)
+		self.flags.pop("ignore_children", None)
 
 		for df in self._get_table_fields():
 			# Make sure not to query the DB for a child table, if it is a virtual one.
 			# During frappe is installed, the property "is_virtual" is not available in tabDocType, so
 			# we need to filter those cases for the access to frappe.db.get_value() as it would crash otherwise.
-			if (
-				hasattr(self, "doctype")
-				and not hasattr(self, "module")
-				and frappe.db.get_value("DocType", df.options, "is_virtual", cache=True)
-			):
+			if hasattr(self, "doctype") and not hasattr(self, "module") and is_virtual_doctype(df.options):
 				self.set(df.fieldname, [])
 				continue
 
@@ -747,49 +746,27 @@ class Document(BaseDocument):
 
 		Will also validate document transitions (Save > Submit > Cancel) calling
 		`self.check_docstatus_transition`."""
-		conflict = False
+
+		self.load_doc_before_save(raise_exception=True)
+
 		self._action = "save"
-		if not self.get("__islocal") and not self.meta.get("is_virtual"):
-			if self.meta.issingle:
-				modified = frappe.db.sql(
-					"""select value from tabSingles
-					where doctype=%s and field='modified' for update""",
-					self.doctype,
-				)
-				modified = modified and modified[0][0]
-				if modified and modified != cstr(self._original_modified):
-					conflict = True
-			else:
-				tmp = frappe.db.sql(
-					"""select modified, docstatus from `tab{}`
-					where name = %s for update""".format(
-						self.doctype
-					),
-					self.name,
-					as_dict=True,
-				)
+		previous = self._doc_before_save
 
-				if not tmp:
-					frappe.throw(_("Record does not exist"))
-				else:
-					tmp = tmp[0]
-
-				modified = cstr(tmp.modified)
-
-				if modified and modified != cstr(self._original_modified):
-					conflict = True
-
-				self.check_docstatus_transition(tmp.docstatus)
-
-			if conflict:
-				frappe.msgprint(
-					_("Error: Document has been modified after you have opened it")
-					+ (f" ({modified}, {self.modified}). ")
-					+ _("Please refresh to get the latest document."),
-					raise_exception=frappe.TimestampMismatchError,
-				)
-		else:
+		# previous is None for new document insert
+		if not previous:
 			self.check_docstatus_transition(0)
+			return
+
+		if cstr(previous.modified) != cstr(self._original_modified):
+			frappe.msgprint(
+				_("Error: Document has been modified after you have opened it")
+				+ (f" ({previous.modified}, {self.modified}). ")
+				+ _("Please refresh to get the latest document."),
+				raise_exception=frappe.TimestampMismatchError,
+			)
+
+		if not self.meta.issingle:
+			self.check_docstatus_transition(previous.docstatus)
 
 	def check_docstatus_transition(self, to_docstatus):
 		"""Ensures valid `docstatus` transition.
@@ -954,15 +931,19 @@ class Document(BaseDocument):
 		from frappe.email.doctype.notification.notification import evaluate_alert
 
 		if self.flags.notifications is None:
-			alerts = frappe.cache().hget("notifications", self.doctype)
-			if alerts is None:
-				alerts = frappe.get_all(
+
+			def _get_notifications():
+				"""returns enabled notifications for the current doctype"""
+
+				return frappe.get_all(
 					"Notification",
 					fields=["name", "event", "method"],
 					filters={"enabled": 1, "document_type": self.doctype},
 				)
-				frappe.cache().hset("notifications", self.doctype, alerts)
-			self.flags.notifications = alerts
+
+			self.flags.notifications = frappe.cache().hget(
+				"notifications", self.doctype, _get_notifications
+			)
 
 		if not self.flags.notifications:
 			return
@@ -1045,7 +1026,6 @@ class Document(BaseDocument):
 
 		Will also update title_field if set"""
 
-		self.load_doc_before_save()
 		self.reset_seen()
 
 		# before_validate method should be executed before ignoring validations
@@ -1068,15 +1048,21 @@ class Document(BaseDocument):
 
 		self.set_title_field()
 
-	def load_doc_before_save(self):
-		"""Save load document from db before saving"""
+	def load_doc_before_save(self, *, raise_exception: bool = False):
+		"""load existing document from db before saving"""
+
 		self._doc_before_save = None
-		if not self.is_new():
-			try:
-				self._doc_before_save = frappe.get_doc(self.doctype, self.name)
-			except frappe.DoesNotExistError:
-				self._doc_before_save = None
-				frappe.clear_last_message()
+
+		if self.is_new():
+			return
+
+		try:
+			self._doc_before_save = frappe.get_doc(self.doctype, self.name, for_update=True)
+		except frappe.DoesNotExistError:
+			if raise_exception:
+				raise
+
+			frappe.clear_last_message()
 
 	def run_post_save_methods(self):
 		"""Run standard methods after `INSERT` or `UPDATE`. Standard Methods are:
@@ -1173,6 +1159,9 @@ class Document(BaseDocument):
 
 		# to trigger notification on value change
 		self.run_method("before_change")
+
+		if self.name is None:
+			return
 
 		frappe.db.set_value(
 			self.doctype,
@@ -1368,7 +1357,7 @@ class Document(BaseDocument):
 		if not user:
 			user = frappe.session.user
 
-		if self.meta.track_seen:
+		if self.meta.track_seen and not frappe.flags.read_only:
 			_seen = self.get("_seen") or []
 			_seen = frappe.parse_json(_seen)
 
@@ -1383,15 +1372,19 @@ class Document(BaseDocument):
 			user = frappe.session.user
 
 		if hasattr(self.meta, "track_views") and self.meta.track_views:
-			frappe.get_doc(
+			view_log = frappe.get_doc(
 				{
 					"doctype": "View Log",
 					"viewed_by": frappe.session.user,
 					"reference_doctype": self.doctype,
 					"reference_name": self.name,
 				}
-			).insert(ignore_permissions=True)
-			frappe.local.flags.commit = True
+			)
+			if frappe.flags.read_only:
+				view_log.deferred_insert()
+			else:
+				view_log.insert(ignore_permissions=True)
+				frappe.local.flags.commit = True
 
 	def log_error(self, title=None, message=None):
 		"""Helper function to create an Error Log"""
@@ -1537,6 +1530,20 @@ class Document(BaseDocument):
 		from frappe.desk.doctype.tag.tag import DocTags
 
 		return DocTags(self.doctype).get_tags(self.name).split(",")[1:]
+
+	def deferred_insert(self) -> None:
+		"""Push the document to redis temporarily and insert later.
+
+		WARN: This doesn't guarantee insertion as redis can be restarted
+		before data is flushed to database.
+		"""
+
+		from frappe.deferred_insert import deferred_insert
+
+		self.set_user_and_timestamp()
+
+		doc = self.get_valid_dict(convert_dates_to_str=True, ignore_virtual=True)
+		deferred_insert(doctype=self.doctype, records=doc)
 
 	def __repr__(self):
 		name = self.name or "unsaved"

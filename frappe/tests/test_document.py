@@ -1,6 +1,5 @@
 # Copyright (c) 2022, Frappe Technologies Pvt. Ltd. and Contributors
 # License: MIT. See LICENSE
-import unittest
 from contextlib import contextmanager
 from datetime import timedelta
 from unittest.mock import Mock, patch
@@ -9,6 +8,7 @@ import frappe
 from frappe.app import make_form_dict
 from frappe.desk.doctype.note.note import Note
 from frappe.model.naming import make_autoname, parse_naming_series, revert_series_if_last
+from frappe.tests.utils import FrappeTestCase
 from frappe.utils import cint, now_datetime, set_request
 from frappe.website.serve import get_response
 
@@ -21,7 +21,7 @@ class CustomTestNote(Note):
 		return now_datetime() - self.creation
 
 
-class TestDocument(unittest.TestCase):
+class TestDocument(FrappeTestCase):
 	def test_get_return_empty_list_for_table_field_if_none(self):
 		d = frappe.get_doc({"doctype": "User"})
 		self.assertEqual(d.get("roles"), [])
@@ -163,6 +163,12 @@ class TestDocument(unittest.TestCase):
 		self.assertRaises(frappe.ValidationError, d.run_method, "validate")
 		self.assertRaises(frappe.ValidationError, d.save)
 
+	def test_db_set_no_query_on_new_docs(self):
+		user = frappe.new_doc("User")
+		user.db_set("user_type", "Magical Wizard")
+		with self.assertQueryCount(0):
+			user.db_set("user_type", "Magical Wizard")
+
 	def test_update_after_submit(self):
 		d = self.test_insert()
 		d.starts_on = "2014-09-09"
@@ -298,7 +304,9 @@ class TestDocument(unittest.TestCase):
 
 		@contextmanager
 		def customize_note(with_options=False):
-			options = "frappe.utils.now_datetime() - doc.creation" if with_options else ""
+			options = (
+				"frappe.utils.now_datetime() - frappe.utils.get_datetime(doc.creation)" if with_options else ""
+			)
 			custom_field = frappe.get_doc(
 				{
 					"doctype": "Custom Field",
@@ -315,6 +323,9 @@ class TestDocument(unittest.TestCase):
 				yield custom_field.insert(ignore_if_duplicate=True)
 			finally:
 				custom_field.delete()
+				# to truly delete the field
+				# creation is commited due to DDL
+				frappe.db.commit()
 
 		with patch_note():
 			doc = frappe.get_last_doc("Note")
@@ -370,6 +381,12 @@ class TestDocument(unittest.TestCase):
 		doc.set("user_emails", None)
 		self.assertEqual(doc.user_emails, [])
 
+		# setting a string value should fail
+		self.assertRaises(TypeError, doc.set, "user_emails", "fail")
+		# but not when loading from db
+		doc.flags.ignore_children = True
+		doc.update({"user_emails": "ok"})
+
 	def test_doc_events(self):
 		"""validate that all present doc events are correct methods"""
 
@@ -394,8 +411,21 @@ class TestDocument(unittest.TestCase):
 		todo.save()
 		self.assertEqual(todo.notify_update.call_count, 1)
 
+	def test_error_on_saving_new_doc_with_name(self):
+		"""Trying to save a new doc with name should raise DoesNotExistError"""
 
-class TestDocumentWebView(unittest.TestCase):
+		doc = frappe.get_doc(
+			{
+				"doctype": "ToDo",
+				"description": "this should raise frappe.DoesNotExistError",
+				"name": "lets-trick-doc-save",
+			}
+		)
+
+		self.assertRaises(frappe.DoesNotExistError, doc.save)
+
+
+class TestDocumentWebView(FrappeTestCase):
 	def get(self, path, user="Guest"):
 		frappe.set_user(user)
 		set_request(method="GET", path=path)

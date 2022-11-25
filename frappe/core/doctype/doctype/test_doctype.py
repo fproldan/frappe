@@ -2,7 +2,6 @@
 # License: MIT. See LICENSE
 import random
 import string
-import unittest
 from unittest.mock import patch
 
 import frappe
@@ -19,9 +18,10 @@ from frappe.core.doctype.doctype.doctype import (
 )
 from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
 from frappe.desk.form.load import getdoc
+from frappe.tests.utils import FrappeTestCase
 
 
-class TestDocType(unittest.TestCase):
+class TestDocType(FrappeTestCase):
 	def tearDown(self):
 		frappe.db.rollback()
 
@@ -669,6 +669,18 @@ class TestDocType(unittest.TestCase):
 			test_json.test_json_field = json.loads(test_json.test_json_field)
 
 		self.assertEqual(test_json.test_json_field["hello"], "world")
+
+	@patch.dict(frappe.conf, {"developer_mode": 1})
+	def test_custom_field_deletion(self):
+		"""Custom child tables whose doctype doesn't exist should be auto deleted."""
+		doctype = new_doctype(custom=0).insert().name
+		child = new_doctype(custom=0, istable=1).insert().name
+
+		field = "abc"
+		create_custom_fields({doctype: [{"fieldname": field, "fieldtype": "Table", "options": child}]})
+
+		frappe.delete_doc("DocType", child)
+		self.assertFalse(frappe.get_meta(doctype).get_field(field))
 
 	@patch.dict(frappe.conf, {"developer_mode": 1})
 	def test_delete_doctype_with_customization(self):

@@ -1,10 +1,9 @@
 # Copyright (c) 2019, Frappe Technologies and Contributors
 # License: MIT. See LICENSE
-import unittest
-
 import requests
 
 import frappe
+from frappe.tests.utils import FrappeTestCase
 from frappe.utils import get_site_url
 
 scripts = [
@@ -86,10 +85,10 @@ frappe.db.add_index("Todo", ["color", "date"])
 ]
 
 
-class TestServerScript(unittest.TestCase):
+class TestServerScript(FrappeTestCase):
 	@classmethod
 	def setUpClass(cls):
-		frappe.db.commit()
+		super().setUpClass()
 		frappe.db.truncate("Server Script")
 		frappe.get_doc("User", "Administrator").add_roles("Script Manager")
 		for script in scripts:
@@ -211,4 +210,26 @@ todo = frappe.qb.DocType("ToDo")
 frappe.qb.from_(todo).select(todo.name).where(todo.name == "{todo.name}").run()
 """
 		script.save()
+		script.execute_method()
+
+	def test_scripts_all_the_way_down(self):
+		# why not
+		script = frappe.get_doc(
+			doctype="Server Script",
+			name="test_nested_scripts_1",
+			script_type="API",
+			api_method="test_nested_scripts_1",
+			script=f"""log("nothing")""",
+		)
+		script.insert()
+		script.execute_method()
+
+		script = frappe.get_doc(
+			doctype="Server Script",
+			name="test_nested_scripts_2",
+			script_type="API",
+			api_method="test_nested_scripts_2",
+			script=f"""frappe.call("test_nested_scripts_1")""",
+		)
+		script.insert()
 		script.execute_method()

@@ -21,7 +21,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-       containers: [1, 2, 3]
+       containers: [1, 2]
 
     name: UI Tests (Cypress)
 
@@ -105,19 +105,16 @@ jobs:
         id: yarn-cache
         with:
           path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
-          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          key: ${{ runner.os }}-yarn-ui-${{ hashFiles('**/yarn.lock') }}
           restore-keys: |
-            ${{ runner.os }}-yarn-
+            ${{ runner.os }}-yarn-ui-
 
       - name: Cache cypress binary
         if: ${{ steps.check-build.outputs.build == 'strawberry' }}
         uses: actions/cache@v3
         with:
-          path: ~/.cache
-          key: ${{ runner.os }}-cypress-
-          restore-keys: |
-            ${{ runner.os }}-cypress-
-            ${{ runner.os }}-
+          path: ~/.cache/Cypress
+          key: ${{ runner.os }}-cypress
 
       - name: Install Dependencies
         if: ${{ steps.check-build.outputs.build == 'strawberry' }}
@@ -130,6 +127,13 @@ jobs:
           TYPE: ui
           DB: mariadb
 
+      - name: Verify yarn.lock
+        if: ${{ steps.check-build.outputs.build == 'strawberry' }}
+        run: |
+          cd ~/frappe-bench/apps/frappe
+          yarn install --immutable --immutable-cache --check-cache
+          git diff --exit-code yarn.lock
+
       - name: Instrument Source Code
         if: ${{ steps.check-build.outputs.build == 'strawberry' }}
         run: cd ~/frappe-bench/apps/frappe/ && npx nyc instrument -x 'frappe/public/dist/**' -x 'frappe/public/js/lib/**' -x '**/*.bundle.js' --compact=false --in-place frappe
@@ -140,11 +144,16 @@ jobs:
 
       - name: Site Setup
         if: ${{ steps.check-build.outputs.build == 'strawberry' }}
-        run: cd ~/frappe-bench/ && bench --site test_site execute frappe.utils.install.complete_setup_wizard
+        run: |
+          cd ~/frappe-bench/
+          bench --site test_site execute frappe.utils.install.complete_setup_wizard
+          bench --site test_site execute frappe.tests.ui_test_helpers.create_test_user
 
       - name: UI Tests
         if: ${{ steps.check-build.outputs.build == 'strawberry' }}
-        run: cd ~/frappe-bench/ && bench --site test_site run-ui-tests frappe --headless --parallel --ci-build-id $GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT
+        run: |
+          cd ~/frappe-bench/
+          bench --site test_site run-ui-tests frappe --headless --parallel --ci-build-id $GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT -- --record
         env:
           CYPRESS_RECORD_KEY: 4a48f41c-11b3-425b-aa88-c58048fa69eb
 

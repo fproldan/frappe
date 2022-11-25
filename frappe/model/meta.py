@@ -40,21 +40,31 @@ from frappe.model.workflow import get_workflow_name
 from frappe.modules import load_doctype_module
 from frappe.utils import cast, cint, cstr
 
+DEFAULT_FIELD_LABELS = {
+	"name": lambda: _("ID"),
+	"creation": lambda: _("Created On"),
+	"docstatus": lambda: _("Document Status"),
+	"idx": lambda: _("Index"),
+	"modified": lambda: _("Last Updated On"),
+	"modified_by": lambda: _("Last Updated By"),
+	"owner": lambda: _("Created By"),
+	"_user_tags": lambda: _("Tags"),
+	"_liked_by": lambda: _("Liked By"),
+	"_comments": lambda: _("Comments"),
+	"_assign": lambda: _("Assigned To"),
+}
+
 
 def get_meta(doctype, cached=True) -> "Meta":
-	if cached:
-		if not frappe.local.meta_cache.get(doctype):
-			meta = frappe.cache().hget("meta", doctype)
-			if meta:
-				meta = Meta(meta)
-			else:
-				meta = Meta(doctype)
-				frappe.cache().hset("meta", doctype, meta.as_dict())
-			frappe.local.meta_cache[doctype] = meta
+	if not cached:
+		return Meta(doctype)
 
-		return frappe.local.meta_cache[doctype]
-	else:
-		return load_meta(doctype)
+	if meta := frappe.cache().hget("doctype_meta", doctype):
+		return meta
+
+	meta = Meta(doctype)
+	frappe.cache().hset("doctype_meta", doctype, meta)
+	return meta
 
 
 def load_meta(doctype):
@@ -86,7 +96,7 @@ def load_doctype_from_file(doctype):
 class Meta(Document):
 	_metaclass = True
 	default_fields = list(default_fields)[1:]
-	special_doctypes = (
+	special_doctypes = {
 		"DocField",
 		"DocPerm",
 		"DocType",
@@ -94,24 +104,25 @@ class Meta(Document):
 		"DocType Action",
 		"DocType Link",
 		"DocType State",
-	)
+	}
 	standard_set_once_fields = [
 		frappe._dict(fieldname="creation", fieldtype="Datetime"),
 		frappe._dict(fieldname="owner", fieldtype="Data"),
 	]
 
 	def __init__(self, doctype):
-		self._fields = {}
+		# from cache
 		if isinstance(doctype, dict):
 			super().__init__(doctype)
+			self.init_field_map()
+			return
 
-		elif isinstance(doctype, Document):
+		if isinstance(doctype, Document):
 			super().__init__(doctype.as_dict())
-			self.process()
-
 		else:
 			super().__init__("DocType", doctype)
-			self.process()
+
+		self.process()
 
 	def load_from_db(self):
 		try:
@@ -126,11 +137,16 @@ class Meta(Document):
 		# don't process for special doctypes
 		# prevent's circular dependency
 		if self.name in self.special_doctypes:
+			self.init_field_map()
 			return
 
-		self.add_custom_fields()
+		has_custom_fields = self.add_custom_fields()
 		self.apply_property_setters()
-		self.sort_fields()
+		self.init_field_map()
+
+		if has_custom_fields:
+			self.sort_fields()
+
 		self.get_valid_columns()
 		self.set_custom_permissions()
 		self.add_custom_links_and_actions()
@@ -233,36 +249,24 @@ class Meta(Document):
 
 	def get_field(self, fieldname):
 		"""Return docfield from meta"""
-		if not self._fields:
-			for f in self.get("fields"):
-				self._fields[f.fieldname] = f
 
 		return self._fields.get(fieldname)
 
 	def has_field(self, fieldname):
 		"""Returns True if fieldname exists"""
-		return True if self.get_field(fieldname) else False
+
+		return fieldname in self._fields
 
 	def get_label(self, fieldname):
 		"""Get label of the given fieldname"""
-		df = self.get_field(fieldname)
-		if df:
-			label = df.label
-		else:
-			label = {
-				"name": _("ID"),
-				"creation": _("Created On"),
-				"docstatus": _("Document Status"),
-				"idx": _("Index"),
-				"modified": _("Last Updated On"),
-				"modified_by": _("Last Updated By"),
-				"owner": _("Created By"),
-				"_user_tags": _("Tags"),
-				"_liked_by": _("Liked By"),
-				"_comments": _("Comments"),
-				"_assign": _("Assigned To"),
-			}.get(fieldname) or _("No Label")
-		return label
+
+		if df := self.get_field(fieldname):
+			return df.label
+
+		if fieldname in DEFAULT_FIELD_LABELS:
+			return DEFAULT_FIELD_LABELS[fieldname]()
+
+		return _("No Label")
 
 	def get_options(self, fieldname):
 		return self.get_field(fieldname).options
@@ -273,11 +277,8 @@ class Meta(Document):
 		if df.fieldtype == "Link":
 			return df.options
 
-		elif df.fieldtype == "Dynamic Link":
+		if df.fieldtype == "Dynamic Link":
 			return self.get_options(df.options)
-
-		else:
-			return None
 
 	def get_search_fields(self):
 		search_fields = self.search_fields or "name"
@@ -321,7 +322,7 @@ class Meta(Document):
 		return list_fields
 
 	def get_custom_fields(self):
-		return [d for d in self.fields if d.get("is_custom_field")]
+		return [d for d in self.fields if getattr(d, "is_custom_field", False)]
 
 	def get_title_field(self):
 		"""Return the title field of this doctype,
@@ -340,8 +341,9 @@ class Meta(Document):
 
 	def is_translatable(self, fieldname):
 		"""Return true of false given a field"""
-		field = self.get_field(fieldname)
-		return field and field.translatable
+
+		if field := self.get_field(fieldname):
+			return field.translatable
 
 	def get_workflow(self):
 		return get_workflow_name(self.name)
@@ -349,28 +351,30 @@ class Meta(Document):
 	def get_naming_series_options(self) -> list[str]:
 		"""Get list naming series options."""
 
-		field = self.get_field("naming_series")
-		if field:
+		if field := self.get_field("naming_series"):
 			options = field.options or ""
-
 			return options.split("\n")
+
 		return []
 
 	def add_custom_fields(self):
 		if not frappe.db.table_exists("Custom Field"):
 			return
 
-		custom_fields = frappe.db.sql(
-			"""
-			SELECT * FROM `tabCustom Field`
-			WHERE dt = %s AND docstatus < 2
-		""",
-			(self.name,),
-			as_dict=1,
+		custom_fields = frappe.db.get_values(
+			"Custom Field",
+			filters={"dt": self.name},
+			fieldname="*",
+			as_dict=True,
+			order_by="idx",
 			update={"is_custom_field": 1},
 		)
 
+		if not custom_fields:
+			return
+
 		self.extend("fields", custom_fields)
+		return True
 
 	def apply_property_setters(self):
 		"""
@@ -450,44 +454,37 @@ class Meta(Document):
 
 				self.set(fieldname, new_list)
 
+	def init_field_map(self):
+		self._fields = {field.fieldname: field for field in self.fields}
+
 	def sort_fields(self):
-		"""sort on basis of insert_after"""
-		custom_fields = sorted(self.get_custom_fields(), key=lambda df: df.idx)
+		"""Sort custom fields on the basis of insert_after"""
 
-		if custom_fields:
-			newlist = []
+		field_order = []
+		insert_after_map = {}
 
-			# if custom field is at top
-			# insert_after is false
-			for c in list(custom_fields):
-				if not c.insert_after:
-					newlist.append(c)
-					custom_fields.pop(custom_fields.index(c))
+		for field in self.fields:
+			if not getattr(field, "is_custom_field", False):
+				field_order.append(field.fieldname)
 
-			# standard fields
-			newlist += [df for df in self.get("fields") if not df.get("is_custom_field")]
+			elif insert_after := getattr(field, "insert_after", None):
+				insert_after_map.setdefault(insert_after, []).append(field.fieldname)
 
-			newlist_fieldnames = [df.fieldname for df in newlist]
-			for i in range(2):
-				for df in list(custom_fields):
-					if df.insert_after in newlist_fieldnames:
-						cf = custom_fields.pop(custom_fields.index(df))
-						idx = newlist_fieldnames.index(df.insert_after)
-						newlist.insert(idx + 1, cf)
-						newlist_fieldnames.insert(idx + 1, cf.fieldname)
+			else:
+				# if custom field is at the top, insert after is None
+				field_order.insert(0, field.fieldname)
 
-				if not custom_fields:
-					break
+		if insert_after_map:
+			_update_field_order_based_on_insert_after(field_order, insert_after_map)
 
-			# worst case, add remaining custom fields to last
-			if custom_fields:
-				newlist += custom_fields
+		sorted_fields = []
 
-			# renum idx
-			for i, f in enumerate(newlist):
-				f.idx = i + 1
+		for idx, fieldname in enumerate(field_order, 1):
+			field = self._fields[fieldname]
+			field.idx = idx
+			sorted_fields.append(field)
 
-			self.fields = newlist
+		self.fields = sorted_fields
 
 	def set_custom_permissions(self):
 		"""Reset `permissions` with Custom DocPerm if exists"""
@@ -666,10 +663,17 @@ def is_single(doctype):
 
 
 def get_parent_dt(dt):
-	parent_dt = frappe.db.get_all(
-		"DocField", "parent", dict(fieldtype=["in", frappe.model.table_fields], options=dt), limit=1
+	if not frappe.is_table(dt):
+		return ""
+
+	return (
+		frappe.db.get_value(
+			"DocField",
+			{"fieldtype": ("in", frappe.model.table_fields), "options": dt},
+			"parent",
+		)
+		or ""
 	)
-	return parent_dt and parent_dt[0].parent or ""
 
 
 def set_fieldname(field_id, fieldname):
@@ -764,7 +768,7 @@ def trim_tables(doctype=None, dry_run=False, quiet=False):
 	if doctype:
 		filters["name"] = doctype
 
-	for doctype in frappe.db.get_all("DocType", filters=filters, pluck="name"):
+	for doctype in frappe.get_all("DocType", filters=filters, pluck="name"):
 		try:
 			dropped_columns = trim_table(doctype, dry_run=dry_run)
 			if dropped_columns:
@@ -801,3 +805,28 @@ def trim_table(doctype, dry_run=True):
 		frappe.db.sql_ddl(f"ALTER TABLE `tab{doctype}` {columns_to_remove}")
 
 	return DROPPED_COLUMNS
+
+
+def _update_field_order_based_on_insert_after(field_order, insert_after_map):
+	"""Update the field order based on insert_after_map"""
+
+	retry_field_insertion = True
+
+	while retry_field_insertion:
+		retry_field_insertion = False
+
+		for fieldname in list(insert_after_map):
+			if fieldname not in field_order:
+				continue
+
+			custom_field_index = field_order.index(fieldname)
+			for custom_field_name in insert_after_map.pop(fieldname):
+				custom_field_index += 1
+				field_order.insert(custom_field_index, custom_field_name)
+
+			retry_field_insertion = True
+
+	if insert_after_map:
+		# insert_after is an invalid fieldname, add these fields to the end
+		for fields in insert_after_map.values():
+			field_order.extend(fields)

@@ -393,10 +393,16 @@ frappe.ui.form.Form = class FrappeForm {
 			this.doc = frappe.get_doc(this.doctype, this.docname);
 
 			// check permissions
+			this.fetch_permissions();
 			if (!this.has_read_permission()) {
 				frappe.show_not_permitted(__(this.doctype) + " " + __(cstr(this.docname)));
 				return;
 			}
+
+			// update grids with new permissions
+			this.grids.forEach((table) => {
+				table.grid.refresh();
+			});
 
 			// read only (workflow)
 			this.read_only = frappe.workflow.is_read_only(this.doctype, this.docname);
@@ -439,6 +445,10 @@ frappe.ui.form.Form = class FrappeForm {
 				.toggleClass("cancelled-form", this.doc.docstatus === 2);
 
 			this.show_conflict_message();
+
+			if (frappe.boot.read_only) {
+				this.disable_form();
+			}
 		}
 	}
 
@@ -1147,11 +1157,12 @@ frappe.ui.form.Form = class FrappeForm {
 			.attr("target", "_blank");
 	}
 
-	has_read_permission() {
-		// get perm
-		var dt = this.parent_doctype ? this.parent_doctype : this.doctype;
+	fetch_permissions() {
+		let dt = this.parent_doctype ? this.parent_doctype : this.doctype;
 		this.perm = frappe.perm.get_perm(dt, this.doc);
+	}
 
+	has_read_permission() {
 		if (!this.perm[0].read) {
 			return 0;
 		}
@@ -1733,7 +1744,7 @@ frappe.ui.form.Form = class FrappeForm {
 		if (this.meta.title_field) {
 			return this.doc[this.meta.title_field];
 		} else {
-			return this.doc.name;
+			return String(this.doc.name);
 		}
 	}
 
@@ -1923,19 +1934,26 @@ frappe.ui.form.Form = class FrappeForm {
 	setup_docinfo_change_listener() {
 		let doctype = this.doctype;
 		let docname = this.docname;
-		let listener_name = `update_docinfo_for_${doctype}_${docname}`;
-		// to avoid duplicates
-		frappe.realtime.off(listener_name);
-		frappe.realtime.on(listener_name, ({ doc, key, action = "update" }) => {
-			let doc_list = frappe.model.docinfo[doctype][docname][key] || [];
-			if (action === "add") {
-				frappe.model.docinfo[doctype][docname][key].push(doc);
-			}
 
+		frappe.socketio.doc_subscribe(doctype, docname);
+		frappe.realtime.off("docinfo_update");
+		frappe.realtime.on("docinfo_update", ({ doc, key, action = "update" }) => {
+			if (
+				!doc.reference_doctype ||
+				!doc.reference_name ||
+				doc.reference_doctype !== doctype ||
+				doc.reference_name !== docname
+			) {
+				return;
+			}
+			let doc_list = frappe.model.docinfo[doctype][docname][key] || [];
 			let docindex = doc_list.findIndex((old_doc) => {
 				return old_doc.name === doc.name;
 			});
 
+			if (action === "add") {
+				frappe.model.docinfo[doctype][docname][key].push(doc);
+			}
 			if (docindex > -1) {
 				if (action === "update") {
 					frappe.model.docinfo[doctype][docname][key].splice(docindex, 1, doc);

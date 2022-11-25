@@ -141,8 +141,16 @@ frappe.ui.form.Layout = class Layout {
 				fieldname: "__details",
 			};
 			let first_tab = this.fields[1].fieldtype === "Tab Break" ? this.fields[1] : null;
+
 			if (!first_tab) {
-				this.fields.splice(1, 0, default_tab);
+				this.fields.splice(0, 0, default_tab);
+			} else {
+				// reshuffle __newname field to accomodate under 1st Tab Break
+				let newname_field = this.fields.find((df) => df.fieldname === "__newname");
+				if (newname_field && newname_field.get_status(this) === "Write") {
+					this.fields.splice(0, 1);
+					this.fields.splice(1, 0, newname_field);
+				}
 			}
 		}
 
@@ -191,9 +199,6 @@ frappe.ui.form.Layout = class Layout {
 			this.fields_dict[fieldname].$wrapper.remove();
 			this.fields_list.splice(this.fields_dict[fieldname], 1, fieldobj);
 			this.fields_dict[fieldname] = fieldobj;
-			if (this.frm) {
-				fieldobj.perm = this.frm.perm;
-			}
 			this.section.fields_list.splice(this.section.fields_dict[fieldname], 1, fieldobj);
 			this.section.fields_dict[fieldname] = fieldobj;
 			this.refresh_fields([df]);
@@ -207,9 +212,6 @@ frappe.ui.form.Layout = class Layout {
 		const fieldobj = this.init_field(df, render);
 		this.fields_list.push(fieldobj);
 		this.fields_dict[df.fieldname] = fieldobj;
-		if (this.frm) {
-			fieldobj.perm = this.frm.perm;
-		}
 
 		this.section.fields_list.push(fieldobj);
 		this.section.fields_dict[df.fieldname] = fieldobj;
@@ -439,11 +441,6 @@ frappe.ui.form.Layout = class Layout {
 				fieldobj.df =
 					frappe.meta.get_docfield(me.doc.doctype, fieldobj.df.fieldname, me.doc.name) ||
 					fieldobj.df;
-
-				// on form change, permissions can change
-				if (me.frm) {
-					fieldobj.perm = me.frm.perm;
-				}
 			}
 			refresh && fieldobj.df && fieldobj.refresh && fieldobj.refresh();
 		}

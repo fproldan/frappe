@@ -325,7 +325,7 @@ class DocType(Document):
 		"""Change the timestamp of parent DocType if the current one is a child to clear caches."""
 		if frappe.flags.in_import:
 			return
-		parent_list = frappe.db.get_all(
+		parent_list = frappe.get_all(
 			"DocField", "parent", dict(fieldtype=["in", frappe.model.table_fields], options=self.name)
 		)
 		for p in parent_list:
@@ -413,10 +413,6 @@ class DocType(Document):
 
 		if not frappe.flags.in_install and hasattr(self, "before_update"):
 			self.sync_global_search()
-
-		# clear from local cache
-		if self.name in frappe.local.meta_cache:
-			del frappe.local.meta_cache[self.name]
 
 		clear_linked_doctype_cache()
 
@@ -1198,6 +1194,9 @@ def validate_fields(meta):
 			frappe.throw(_("Precision should be between 1 and 6"))
 
 	def check_unique_and_text(docname, d):
+		if meta.is_virtual:
+			return
+
 		if meta.issingle:
 			d.unique = 0
 			d.search_index = 0

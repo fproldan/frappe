@@ -12,15 +12,23 @@ datetime_like_types = (datetime.datetime, datetime.date, datetime.time, datetime
 
 
 class FrappeTestCase(unittest.TestCase):
-	"""Base test class for Frappe tests."""
+	"""Base test class for Frappe tests.
+
+
+	If you specify `setUpClass` then make sure to call `super().setUpClass`
+	otherwise this class will become ineffective.
+	"""
+
+	TEST_SITE = "test_site"
 
 	SHOW_TRANSACTION_COMMIT_WARNINGS = False
 
 	@classmethod
 	def setUpClass(cls) -> None:
+		cls.TEST_SITE = getattr(frappe.local, "site", None) or cls.TEST_SITE
+		cls.ADMIN_PASSWORD = frappe.get_conf(cls.TEST_SITE).admin_password
 		# flush changes done so far to avoid flake
 		frappe.db.commit()
-		frappe.db.begin()
 		if cls.SHOW_TRANSACTION_COMMIT_WARNINGS:
 			frappe.db.add_before_commit(_commit_watcher)
 
@@ -59,6 +67,23 @@ class FrappeTestCase(unittest.TestCase):
 		else:
 			self.assertEqual(expected, actual, msg=msg)
 
+	@contextmanager
+	def assertQueryCount(self, count):
+		queries = []
+
+		def _sql_with_count(*args, **kwargs):
+			ret = orig_sql(*args, **kwargs)
+			queries.append(frappe.db.last_query)
+			return ret
+
+		try:
+			orig_sql = frappe.db.sql
+			frappe.db.sql = _sql_with_count
+			yield
+			self.assertLessEqual(len(queries), count, msg="Queries executed: " + "\n\n".join(queries))
+		finally:
+			frappe.db.sql = orig_sql
+
 
 def _commit_watcher():
 	import traceback
@@ -83,7 +108,7 @@ def _restore_thread_locals(flags):
 	frappe.local.conf = frappe._dict(frappe.get_site_config())
 	frappe.local.cache = {}
 	frappe.local.lang = "en"
-	frappe.local.lang_full_dict = None
+	frappe.local.preload_assets = {"style": [], "script": []}
 
 
 @contextmanager

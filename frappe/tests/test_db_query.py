@@ -1,7 +1,6 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: MIT. See LICENSE
 import datetime
-import unittest
 
 import frappe
 from frappe.core.page.permission_manager.permission_manager import add, reset, update
@@ -11,12 +10,13 @@ from frappe.handler import execute_cmd
 from frappe.model.db_query import DatabaseQuery
 from frappe.permissions import add_user_permission, clear_user_permissions_for_doctype
 from frappe.query_builder import Column
+from frappe.tests.utils import FrappeTestCase
 from frappe.utils.testutils import add_custom_field, clear_custom_fields
 
 test_dependencies = ["User", "Blog Post", "Blog Category", "Blogger"]
 
 
-class TestReportview(unittest.TestCase):
+class TestReportview(FrappeTestCase):
 	def setUp(self):
 		frappe.set_user("Administrator")
 
@@ -42,7 +42,7 @@ class TestReportview(unittest.TestCase):
 			content="test",
 			seen_by=[{"user": "Administrator"}],
 		).insert()
-		result = frappe.db.get_all(
+		result = frappe.get_all(
 			"Note",
 			filters={"name": note.name},
 			fields=["name", "seen_by.user as seen_by"],
@@ -55,7 +55,7 @@ class TestReportview(unittest.TestCase):
 		todo = frappe.get_doc(
 			doctype="ToDo", description="Test ToDo", allocated_to="Administrator"
 		).insert()
-		result = frappe.db.get_all(
+		result = frappe.get_all(
 			"ToDo",
 			filters={"name": todo.name},
 			fields=["name", "allocated_to.email as allocated_user_email"],
@@ -744,6 +744,15 @@ class TestReportview(unittest.TestCase):
 		)[0]
 
 		self.assertTrue(dashboard_settings)
+
+	def test_coalesce_with_in_ops(self):
+		self.assertNotIn("ifnull", frappe.get_all("User", {"name": ("in", ["a", "b"])}, run=0))
+		self.assertIn("ifnull", frappe.get_all("User", {"name": ("in", ["a", None])}, run=0))
+		self.assertIn("ifnull", frappe.get_all("User", {"name": ("in", ["a", ""])}, run=0))
+		self.assertIn("ifnull", frappe.get_all("User", {"name": ("in", [])}, run=0))
+		self.assertIn("ifnull", frappe.get_all("User", {"name": ("not in", ["a"])}, run=0))
+		self.assertIn("ifnull", frappe.get_all("User", {"name": ("not in", [])}, run=0))
+		self.assertIn("ifnull", frappe.get_all("User", {"name": ("not in", [""])}, run=0))
 
 
 def add_child_table_to_blog_post():

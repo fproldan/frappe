@@ -59,8 +59,8 @@ user_cache_keys = (
 )
 
 doctype_cache_keys = (
-	"meta",
-	"form_meta",
+	"doctype_meta",
+	"doctype_form_meta",
 	"table_columns",
 	"last_modified",
 	"linked_doctypes",
@@ -117,9 +117,6 @@ def clear_doctype_cache(doctype=None):
 	clear_controller_cache(doctype)
 	cache = frappe.cache()
 
-	if getattr(frappe.local, "meta_cache") and (doctype in frappe.local.meta_cache):
-		del frappe.local.meta_cache[doctype]
-
 	for key in ("is_table", "doctype_modules", "document_cache"):
 		cache.delete_value(key)
 
@@ -133,11 +130,17 @@ def clear_doctype_cache(doctype=None):
 		clear_single(doctype)
 
 		# clear all parent doctypes
-
-		for dt in frappe.db.get_all(
+		for dt in frappe.get_all(
 			"DocField", "parent", dict(fieldtype=["in", frappe.model.table_fields], options=doctype)
 		):
 			clear_single(dt.parent)
+
+		# clear all parent doctypes
+		if not frappe.flags.in_install:
+			for dt in frappe.get_all(
+				"Custom Field", "dt", dict(fieldtype=["in", frappe.model.table_fields], options=doctype)
+			):
+				clear_single(dt.dt)
 
 		# clear all notifications
 		delete_notification_count_for(doctype)

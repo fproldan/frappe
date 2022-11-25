@@ -75,7 +75,7 @@ class WebsiteTheme(Document):
 			self.delete_old_theme_files(folder_path)
 
 		# add a random suffix
-		suffix = frappe.generate_hash("Website Theme", 8) if self.custom else "style"
+		suffix = frappe.generate_hash(length=8) if self.custom else "style"
 		file_name = frappe.scrub(self.name) + "_" + suffix + ".css"
 		output_path = join_path(folder_path, file_name)
 
@@ -133,9 +133,9 @@ class WebsiteTheme(Document):
 
 
 def get_active_theme() -> Optional["WebsiteTheme"]:
-	if website_theme := frappe.db.get_single_value("Website Settings", "website_theme"):
+	if website_theme := frappe.get_website_settings("website_theme"):
 		try:
-			return frappe.get_doc("Website Theme", website_theme)
+			return frappe.get_cached_doc("Website Theme", website_theme)
 		except frappe.DoesNotExistError:
 			pass
 

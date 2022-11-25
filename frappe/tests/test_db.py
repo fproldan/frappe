@@ -3,7 +3,6 @@
 
 import datetime
 import inspect
-import unittest
 from math import ceil
 from random import choice
 from unittest.mock import patch
@@ -12,16 +11,17 @@ import frappe
 from frappe.core.utils import find
 from frappe.custom.doctype.custom_field.custom_field import create_custom_field
 from frappe.database import savepoint
-from frappe.database.database import Database
+from frappe.database.database import Database, get_query_execution_timeout
 from frappe.database.utils import FallBackDateTimeStr
 from frappe.query_builder import Field
 from frappe.query_builder.functions import Concat_ws
 from frappe.tests.test_query_builder import db_type_is, run_only_if
-from frappe.utils import add_days, cint, now, random_string
+from frappe.tests.utils import FrappeTestCase
+from frappe.utils import add_days, cint, now, random_string, set_request
 from frappe.utils.testutils import clear_custom_fields
 
 
-class TestDB(unittest.TestCase):
+class TestDB(FrappeTestCase):
 	def test_datetime_format(self):
 		now_str = now()
 		self.assertEqual(frappe.db.format_datetime(None), FallBackDateTimeStr)
@@ -35,6 +35,34 @@ class TestDB(unittest.TestCase):
 
 	def test_get_database_size(self):
 		self.assertIsInstance(frappe.db.get_database_size(), (float, int))
+
+	def test_db_statement_execution_timeout(self):
+		frappe.db.set_execution_timeout(2)
+		# Setting 0 means no timeout.
+		self.addCleanup(frappe.db.set_execution_timeout, 0)
+
+		try:
+			savepoint = "statement_timeout"
+			frappe.db.savepoint(savepoint)
+			frappe.db.multisql(
+				{
+					"mariadb": "select sleep(10)",
+					"postgres": "select pg_sleep(10)",
+				}
+			)
+		except Exception as e:
+			self.assertTrue(frappe.db.is_statement_timeout(e), f"exepcted {e} to be timeout error")
+			frappe.db.rollback(save_point=savepoint)
+		else:
+			frappe.db.rollback(save_point=savepoint)
+			self.fail("Long running queries not timing out")
+
+	@patch.dict(frappe.conf, {"http_timeout": 20, "enable_db_statement_timeout": 1})
+	def test_db_timeout_computation(self):
+		set_request(method="GET", path="/")
+		self.assertEqual(get_query_execution_timeout(), 30)
+		frappe.local.request = None
+		self.assertEqual(get_query_execution_timeout(), 0)
 
 	def test_get_value(self):
 		self.assertEqual(frappe.db.get_value("User", {"name": ["=", "Administrator"]}), "Administrator")
@@ -460,6 +488,14 @@ class TestDB(unittest.TestCase):
 			# recover transaction to continue other tests
 			raise Exception
 
+	def test_read_only_errors(self):
+		frappe.db.rollback()
+		frappe.db.begin(read_only=True)
+		self.addCleanup(frappe.db.rollback)
+
+		with self.assertRaises(frappe.InReadOnlyMode):
+			frappe.db.set_value("User", "Administrator", "full_name", "Haxor")
+
 	def test_exists(self):
 		dt, dn = "User", "Administrator"
 		self.assertEqual(frappe.db.exists(dt, dn, cache=True), dn)
@@ -559,7 +595,7 @@ class TestDB(unittest.TestCase):
 
 
 @run_only_if(db_type_is.MARIADB)
-class TestDDLCommandsMaria(unittest.TestCase):
+class TestDDLCommandsMaria(FrappeTestCase):
 	test_table_name = "TestNotes"
 
 	def setUp(self) -> None:
@@ -621,9 +657,10 @@ class TestDDLCommandsMaria(unittest.TestCase):
 		self.assertEqual(len(indexs_in_table), 2)
 
 
-class TestDBSetValue(unittest.TestCase):
+class TestDBSetValue(FrappeTestCase):
 	@classmethod
 	def setUpClass(cls):
+		super().setUpClass()
 		cls.todo1 = frappe.get_doc(doctype="ToDo", description="test_set_value 1").insert()
 		cls.todo2 = frappe.get_doc(doctype="ToDo", description="test_set_value 2").insert()
 
@@ -725,7 +762,7 @@ class TestDBSetValue(unittest.TestCase):
 			frappe.db.get_value("ToDo", todo.name, ["modified", "modified_by"]),
 		)
 
-	def test_for_update(self):
+	def test_set_value(self):
 		self.todo1.reload()
 
 		with patch.object(Database, "sql") as sql_called:
@@ -736,28 +773,23 @@ class TestDBSetValue(unittest.TestCase):
 				f"{self.todo1.description}-edit by `test_for_update`",
 			)
 			first_query = sql_called.call_args_list[0].args[0]
-			second_query = sql_called.call_args_list[1].args[0]
 
-			self.assertTrue(sql_called.call_count == 2)
-			self.assertTrue("FOR UPDATE" in first_query)
 			if frappe.conf.db_type == "postgres":
 				from frappe.database.postgres.database import modify_query
 
-				self.assertTrue(modify_query("UPDATE `tabToDo` SET") in second_query)
+				self.assertTrue(modify_query("UPDATE `tabToDo` SET") in first_query)
 			if frappe.conf.db_type == "mariadb":
-				self.assertTrue("UPDATE `tabToDo` SET" in second_query)
+				self.assertTrue("UPDATE `tabToDo` SET" in first_query)
 
 	def test_cleared_cache(self):
 		self.todo2.reload()
+		frappe.get_cached_doc(self.todo2.doctype, self.todo2.name)  # init cache
 
-		with patch.object(frappe, "clear_document_cache") as clear_cache:
-			frappe.db.set_value(
-				self.todo2.doctype,
-				self.todo2.name,
-				"description",
-				f"{self.todo2.description}-edit by `test_cleared_cache`",
-			)
-			clear_cache.assert_called()
+		description = f"{self.todo2.description}-edit by `test_cleared_cache`"
+
+		frappe.db.set_value(self.todo2.doctype, self.todo2.name, "description", description)
+		cached_doc = frappe.get_cached_doc(self.todo2.doctype, self.todo2.name)
+		self.assertEqual(cached_doc.description, description)
 
 	def test_update_alias(self):
 		args = (self.todo1.doctype, self.todo1.name, "description", "Updated by `test_update_alias`")
@@ -782,7 +814,7 @@ class TestDBSetValue(unittest.TestCase):
 
 
 @run_only_if(db_type_is.POSTGRES)
-class TestDDLCommandsPost(unittest.TestCase):
+class TestDDLCommandsPost(FrappeTestCase):
 	test_table_name = "TestNotes"
 
 	def setUp(self) -> None:
@@ -891,7 +923,7 @@ class TestDDLCommandsPost(unittest.TestCase):
 
 
 @run_only_if(db_type_is.POSTGRES)
-class TestTransactionManagement(unittest.TestCase):
+class TestTransactionManagement(FrappeTestCase):
 	def test_create_proper_transactions(self):
 		def _get_transaction_id():
 			return frappe.db.sql("select txid_current()", pluck=True)

@@ -41,7 +41,7 @@ def get_modules_from_app(app):
 		'Healthcare', 'Setup', 'Manufacturing', 'Restaurant', 'Hotels', 'Communication', 'E-commerce',
 		'Core', 'Email', 'Geo', 'Desk', 'Printing', 'Contacts', 'Data Migration', 'Chat', 'Social',
 		'ERPNext Integrations', 'Frappe Chat', 'Zenoti', 'unicommerce', 'Amazon', 'Argentina',
-		'Custom', 'Portal', 'Ecommerce', 'Workflow', 'Ecommerce Integrations', 'shopify'
+		'Custom', 'Portal', 'Ecommerce', 'Workflow', 'Ecommerce Integrations', 'shopify', 'Woocommerce', 'Tiendanube', 'Mercadolibre'
 	]
 	return [m for m in frappe.get_all('Module Def',
 		filters={'app_name': app},

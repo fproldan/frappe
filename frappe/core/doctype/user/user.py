@@ -106,6 +106,7 @@ class User(Document):
 	def on_update(self):
 		# clear new password
 		self.validate_user_limit()
+		self.validate_usuarios_reducidos_limit()
 		self.share_with_self()
 		clear_notifications(user=self.name)
 		frappe.clear_cache(user=self.name)
@@ -626,7 +627,30 @@ class User(Document):
 			total_users += 1
 
 		if total_users > limits.users:
-			frappe.throw('Lo sentimos, ha alcanzado el límite máximo de <b>usuarios</b> para su suscripción. Puede desactivar un usuario existente o contactar a <a href="https://diamo.com.ar" target="_blank">soporte</a> para descubrir cómo añadir más <b>usuarios</b>.', MaxUsersReachedError)
+			frappe.throw('Lo sentimos, ha alcanzado el límite máximo de <b>usuarios</b> para su suscripción. Puede desactivar un usuario existente o contactar a <a href="https://diamo.com.ar" target="_blank">soporte</a> para descubrir cómo añadir más <b>usuarios</b>.')
+
+	def validate_usuarios_reducidos_limit(self):
+		if self.user_type not in frappe.get_hooks('user_types_reducidos'):
+			return
+
+		if not self.enabled:
+			# don't validate max users when saving a disabled user
+			return
+
+		limits = get_limits()
+		if frappe.scrub(self.user_type) not in limits.keys():
+			# no limits defined
+			return
+
+		total_users = get_total_users(self.user_type)
+		if self.is_new():
+			# get_total_users gets existing users in database
+			# a new record isn't inserted yet, so adding 1
+			total_users += 1
+
+		if total_users > limits.get(frappe.scrub(self.user_type)):
+			frappe.throw(f'Lo sentimos, ha alcanzado el límite máximo de <b>{self.user_type}</b> para su suscripción. Puede desactivar un usuario existente o contactar a <a href="https://diamo.com.ar" target="_blank">soporte</a> para descubrir cómo añadir más <b>{self.user_type}</b>.')
+
 
 @frappe.whitelist()
 def get_timezones():
@@ -887,13 +911,13 @@ def user_query(doctype, txt, searchfield, start, page_len, filters):
 		dict(start=start, page_len=page_len, txt=txt)
 	)
 
-def get_total_users():
+def get_total_users(user_type='System User'):
 	"""Returns total no. of system users"""
 	return flt(frappe.db.sql('''SELECT SUM(`simultaneous_sessions`)
 		FROM `tabUser`
 		WHERE `enabled` = 1
-		AND `user_type` = 'System User'
-		AND `name` NOT IN ({})'''.format(", ".join(["%s"]*len(STANDARD_USERS))), STANDARD_USERS)[0][0])
+		AND `user_type` = '{}'
+		AND `name` NOT IN ({})'''.format(user_type, ", ".join(["%s"]*len(STANDARD_USERS))), STANDARD_USERS)[0][0])
 
 def get_system_users(exclude_users=None, limit=None):
 	if not exclude_users:

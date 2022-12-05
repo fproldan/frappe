@@ -42,8 +42,7 @@ class User(Document):
 
 	def onload(self):
 		from frappe.config import get_modules_from_all_apps
-		self.set_onload('all_modules',
-			[m.get("module_name") for m in get_modules_from_all_apps()])
+		self.set_onload('all_modules', [m.get("module_name") for m in get_modules_from_all_apps()])
 
 	def before_insert(self):
 		self.flags.in_insert = True
@@ -192,7 +191,9 @@ class User(Document):
 			'Guest': 'Website User'
 		}
 
-		if self.user_type and not frappe.get_cached_value('User Type', self.user_type, 'is_standard'):
+		user_types_reducidos = frappe.get_hooks("user_types_reducidos")
+
+		if self.user_type and not frappe.get_cached_value('User Type', self.user_type, 'is_standard') or frappe.get_cached_value('User Type', self.user_type, 'name') in user_types_reducidos:
 			if user_type_mapper.get(self.name):
 				self.user_type = user_type_mapper.get(self.name)
 			else:
@@ -211,6 +212,11 @@ class User(Document):
 				self.append('roles', {
 					'role': user_type_doc.role
 				})
+
+				if self.user_type in frappe.get_hooks("user_types_reducidos"):
+					self.append('roles', {
+						'role': "Herramientas Sistema"
+					})
 
 				frappe.msgprint(_('Role has been set as per the user type {0}')
 					.format(self.user_type), alert=True)
@@ -526,6 +532,8 @@ class User(Document):
 
 	def get_blocked_modules(self):
 		"""Returns list of modules blocked for that user"""
+		if self.user_type in frappe.get_hooks('user_types_reducidos'):
+			return []
 		return [d.module for d in self.block_modules] if self.block_modules else []
 
 	def validate_user_email_inbox(self):

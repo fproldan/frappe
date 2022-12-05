@@ -54,9 +54,9 @@ class UserType(Document):
 			frappe.throw(_('User does not have permission to create the new {0}')
 				.format(frappe.bold(_('User Type'))), title=_('Permission Error'))
 
-		if not limit:
-			frappe.throw(_('The limit has not set for the user type {0} in the site config file.')
-				.format(frappe.bold(self.name)), title=_('Set Limit'))
+		# if not limit:
+		# 	frappe.throw(_('The limit has not set for the user type {0} in the site config file.')
+		# 		.format(frappe.bold(self.name)), title=_('Set Limit'))
 
 		if self.user_doctypes and len(self.user_doctypes) > limit:
 			frappe.throw(_('The total number of user document types limit has been crossed.'),
@@ -72,9 +72,9 @@ class UserType(Document):
 			frappe.throw(_("The field {0} is mandatory")
 				.format(frappe.bold(_('Role'))))
 
-		if not frappe.db.get_value('Role', self.role, 'is_custom'):
-			frappe.throw(_("The role {0} should be a custom role.")
-				.format(frappe.bold(get_link_to_form('Role', self.role))))
+		# if not frappe.db.get_value('Role', self.role, 'is_custom'):
+		# 	frappe.throw(_("The role {0} should be a custom role.")
+		# 		.format(frappe.bold(get_link_to_form('Role', self.role))))
 
 	def update_users(self):
 		for row in frappe.get_all('User', filters = {'user_type': self.name}):

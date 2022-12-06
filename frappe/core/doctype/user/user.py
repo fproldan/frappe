@@ -534,13 +534,14 @@ class User(Document):
 	def get_blocked_modules(self):
 		"""Returns list of modules blocked for that user"""
 		if self.user_type in frappe.get_hooks('user_types_reducidos'):
-			return []
+			from erpnext.setup.install import get_user_types_data
+			uset_types_data = get_user_types_data()
+			return uset_types_data[self.user_type].get('blocked_modules') or []
 		return [d.module for d in self.block_modules] if self.block_modules else []
 
 	def validate_user_email_inbox(self):
 		""" check if same email account added in User Emails twice """
-
-		email_accounts = [ user_email.email_account for user_email in self.user_emails ]
+		email_accounts = [user_email.email_account for user_email in self.user_emails]
 		if len(email_accounts) != len(set(email_accounts)):
 			frappe.throw(_("Email Account added multiple times"))
 

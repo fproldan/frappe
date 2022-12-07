@@ -69,21 +69,6 @@
 		</div>
 	{% endif %}
 
-
-	{% if limits.usuario_contador %}
-	    {% var usuario_contador_percent = ((enabled_usuario_contador / limits.usuario_contador) * 100); %}
-		<div class="usage-info-section" style="margin: 30px;">
-			<h4>{{ "Usuario Contador" }}</h4>
-
-			<div class="progress" style="margin-bottom: 0;">
-				<div class="progress-bar progress-bar-{%= (usuario_contador_percent < 75 ? "success" : "warning") %}" style="width: {{ usuario_contador_percent }}%">
-				</div>
-			</div>
-
-			<p>{%= enabled_usuario_contador %} de {%= limits.usuario_contador %} habilitados</p>
-		</div>
-	{% endif %}
-
 	{% if limits.companies %}
 	    {% var companies_percent = ((enabled_companies / limits.companies) * 100); %}
 		<div class="usage-info-section" style="margin: 30px;">

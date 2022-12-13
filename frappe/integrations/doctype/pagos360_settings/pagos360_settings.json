@@ -41,7 +41,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-09-29 09:03:05.911628",
+ "modified": "2021-09-30 09:03:05.911628",
  "modified_by": "Administrator",
  "module": "Integrations",
  "name": "Pagos360 Settings",
@@ -76,6 +76,11 @@
    "role": "Accounts Manager",
    "share": 1,
    "write": 1
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "Usuario Contador"
   }
  ],
  "read_only": 1,

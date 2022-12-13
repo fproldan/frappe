@@ -140,7 +140,7 @@
  ],
  "in_create": 1,
  "links": [],
- "modified": "2021-09-29 09:43:39.581574",
+ "modified": "2021-09-30 09:43:39.581574",
  "modified_by": "Administrator",
  "module": "Integrations",
  "name": "Adhesion Pagos360",
@@ -181,6 +181,11 @@
    "role": "Accounts Manager",
    "share": 1,
    "write": 1
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "Usuario Contador"
   }
  ],
  "restrict_to_domain": "Pagos360",

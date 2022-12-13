@@ -80,7 +80,7 @@ frappe.RoleEditor = class {
 						`);
 					});
 				}
-				this.perm_dialog.set_title(role);
+				this.perm_dialog.set_title(__(role));
 				this.perm_dialog.show();
 			});
 	}

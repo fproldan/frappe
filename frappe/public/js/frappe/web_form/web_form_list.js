@@ -191,7 +191,7 @@ export default class WebFormList {
 		const actions = document.querySelector(".list-view-actions");
 
 		frappe.has_permission(this.doctype, "", "delete", () => {
-			this.addButton(actions, "delete-rows", "danger", true, "Delete", () =>
+			this.addButton(actions, "delete-rows", "danger", true, __("Delete"), () =>
 				this.delete_rows()
 			);
 		});
@@ -201,7 +201,7 @@ export default class WebFormList {
 			"new",
 			"primary",
 			false,
-			"New",
+			__("Nuevo"),
 			() => (window.location.href = window.location.pathname + "?new=1")
 		);
 	}
@@ -242,7 +242,7 @@ export default class WebFormList {
 	create_more() {
 		if (this.rows.length >= this.page_length) {
 			const footer = document.querySelector(".list-view-footer");
-			this.addButton(footer, "more", "secondary", false, "More", () =>  this.more());
+			this.addButton(footer, "more", "secondary", false, __("More"), () =>  this.more());
 		}
 	}
 

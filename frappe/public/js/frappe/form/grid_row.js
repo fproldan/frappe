@@ -235,7 +235,7 @@ export default class GridRow {
 				this.open_form_button = $(`
 					<div class="btn-open-row">
 						<a>${frappe.utils.icon('edit', 'xs')}</a>
-						<div class="hidden-xs edit-grid-row">${ __("Edit") }</div>
+						<div class="hidden-xs edit-grid-row">${ __("Editar") }</div>
 					</div>
 				`)
 					.appendTo($('<div class="col col-xs-1"></div>').appendTo(this.row))
@@ -381,7 +381,7 @@ export default class GridRow {
 		this.docfields.forEach(column => {
 			if (!column.hidden && show_field(column.fieldtype)) {
 				fields.push({
-					label: column.label,
+					label: __(column.label),
 					value: column.fieldname,
 					checked: selected_fields ? in_list(selected_fields, column.fieldname) : false
 				});

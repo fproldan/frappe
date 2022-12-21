@@ -354,7 +354,7 @@ def get_context(context):
 	def has_web_form_permission(self, doctype, name, ptype='read'):
 		if frappe.session.user=="Guest":
 			return False
-		return True
+
 		if self.apply_document_permissions:
 			return frappe.get_doc(doctype, name).has_permission()
 

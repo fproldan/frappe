@@ -120,7 +120,7 @@ export default class WebFormList {
 		this.columns = this.fields_list.map(df => {
 			return {
 				label: df.label,
-				fieldname: df.fieldname,
+				fieldname: __(df.fieldname),
 				fieldtype: df.fieldtype
 			};
 		});

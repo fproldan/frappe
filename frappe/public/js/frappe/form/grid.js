@@ -66,7 +66,7 @@ export default class Grid {
 							alt="Grid Empty State"
 							class="grid-empty-illustration"
 						>
-						${__("No Data")}
+						No hay datos
 					</div>
 				</div>
 			</div>
@@ -76,30 +76,30 @@ export default class Grid {
 						<button class="btn btn-xs btn-danger grid-remove-rows hidden"
 							style="margin-right: 4px;"
 							data-action="delete_rows">
-							${__("Delete")}
+							Eliminar
 						</button>
 						<button class="btn btn-xs btn-danger grid-remove-all-rows hidden"
 							style="margin-right: 4px;"
 							data-action="delete_all_rows">
-							${__("Delete All")}
+							Eliminar todo
 						</button>
 						<button class="grid-add-multiple-rows btn btn-xs btn-secondary hidden"
 							style="margin-right: 4px;">
-							${__("Add Multiple")}</a>
+							Añadir multiple</a>
 						</button>
 						<!-- hack to allow firefox include this in tabs -->
 						<button class="btn btn-xs btn-secondary grid-add-row">
-							${__("Añadir Fila")}
+							Añadir Fila
 						</button>
 					</div>
 					<div class="grid-pagination">
 					</div>
 					<div class="text-right">
 						<a href="#" class="grid-download btn btn-xs btn-secondary hidden">
-							${__("Download")}
+							Descargar
 						</a>
 						<a href="#" class="grid-upload btn btn-xs btn-secondary hidden">
-							${__("Upload")}
+							Subir
 						</a>
 					</div>
 				</div>

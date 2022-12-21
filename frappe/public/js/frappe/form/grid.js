@@ -89,7 +89,7 @@ export default class Grid {
 						</button>
 						<!-- hack to allow firefox include this in tabs -->
 						<button class="btn btn-xs btn-secondary grid-add-row">
-							${__("Add Row")}
+							${__("Añadir Fila")}
 						</button>
 					</div>
 					<div class="grid-pagination">

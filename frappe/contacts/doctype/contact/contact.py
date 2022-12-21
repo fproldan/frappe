@@ -291,7 +291,6 @@ def get_contacts_linked_from(doctype, docname, fields=None):
 		'name': ('in', contact_names)
 	})
 
-
 def get_list_context(context=None):
 	return {
 		"title": _("Contacts"),

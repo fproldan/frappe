@@ -290,3 +290,35 @@ def get_contacts_linked_from(doctype, docname, fields=None):
 	return frappe.get_list('Contact', fields=fields, filters={
 		'name': ('in', contact_names)
 	})
+
+
+def get_list_context(context=None):
+	return {
+		"title": _("Contacts"),
+		"get_list": get_contacts_list,
+		"row_template": "templates/includes/address_row.html",
+		'no_breadcrumbs': True,
+	}
+
+def get_contacts_list(doctype, txt, filters, limit_start, limit_page_length = 20, order_by = None):
+	from frappe.www.list import get_list
+	user = frappe.session.user
+	ignore_permissions = True
+
+	if not filters: filters = []
+	filters.append(("Contact", "owner", "=", user))
+
+	return get_list(doctype, txt, filters, limit_start, limit_page_length, ignore_permissions=ignore_permissions)
+
+def has_website_permission(doc, ptype, user, verbose=False):
+	"""Returns true if there is a related lead or contact related to this document"""
+	contact_name = frappe.db.get_value("Contact", {"email_id": frappe.session.user})
+	if contact_name:
+		contact = frappe.get_doc('Contact', contact_name)
+		return contact.has_common_link(doc)
+
+		lead_name = frappe.db.get_value("Lead", {"email_id": frappe.session.user})
+		if lead_name:
+			return doc.has_link('Lead', lead_name)
+
+	return False

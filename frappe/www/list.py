@@ -82,8 +82,8 @@ def get_list_data(doctype, txt=None, limit_start=0, fields=None, cmd=None, limit
 
 	filters = prepare_filters(doctype, controller, kwargs)
 	list_context = get_list_context(frappe._dict(), doctype, web_form_name)
-	list_context.title_field = getattr(controller, 'website',
-		{}).get('page_title_field', meta.title_field or 'name')
+	print(doctype, list_context)
+	list_context.title_field = getattr(controller, 'website', {}).get('page_title_field', meta.title_field or 'name')
 
 	if list_context.filters:
 		filters.update(list_context.filters)
@@ -184,9 +184,9 @@ def get_list_context(context, doctype, web_form_name=None):
 
 	return list_context
 
-def get_list(doctype, txt, filters, limit_start, limit_page_length=20, ignore_permissions=False,
-	fields=None, order_by=None):
+def get_list(doctype, txt, filters, limit_start, limit_page_length=20, ignore_permissions=False, fields=None, order_by=None):
 	meta = frappe.get_meta(doctype)
+
 	if not filters:
 		filters = []
 

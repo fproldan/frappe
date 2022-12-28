@@ -43,6 +43,7 @@ frappe.ready(() => {
 	});
 
 	$(document).on("click", ".submit-discussion", (e) => {
+		alert('qweqwe')
 		submit_discussion(e);
 	});
 

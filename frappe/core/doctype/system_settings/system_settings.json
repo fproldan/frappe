@@ -512,11 +512,7 @@
  "icon": "fa fa-cog",
  "issingle": 1,
  "links": [],
-<<<<<<< HEAD
- "modified": "2022-08-16 12:32:23.736407",
-=======
- "modified": "2021-12-13 12:07:26.860735",
->>>>>>> d564b7b527 (revert: set amended docname to original docname-1)
+ "modified": "2022-08-17 12:32:23.736407",
  "modified_by": "Administrator",
  "module": "Core",
  "name": "System Settings",

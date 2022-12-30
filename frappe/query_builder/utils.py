@@ -7,6 +7,7 @@ from pypika import Query
 import frappe
 from .builder import MariaDB, Postgres
 
+from frappe.query_builder.terms import NamedParameterWrapper
 
 class db_type_is(Enum):
 	MARIADB = "mariadb"
@@ -26,10 +27,8 @@ class BuilderIdentificationFailed(Exception):
 
 def get_query_builder(type_of_db: str) -> Query:
 	"""[return the query builder object]
-
 	Args:
 		type_of_db (str): [string value of the db used]
-
 	Returns:
 		Query: [Query object]
 	"""
@@ -42,17 +41,24 @@ def get_attr(method_string):
 	methodname = method_string.split('.')[-1]
 	return getattr(import_module(modulename), methodname)
 
+def DocType(*args, **kwargs):
+	return frappe.qb.DocType(*args, **kwargs)
+
 def patch_query_execute():
 	"""Patch the Query Builder with helper execute method
 	This excludes the use of `frappe.db.sql` method while
 	executing the query object
 	"""
-
 	def execute_query(query, *args, **kwargs):
-		query = str(query)
+		query, params = prepare_query(query)
+		return frappe.db.sql(query, params, *args, **kwargs) # nosemgrep
+
+	def prepare_query(query):
+		params = {}
+		query = query.get_sql(param_wrapper = NamedParameterWrapper(params))
 		if frappe.flags.in_safe_exec and not query.lower().strip().startswith("select"):
 			raise frappe.PermissionError('Only SELECT SQL allowed in scripting')
-		return frappe.db.sql(query, *args, **kwargs)
+		return query, params
 
 	query_class = get_attr(str(frappe.qb).split("'")[1])
 	builder_class = get_type_hints(query_class._builder).get('return')
@@ -61,3 +67,4 @@ def patch_query_execute():
 		raise BuilderIdentificationFailed
 
 	builder_class.run = execute_query
+	builder_class.walk = prepare_query

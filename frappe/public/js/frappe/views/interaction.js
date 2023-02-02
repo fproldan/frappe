@@ -197,8 +197,8 @@ frappe.views.InteractionComposer = class InteractionComposer {
 		let me = this;
 		let values = this.dialog.get_values(true);
 		if (values) {
-			values["reference_doctype"] = me.frm.doc.doctype;
-			values["reference_document"] = me.frm.doc.name;
+			values["reference_doctype"] = me.reference_doctype || me.frm.doc.doctype;
+			values["reference_document"] = me.reference_document ||  me.frm.doc.name;
 		}
 
 		return values;

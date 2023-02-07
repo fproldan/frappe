@@ -52,7 +52,6 @@ frappe.views.InteractionComposer = class InteractionComposer {
 			{label:__("Reference"), fieldtype:"Select",
 				fieldname:"interaction_type", options: interaction_docs,
 				reqd: 1,
-				default: default_ref,
 				onchange: () => {
 					let values = me.get_values();
 					me.get_fields().forEach(field => {

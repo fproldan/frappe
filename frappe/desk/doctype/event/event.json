@@ -63,7 +63,7 @@
    "fieldname": "event_category",
    "fieldtype": "Select",
    "label": "Event Category",
-   "options": "Event\nMeeting\nCall\nSent/Received Email\nOther"
+   "options": "Event\nMeeting\nProg. Visita\nCall\nSent/Received Email\nOther"
   },
   {
    "fieldname": "event_type",
@@ -277,8 +277,7 @@
  "icon": "fa fa-calendar",
  "idx": 1,
  "links": [],
-
- "modified": "2021-11-18 05:06:24.881742",
+ "modified": "2021-11-18 06:06:24.881742",
  "modified_by": "Administrator",
  "module": "Desk",
  "name": "Event",

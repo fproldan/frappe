@@ -11,6 +11,7 @@ from openpyxl.utils import get_column_letter
 
 import frappe
 from frappe import _
+
 ILLEGAL_CHARACTERS_RE = re.compile(r'[\000-\010]|[\013-\014]|[\016-\037]')
 
 

@@ -24,6 +24,9 @@
   "phone",
   "mobile_no",
   "company_name",
+  "area",
+  "puesto",
+  "proceso",
   "image",
   "sb_00",
   "google_contacts",
@@ -250,6 +253,22 @@
    "fieldname": "is_po_so_contact",
    "fieldtype": "Check",
    "label": "Es contacto de OC/OV"
+  },
+  {
+   "fieldname": "area",
+   "fieldtype": "Data",
+   "label": "Area"
+  },
+  {
+   "fieldname": "puesto",
+   "fieldtype": "Data",
+   "label": "Puesto"
+  },
+  {
+   "default": "Ventas",
+   "fieldname": "proceso",
+   "fieldtype": "Data",
+   "label": "Proceso"
   }
  ],
  "icon": "fa fa-user",
@@ -257,7 +276,7 @@
  "image_field": "image",
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-09-23 11:50:21.026529",
+ "modified": "2023-04-04 22:19:14.101669",
  "modified_by": "Administrator",
  "module": "Contacts",
  "name": "Contact",
@@ -387,6 +406,7 @@
    "role": "All"
   }
  ],
+ "route": "app/doctype/Contact",
  "sort_field": "modified",
  "sort_order": "ASC"
 }

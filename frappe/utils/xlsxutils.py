@@ -13,6 +13,7 @@ import frappe
 from frappe import _
 from frappe.utils.html_utils import unescape_html
 
+
 ILLEGAL_CHARACTERS_RE = re.compile(r'[\000-\010]|[\013-\014]|[\016-\037]')
 
 
@@ -34,6 +35,7 @@ def make_xlsx(data, sheet_name, wb=None, column_widths=None):
 	for row in data:
 		clean_row = []
 		for item in row:
+			item = _(item)
 			if isinstance(item, str) and (sheet_name not in ['Data Import Template', 'Data Export']):
 				value = handle_html(item)
 			else:

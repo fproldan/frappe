@@ -10,6 +10,9 @@ from openpyxl.styles import Font
 from openpyxl.utils import get_column_letter
 
 import frappe
+from frappe import _
+from frappe.utils.html_utils import unescape_html
+
 
 ILLEGAL_CHARACTERS_RE = re.compile(r'[\000-\010]|[\013-\014]|[\016-\037]')
 
@@ -32,6 +35,7 @@ def make_xlsx(data, sheet_name, wb=None, column_widths=None):
 	for row in data:
 		clean_row = []
 		for item in row:
+			item = _(item)
 			if isinstance(item, str) and (sheet_name not in ['Data Import Template', 'Data Export']):
 				value = handle_html(item)
 			else:
@@ -51,19 +55,15 @@ def make_xlsx(data, sheet_name, wb=None, column_widths=None):
 
 
 def handle_html(data):
+	from html2text import HTML2Text
+
 	# return if no html tags found
 	data = frappe.as_unicode(data)
 
-	if '<' not in data:
-		return data
-	if '>' not in data:
+	if '<' not in data or '>' not in data:
 		return data
 
-	from html2text import HTML2Text
-
-	h = HTML2Text()
-	h.unicode_snob = True
-	h = h.unescape(data or "")
+	h = unescape_html(data or "")
 
 	obj = HTML2Text()
 	obj.ignore_links = True

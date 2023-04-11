@@ -178,9 +178,9 @@ def get_contact_details(contact):
 		"contact_phone": contact.get("phone"),
 		"contact_designation": contact.get("designation"),
 		"contact_department": contact.get("department"),
-		"area": contact.get("area"),
-		"puesto": contact.get("puesto"),
-		"proceso": contact.get("proceso"),
+		"area": contact.get("area") or '',
+		"puesto": contact.get("puesto")  or '',
+		"proceso": contact.get("proceso")  or '',
 	}
 	return out
 

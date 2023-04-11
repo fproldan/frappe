@@ -177,7 +177,10 @@ def get_contact_details(contact):
 		"contact_mobile": contact.get("mobile_no"),
 		"contact_phone": contact.get("phone"),
 		"contact_designation": contact.get("designation"),
-		"contact_department": contact.get("department")
+		"contact_department": contact.get("department"),
+		"area": contact.get("area"),
+		"puesto": contact.get("puesto"),
+		"proceso": contact.get("proceso"),
 	}
 	return out
 

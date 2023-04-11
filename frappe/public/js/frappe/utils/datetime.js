@@ -139,6 +139,10 @@ $.extend(frappe.datetime, {
 		return moment(d).format("YYYY-MM-DD HH:mm:ss");
 	},
 
+	get_datetime_as_string_es: function(d) {
+		return moment(d).format("DD/MM/YYYY HH:mm:ss");
+	},
+
 	user_to_str: function(val, only_time = false) {
 
 		var user_time_fmt = frappe.datetime.get_user_time_fmt();

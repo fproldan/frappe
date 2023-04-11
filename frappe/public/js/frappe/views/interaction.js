@@ -48,7 +48,6 @@ frappe.views.InteractionComposer = class InteractionComposer {
 	get_fields() {
 		let me = this;
 		let interaction_docs = Object.keys(get_doc_mappings());
-
 		let fields = [
 			{label:__("Reference"), fieldtype:"Select",
 				fieldname:"interaction_type", options: interaction_docs,
@@ -197,8 +196,8 @@ frappe.views.InteractionComposer = class InteractionComposer {
 		let me = this;
 		let values = this.dialog.get_values(true);
 		if (values) {
-			values["reference_doctype"] = me.frm.doc.doctype;
-			values["reference_document"] = me.frm.doc.name;
+			values["reference_doctype"] = me.reference_doctype || me.frm.doc.doctype;
+			values["reference_document"] = me.reference_document ||  me.frm.doc.name;
 		}
 
 		return values;

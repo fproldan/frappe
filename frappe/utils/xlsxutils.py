@@ -34,6 +34,7 @@ def make_xlsx(data, sheet_name, wb=None, column_widths=None):
 	for row in data:
 		clean_row = []
 		for item in row:
+			item = _(item)
 			if isinstance(item, str) and (sheet_name not in ['Data Import Template', 'Data Export']):
 				value = handle_html(item)
 			else:

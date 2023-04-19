@@ -7,8 +7,8 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.desk.form.document_follow import follow_document
-from frappe.desk.doctype.notification_log.notification_log import enqueue_create_notification,\
-	get_title, get_title_html
+from frappe.desk.doctype.notification_log.notification_log import enqueue_create_notification, get_title, get_title_html
+from frappe.utils import now_datetime
 import frappe.utils
 import frappe.share
 import json
@@ -25,6 +25,7 @@ def get(args=None):
 		reference_name = args.get('name'),
 		status = ('!=', 'Cancelled')
 	), limit=5)
+
 
 @frappe.whitelist()
 def add(args=None):
@@ -51,6 +52,16 @@ def add(args=None):
 			"status": "Open",
 			"owner": assign_to
 		}
+
+		if args['doctype'] in ['Lead', 'Quotation']:
+			frappe.get_doc({
+				"doctype": "Asignaciones",
+				"owner": assign_to,
+				"reference_type": args['doctype'],
+				"reference_name": args['name'],
+				"date_from": now_datetime(),
+				"assigned_by": args.get('assigned_by', frappe.session.user),
+			}).insert(ignore_permissions=True)
 
 		if frappe.get_all("ToDo", filters=filters):
 			users_with_duplicate_todo.append(assign_to)
@@ -125,6 +136,21 @@ def close_all_assignments(doctype, name):
 
 @frappe.whitelist()
 def remove(doctype, name, assign_to):
+	if doctype in ['Lead', 'Quotation']:
+		filters = {
+			"reference_type": doctype,
+			"reference_name": name,
+			"owner": assign_to,
+		}
+		asignaciones = frappe.get_all("Asignaciones", filters=filters, fields='name,to')
+
+		for asignacion in asignaciones:
+			if asignacion['to'] is not None:
+				continue
+
+			frappe.db.set_value("Asignaciones", asignacion['name'], 'date_to', now_datetime())
+			frappe.db.commit()
+
 	return set_status(doctype, name, assign_to, status="Cancelled")
 
 def set_status(doctype, name, assign_to, status="Cancelled"):

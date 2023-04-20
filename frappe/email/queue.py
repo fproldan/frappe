@@ -373,7 +373,10 @@ def flush(from_test=False):
 		msgprint(_("Emails are muted"))
 		from_test = True
 
-	smtpserver_dict = frappe._dict()
+	try:
+		queued_jobs = set(get_jobs(site=frappe.local.site, key="job_name")[frappe.local.site])
+	except Exception:
+		queued_jobs = set()
 
 	for email in get_queue():
 
@@ -381,18 +384,18 @@ def flush(from_test=False):
 			break
 
 		if email.name:
-			smtpserver = smtpserver_dict.get(email.sender)
-			if not smtpserver:
-				smtpserver = SMTPServer()
-				smtpserver_dict[email.sender] = smtpserver
+			job_name = f"email_queue_sendmail_{email.name}"
 
 			if from_test:
-				send_one(email.name, smtpserver, auto_commit)
+				send_one(email.name, auto_commit)
 			else:
+				if job_name in queued_jobs:
+					frappe.logger().debug(f"Not queueing job {job_name} because it is in queue already")
+					continue
+			
 				send_one_args = {
-					'email': email.name,
-					'smtpserver': smtpserver,
-					'auto_commit': auto_commit,
+					"email": email.name,
+					"auto_commit": auto_commit,
 				}
 				enqueue(
 					method = 'frappe.email.queue.send_one',

@@ -7,32 +7,9 @@ import smtplib
 import email.utils
 import _socket, sys
 from frappe import _
+from frappe.email.oauth import Oauth
 from frappe.utils import cint, cstr, parse_addr
 
-def send(email, append_to=None, retry=1):
-	"""Deprecated: Send the message or add it to Outbox Email"""
-	def _send(retry):
-		try:
-			smtpserver = SMTPServer(append_to=append_to)
-
-			# validate is called in as_string
-			email_body = email.as_string()
-
-			smtpserver.sess.sendmail(email.sender, email.recipients + (email.cc or []), email_body)
-		except smtplib.SMTPSenderRefused:
-			frappe.throw(_("Invalid login or password"), title='Email Failed')
-			raise
-		except smtplib.SMTPRecipientsRefused:
-			frappe.msgprint(_("Invalid recipient address"), title='Email Failed')
-			raise
-		except (smtplib.SMTPServerDisconnected, smtplib.SMTPAuthenticationError):
-			if not retry:
-				raise
-			else:
-				retry = retry - 1
-				_send(retry)
-
-	_send(retry)
 
 def get_outgoing_email_account(raise_exception_not_set=True, append_to=None, sender=None):
 	"""Returns outgoing email account based on `append_to` or the default
@@ -60,11 +37,14 @@ def get_outgoing_email_account(raise_exception_not_set=True, append_to=None, sen
 
 		if not email_account and append_to:
 			# append_to is only valid when enable_incoming is checked
-			email_accounts = frappe.db.get_values("Email Account", {
-				"enable_outgoing": 1,
-				"enable_incoming": 1,
-				"append_to": append_to,
-			}, cache=True)
+			email_accounts = frappe.db.get_values(
+				"Email Account",
+				{
+					"enable_outgoing": 1,
+					"enable_incoming": 1,
+					"append_to": append_to,
+				},
+			)
 
 			if email_accounts:
 				_email_account = email_accounts[0]
@@ -92,7 +72,11 @@ def get_outgoing_email_account(raise_exception_not_set=True, append_to=None, sen
 		if email_account:
 			if email_account.enable_outgoing and not getattr(email_account, 'from_site_config', False):
 				raise_exception = True
-				if email_account.smtp_server in ['localhost','127.0.0.1'] or email_account.no_smtp_authentication:
+				if (
+					email_account.smtp_server in ["localhost", "127.0.0.1"]
+					or email_account.no_smtp_authentication
+					or email_account.auth_method == "OAuth"
+				):
 					raise_exception = False
 				email_account.password = email_account.get_password(raise_exception=raise_exception)
 			email_account.default_sender = email.utils.formataddr((email_account.name, email_account.get("email_id")))
@@ -156,7 +140,18 @@ def _get_email_account(filters):
 	return frappe.get_doc("Email Account", name) if name else None
 
 class SMTPServer:
-	def __init__(self, login=None, password=None, server=None, port=None, use_tls=None, use_ssl=None, append_to=None):
+	def __init__(
+		self,
+		login=None,
+		password=None,
+		server=None,
+		port=None,
+		use_tls=None,
+		use_ssl=None,
+		append_to=None,
+		use_oauth=0,
+		access_token=None,
+	):
 		# get defaults from mail settings
 
 		self._sess = None
@@ -171,7 +166,8 @@ class SMTPServer:
 			self.use_ssl = cint(use_ssl)
 			self.login = login
 			self.password = password
-
+			self.use_oauth = use_oauth
+			self.access_token = access_token
 		else:
 			self.setup_email_account(append_to)
 
@@ -194,6 +190,10 @@ class SMTPServer:
 			self.append_emails_to_sent_folder = self.email_account.append_emails_to_sent_folder
 			self.always_use_account_email_id_as_sender = cint(self.email_account.get("always_use_account_email_id_as_sender"))
 			self.always_use_account_name_as_sender_name = cint(self.email_account.get("always_use_account_name_as_sender_name"))
+
+			oauth_token = self.email_account.get_oauth_token()
+			self.use_oauth = self.email_account.auth_method == "OAuth"
+			self.access_token = oauth_token.get_password("access_token") if oauth_token else None
 
 	@property
 	def sess(self):
@@ -230,7 +230,10 @@ class SMTPServer:
 				self._sess.starttls()
 				self._sess.ehlo()
 
-			if self.login and self.password:
+			if self.use_oauth:
+				Oauth(self._sess, self.email_account, self.login, self.access_token).connect()
+
+			elif self.password:
 				ret = self._sess.login(str(self.login or ""), str(self.password or ""))
 
 				# check if logged correctly

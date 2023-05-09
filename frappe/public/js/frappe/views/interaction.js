@@ -49,6 +49,11 @@ frappe.views.InteractionComposer = class InteractionComposer {
 		let me = this;
 		let interaction_docs = Object.keys(get_doc_mappings());
 		let fields = [
+			{fieldtype: "Section Break"},
+			{label:__("CUIT"), fieldtype:"Data", fieldname:"cuit"},
+			{fieldtype: "Column Break"},
+			{label:__("Razon Social"), fieldtype:"Data", fieldname:"razon_social"},
+			{fieldtype: "Section Break"},
 			{label:__("Reference"), fieldtype:"Select",
 				fieldname:"interaction_type", options: interaction_docs,
 				reqd: 1,
@@ -64,23 +69,17 @@ frappe.views.InteractionComposer = class InteractionComposer {
 					me.get_event_categories();
 				}
 			},
-			{label:__("Category"), fieldtype:"Select",
-				fieldname:"category", options: "", hidden: 1},
-			{label:__("Public"), fieldtype:"Check",
-				fieldname:"public", default: "1"},
+			{label:__("Category"), fieldtype:"Select", fieldname:"category", options: "", hidden: 1},
+			{label:__("Public"), fieldtype:"Check", fieldname:"public", default: "1"},
 			{fieldtype: "Column Break"},
-			{label:__("Date"), fieldtype:"Datetime",
-				fieldname:"due_date"},
-			{label:__("Assigned To"), fieldtype:"Link",
-				fieldname:"assigned_to", options:"User"},
+			{label:__("Date"), fieldtype:"Datetime", fieldname:"due_date"},
+			{label:__("Assigned To"), fieldtype:"Link", fieldname:"assigned_to", options:"User"},
 			{fieldtype: "Section Break"},
-			{label:__("Summary"), fieldtype:"Data",
-				fieldname:"summary"},
+			{label:__("Summary"), fieldtype:"Data", fieldname:"summary"},
 			{fieldtype: "Section Break"},
 			{fieldtype:"Text Editor", fieldname:"description"},
 			{fieldtype: "Section Break"},
-			{label:__("Select Attachments"), fieldtype:"HTML",
-				fieldname:"select_attachments"}
+			{label:__("Select Attachments"), fieldtype:"HTML", fieldname:"select_attachments"}
 		];
 
 		return fields;
@@ -313,7 +312,9 @@ function get_doc_mappings() {
 				"description": "description",
 				"category": "event_category",
 				"due_date": "starts_on",
-				"public": "event_type"
+				"public": "event_type",
+				"cuit": "cuit",
+				"razon_social": "razon_social",
 			},
 			"reqd_fields": ["summary", "due_date"],
 			"hidden_fields": []
@@ -325,7 +326,9 @@ function get_doc_mappings() {
 				"due_date": "date",
 				"reference_doctype": "reference_type",
 				"reference_document": "reference_name",
-				"assigned_to": "owner"
+				"assigned_to": "owner",
+				"cuit": "cuit",
+				"razon_social": "razon_social",
 			},
 			"reqd_fields": ["description"],
 			"hidden_fields": ["public", "category"]

@@ -53,7 +53,7 @@ frappe.views.InteractionComposer = class InteractionComposer {
 			{label:__("CUIT"), fieldtype:"Data", fieldname:"cuit"},
 			{fieldtype: "Column Break"},
 			{label:__("Razon Social"), fieldtype:"Data", fieldname:"razon_social"},
-			{fieldtype: "Section Break"},
+			{fieldtype: "Section Break"}, // ,hidden: !me.cuit && !me.razon_social
 			{label:__("Reference"), fieldtype:"Select",
 				fieldname:"interaction_type", options: interaction_docs,
 				reqd: 1,

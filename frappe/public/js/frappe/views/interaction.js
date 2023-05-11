@@ -53,7 +53,17 @@ frappe.views.InteractionComposer = class InteractionComposer {
 			{label:__("CUIT"), fieldtype:"Data", fieldname:"cuit"},
 			{fieldtype: "Column Break"},
 			{label:__("Razon Social"), fieldtype:"Data", fieldname:"razon_social"},
-			{fieldtype: "Section Break"}, // ,hidden: !me.cuit && !me.razon_social
+			{
+				fieldtype: "Section Break",
+				depends_on: (state) => {
+					if (this.dialog) {
+						let cuit = this.dialog.get_value("cuit");
+						let razon_social = this.dialog.get_value("razon_social");
+						return cuit || razon_social;
+					}
+					return false;
+				}
+			}, // ,hidden: !me.cuit && !me.razon_social
 			{label:__("Reference"), fieldtype:"Select",
 				fieldname:"interaction_type", options: interaction_docs,
 				reqd: 1,
@@ -74,11 +84,41 @@ frappe.views.InteractionComposer = class InteractionComposer {
 			{fieldtype: "Column Break"},
 			{label:__("Date"), fieldtype:"Datetime", fieldname:"due_date"},
 			{label:__("Assigned To"), fieldtype:"Link", fieldname:"assigned_to", options:"User"},
-			{fieldtype: "Section Break"},
+			{
+				fieldtype: "Section Break",
+				depends_on: (state) => {
+					if (this.dialog) {
+						let cuit = this.dialog.get_value("cuit");
+						let razon_social = this.dialog.get_value("razon_social");
+						return cuit || razon_social;
+					}	
+					return false;
+				}
+			},
 			{label:__("Summary"), fieldtype:"Data", fieldname:"summary"},
-			{fieldtype: "Section Break"},
+			{
+				fieldtype: "Section Break",
+				depends_on: (state) => {
+					if (this.dialog) {
+						let cuit = this.dialog.get_value("cuit");
+						let razon_social = this.dialog.get_value("razon_social");
+						return cuit || razon_social;
+					}
+					return false;
+				}
+			},
 			{fieldtype:"Text Editor", fieldname:"description"},
-			{fieldtype: "Section Break"},
+			{
+				fieldtype: "Section Break",
+				depends_on: (state) => {
+					if (this.dialog) {
+						let cuit = this.dialog.get_value("cuit");
+						let razon_social = this.dialog.get_value("razon_social");
+						return cuit || razon_social;
+					}
+					return false;
+				}
+			},
 			{label:__("Select Attachments"), fieldtype:"HTML", fieldname:"select_attachments"}
 		];
 

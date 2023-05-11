@@ -8,6 +8,10 @@
  "email_append_to": 1,
  "engine": "InnoDB",
  "field_order": [
+  "section_break_1",
+  "cuit",
+  "column_break_3",
+  "razon_social",
   "details",
   "subject",
   "event_category",
@@ -46,6 +50,7 @@
  ],
  "fields": [
   {
+   "depends_on": "eval:doc.cuit || doc.razon_social",
    "fieldname": "details",
    "fieldtype": "Section Break",
    "label": "Details",
@@ -184,6 +189,7 @@
    "label": "Sunday"
   },
   {
+   "depends_on": "eval:doc.cuit || doc.razon_social",
    "fieldname": "section_break_8",
    "fieldtype": "Section Break"
   },
@@ -203,6 +209,7 @@
    "width": "300px"
   },
   {
+   "depends_on": "eval:doc.cuit || doc.razon_social",
    "fieldname": "participants",
    "fieldtype": "Section Break",
    "label": "Participants",
@@ -272,16 +279,33 @@
    "label": "Sender",
    "options": "Email",
    "read_only": 1
+  },
+  {
+   "fieldname": "section_break_1",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "cuit",
+   "fieldtype": "Data",
+   "label": "CUIT"
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "razon_social",
+   "fieldtype": "Data",
+   "label": "Razon Social"
   }
  ],
  "icon": "fa fa-calendar",
  "idx": 1,
  "links": [],
- "modified": "2021-11-18 06:06:24.881742",
+ "modified": "2023-05-09 17:15:49.909057",
  "modified_by": "Administrator",
  "module": "Desk",
  "name": "Event",
- "naming_rule": "Expression (old style)",
  "owner": "Administrator",
  "permissions": [
   {
@@ -309,6 +333,7 @@
   }
  ],
  "read_only": 1,
+ "route": "app/doctype/Event",
  "sender_field": "sender",
  "sort_field": "modified",
  "sort_order": "DESC",

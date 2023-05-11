@@ -7,6 +7,10 @@
  "email_append_to": 1,
  "engine": "InnoDB",
  "field_order": [
+  "section_break_1",
+  "cuit",
+  "column_break_3",
+  "razon_social",
   "description_and_status",
   "status",
   "priority",
@@ -28,6 +32,7 @@
  ],
  "fields": [
   {
+   "depends_on": "eval:doc.cuit || doc.razon_social",
    "fieldname": "description_and_status",
    "fieldtype": "Section Break"
   },
@@ -79,6 +84,7 @@
    "options": "User"
   },
   {
+   "depends_on": "eval:doc.cuit || doc.razon_social",
    "fieldname": "description_section",
    "fieldtype": "Section Break"
   },
@@ -153,12 +159,32 @@
    "label": "Assignment Rule",
    "options": "Assignment Rule",
    "read_only": 1
+  },
+  {
+   "fieldname": "section_break_1",
+   "fieldtype": "Section Break"
+  },
+  {
+   "allow_in_quick_entry": 1,
+   "fieldname": "cuit",
+   "fieldtype": "Data",
+   "label": "CUIT"
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_in_quick_entry": 1,
+   "fieldname": "razon_social",
+   "fieldtype": "Data",
+   "label": "Razon Social"
   }
  ],
  "icon": "fa fa-check",
  "idx": 2,
  "links": [],
- "modified": "2020-01-14 17:04:36.971002",
+ "modified": "2023-05-09 17:17:56.179142",
  "modified_by": "Administrator",
  "module": "Desk",
  "name": "ToDo",
@@ -188,6 +214,7 @@
   }
  ],
  "quick_entry": 1,
+ "route": "app/doctype/ToDo",
  "search_fields": "description, reference_type, reference_name",
  "sender_field": "sender",
  "sort_field": "modified",

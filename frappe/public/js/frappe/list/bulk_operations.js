@@ -178,6 +178,7 @@ export default class BulkOperations {
 
 	submit_or_cancel (docnames, action = 'submit', done = null) {
 		action = action.toLowerCase();
+		frappe.dom.freeze("Procesando...");
 		frappe
 			.call({
 				method: 'frappe.desk.doctype.bulk_update.bulk_update.submit_cancel_or_update_docs',
@@ -188,6 +189,7 @@ export default class BulkOperations {
 				},
 			})
 			.then((r) => {
+				frappe.dom.unfreeze();
 				let failed = r.message;
 				if (!failed) failed = [];
 

@@ -16,6 +16,7 @@
   "user",
   "address",
   "sync_with_google_contacts",
+  "tipo_de_servicio_impositivo_pedidos",
   "cb00",
   "status",
   "salutation",
@@ -269,6 +270,12 @@
    "fieldname": "proceso",
    "fieldtype": "Data",
    "label": "Proceso"
+  },
+  {
+   "fieldname": "tipo_de_servicio_impositivo_pedidos",
+   "fieldtype": "Select",
+   "label": "Tipo de Servicio Impositivo / Pedidos",
+   "options": "\nOrdenes de Compras\nEntregas\nPagos"
   }
  ],
  "icon": "fa fa-user",
@@ -276,7 +283,7 @@
  "image_field": "image",
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2023-04-04 22:19:14.101669",
+ "modified": "2023-06-05 14:43:24.577569",
  "modified_by": "Administrator",
  "module": "Contacts",
  "name": "Contact",

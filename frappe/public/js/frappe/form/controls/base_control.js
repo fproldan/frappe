@@ -159,7 +159,7 @@ frappe.ui.form.Control = Class.extend({
 	},
 	validate_and_set_in_model: function(value, e, force_set_value) {
 		let me = this;
-		let force_set_value = (this.doc && this.doc.__run_link_triggers) || force_set_value;
+		force_set_value = (this.doc && this.doc.__run_link_triggers) || force_set_value;
 		let is_value_same = (this.get_model_value() === value);
 
 		if (this.inside_change_event || (!force_set_value && is_value_same)) {

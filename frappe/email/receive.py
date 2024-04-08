@@ -220,6 +220,9 @@ class EmailServer:
 			).where(Communication.email_account == self.settings.email_account).run()
 
 			if self.settings.use_imap:
+				# Remove {"} quotes that are added to handle spaces in IMAP Folder names
+				if folder[0] == folder[-1] == '"':
+					folder = folder[1:-1]
 				# new update for the IMAP Folder DocType
 				IMAPFolder = frappe.qb.DocType("IMAP Folder")
 				frappe.qb.update(IMAPFolder).set(IMAPFolder.uidvalidity, current_uid_validity).set(
@@ -233,15 +236,8 @@ class EmailServer:
 					EmailAccount.uidnext, uidnext
 				).where(EmailAccount.name == self.settings.email_account_name).run()
 
-			# uid validity not found pulling emails for first time
-			if not uid_validity:
-				self.settings.email_sync_rule = "UNSEEN"
-				return
-
 			sync_count = 100 if uid_validity else int(self.settings.initial_sync_count)
-			from_uid = (
-				1 if uidnext < (sync_count + 1) or (uidnext - sync_count) < 1 else uidnext - sync_count
-			)
+			from_uid = 1 if uidnext < (sync_count + 1) or (uidnext - sync_count) < 1 else uidnext - sync_count
 			# sync last 100 email
 			self.settings.email_sync_rule = f"UID {from_uid}:{uidnext}"
 			self.uid_reindexed = True
@@ -447,9 +443,7 @@ class Email:
 		if not email:
 			return
 		decoded = ""
-		for part, encoding in decode_header(
-			frappe.as_unicode(email).replace('"', " ").replace("'", " ")
-		):
+		for part, encoding in decode_header(frappe.as_unicode(email).replace('"', " ").replace("'", " ")):
 			if encoding:
 				decoded += part.decode(encoding, "replace")
 			else:
@@ -644,13 +638,11 @@ class InboundMail(Email):
 		if self.reference_document():
 			data["reference_doctype"] = self.reference_document().doctype
 			data["reference_name"] = self.reference_document().name
-		else:
-			if append_to and append_to != "Communication":
-				reference_doc = self._create_reference_document(append_to)
-				if reference_doc:
-					data["reference_doctype"] = reference_doc.doctype
-					data["reference_name"] = reference_doc.name
-			data["is_first"] = True
+		elif append_to and append_to != "Communication":
+			reference_name = self._create_reference_document(append_to)
+			if reference_name:
+				data["reference_doctype"] = append_to
+				data["reference_name"] = reference_name
 
 		if self.is_notification():
 			# Disable notifications for notification.
@@ -676,8 +668,8 @@ class InboundMail(Email):
 		# replace inline images
 		content = self.content
 		for file in attachments:
-			if file.name in self.cid_map and self.cid_map[file.name]:
-				content = content.replace(f"cid:{self.cid_map[file.name]}", file.file_url)
+			if self.cid_map.get(file.name):
+				content = content.replace(f"cid:{self.cid_map[file.name]}", file.unique_url)
 		return content
 
 	def is_notification(self):
@@ -817,28 +809,25 @@ class InboundMail(Email):
 	def _create_reference_document(self, doctype):
 		"""Create reference document if it does not exist in the system."""
 		parent = frappe.new_doc(doctype)
-		email_fileds = self.get_email_fields(doctype)
+		email_fields = self.get_email_fields(doctype)
 
-		if email_fileds.subject_field:
-			parent.set(email_fileds.subject_field, frappe.as_unicode(self.subject)[:140])
+		if email_fields.subject_field:
+			parent.set(email_fields.subject_field, frappe.as_unicode(self.subject)[:140])
 
-		if email_fileds.sender_field:
-			parent.set(email_fileds.sender_field, frappe.as_unicode(self.from_email))
+		if email_fields.sender_field:
+			parent.set(email_fields.sender_field, frappe.as_unicode(self.from_email))
+
+		if email_fields.sender_name_field:
+			parent.set(email_fields.sender_name_field, frappe.as_unicode(self.from_real_name))
 
 		parent.flags.ignore_mandatory = True
 
 		try:
 			parent.insert(ignore_permissions=True)
+			return parent.name
 		except frappe.DuplicateEntryError:
 			# try and find matching parent
-			parent_name = frappe.db.get_value(
-				self.email_account.append_to, {email_fileds.sender_field: self.from_email}
-			)
-			if parent_name:
-				parent.name = parent_name
-			else:
-				parent = None
-		return parent
+			return frappe.db.get_value(doctype, {email_fields.sender_field: self.from_email})
 
 	@staticmethod
 	def get_doc(doctype, docname, ignore_error=False):
@@ -857,9 +846,7 @@ class InboundMail(Email):
 	@staticmethod
 	def get_users_linked_to_account(email_account):
 		"""Get list of users who linked to Email account."""
-		users = frappe.get_all(
-			"User Email", filters={"email_account": email_account.name}, fields=["parent"]
-		)
+		users = frappe.get_all("User Email", filters={"email_account": email_account.name}, fields=["parent"])
 		return list({user.get("parent") for user in users})
 
 	@staticmethod
@@ -874,7 +861,7 @@ class InboundMail(Email):
 		"""Returns Email related fields of a doctype."""
 		fields = frappe._dict()
 
-		email_fields = ["subject_field", "sender_field"]
+		email_fields = ["subject_field", "sender_field", "sender_name_field"]
 		meta = frappe.get_meta(doctype)
 
 		for field in email_fields:

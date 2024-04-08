@@ -494,6 +494,7 @@ Object.assign(frappe.utils, {
 		var style = default_style || "default";
 		var colour = "gray";
 		if (text) {
+			text = cstr(text);
 			if (has_words(["Pending", "Review", "Medium", "Not Approved"], text)) {
 				style = "warning";
 				colour = "orange";
@@ -1186,6 +1187,8 @@ Object.assign(frappe.utils, {
 	get_number_system: function (country) {
 		if (["Bangladesh", "India", "Myanmar", "Pakistan"].includes(country)) {
 			return number_systems.indian;
+		} else if (country == "Nepal") {
+			return number_systems.nepalese;
 		} else {
 			return number_systems.default;
 		}
@@ -1218,7 +1221,7 @@ Object.assign(frappe.utils, {
 					? "es-icon es-solid"
 					: "es-icon es-line"
 				: "icon"
-		} ${svg_class} ${size_class}" style="${icon_style}">
+		} ${svg_class} ${size_class}" style="${icon_style}" aria-hidden="true">
 			<use class="${icon_class}" href="${icon_name}"></use>
 		</svg>`;
 	},
@@ -1554,6 +1557,9 @@ Object.assign(frappe.utils, {
 	},
 
 	fetch_link_title(doctype, name) {
+		if (!doctype || !name) {
+			return;
+		}
 		try {
 			return frappe
 				.xcall("frappe.desk.search.get_link_title", {
@@ -1574,7 +1580,7 @@ Object.assign(frappe.utils, {
 	only_allow_num_decimal(input) {
 		input.on("input", (e) => {
 			let self = $(e.target);
-			self.val(self.val().replace(/[^0-9.]/g, ""));
+			self.val(self.val().replace(/[^0-9.\-]/g, ""));
 			if (
 				(e.which != 46 || self.val().indexOf(".") != -1) &&
 				(e.which < 48 || e.which > 57)

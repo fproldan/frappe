@@ -24,12 +24,11 @@ frappe.ui.form.on("Web Form", {
 	},
 
 	refresh: function (frm) {
-		// show is-standard only if developer mode
-		frm.get_field("is_standard").toggle(frappe.boot.developer_mode);
-
 		if (frm.doc.is_standard && !frappe.boot.developer_mode) {
-			frm.set_read_only();
-			frm.disable_save();
+			frm.disable_form();
+			frappe.show_alert(
+				__("Standard Web Forms can not be modified, duplicate the Web Form instead.")
+			);
 		}
 		render_list_settings_message(frm);
 
@@ -107,6 +106,7 @@ frappe.ui.form.on("Web Form", {
 							reqd: df.reqd,
 							default: df.default,
 							read_only: df.read_only,
+							precision: df.precision,
 							depends_on: df.depends_on,
 							mandatory_depends_on: df.mandatory_depends_on,
 							read_only_depends_on: df.read_only_depends_on,

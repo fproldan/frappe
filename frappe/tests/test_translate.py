@@ -10,6 +10,7 @@ import frappe.translate
 from frappe import _
 from frappe.tests.utils import FrappeTestCase
 from frappe.translate import (
+	clear_cache,
 	extract_javascript,
 	extract_messages_from_javascript_code,
 	extract_messages_from_python_code,
@@ -29,10 +30,10 @@ first_lang, second_lang, third_lang, fourth_lang, fifth_lang = choices(
 
 
 class TestTranslate(FrappeTestCase):
-	guest_sessions_required = [
+	guest_sessions_required = (
 		"test_guest_request_language_resolution_with_cookie",
 		"test_guest_request_language_resolution_with_request_header",
-	]
+	)
 
 	def setUp(self):
 		if self._testMethodName in self.guest_sessions_required:
@@ -55,13 +56,27 @@ class TestTranslate(FrappeTestCase):
 			msg=f"Mismatched output:\nExpected: {expected_output}\nFound: {data}",
 		)
 
-		for extracted, expected in zip(data, expected_output):
+		for extracted, expected in zip(data, expected_output, strict=False):
 			ext_filename, ext_message, ext_context, ext_line = extracted
 			exp_message, exp_context, exp_line = expected
 			self.assertEqual(ext_filename, exp_filename)
 			self.assertEqual(ext_message, exp_message)
 			self.assertEqual(ext_context, exp_context)
 			self.assertEqual(ext_line, exp_line)
+
+	def test_read_language_variant(self):
+		frappe.local.lang = "en"
+		self.assertEqual(_("Mobile No"), "Mobile No")
+		try:
+			frappe.local.lang = "pt-BR"
+			self.assertEqual(_("Mobile No"), "Telefone Celular")
+		finally:
+			try:
+				frappe.local.lang = "pt"
+				self.assertEqual(_("Mobile No"), "Nr. de Telemóvel")
+			finally:
+				frappe.local.lang = "en"
+				self.assertEqual(_("Mobile No"), "Mobile No")
 
 	def test_translation_with_context(self):
 		try:
@@ -142,7 +157,6 @@ class TestTranslate(FrappeTestCase):
 		verify_translation_files("frappe")
 
 	def test_python_extractor(self):
-
 		code = textwrap.dedent(
 			"""
 			frappe._("attr")
@@ -171,12 +185,11 @@ class TestTranslate(FrappeTestCase):
 
 		output = extract_messages_from_python_code(code)
 		self.assertEqual(len(expected_output), len(output))
-		for expected, actual in zip(expected_output, output):
+		for expected, actual in zip(expected_output, output, strict=False):
 			with self.subTest():
 				self.assertEqual(expected, actual)
 
 	def test_js_extractor(self):
-
 		code = textwrap.dedent(
 			"""
 			__("attr")
@@ -209,7 +222,7 @@ class TestTranslate(FrappeTestCase):
 		output = extract_messages_from_javascript_code(code)
 
 		self.assertEqual(len(expected_output), len(output))
-		for expected, actual in zip(expected_output, output):
+		for expected, actual in zip(expected_output, output, strict=False):
 			with self.subTest():
 				self.assertEqual(expected, actual)
 

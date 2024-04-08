@@ -88,7 +88,7 @@ class RateLimiter:
 
 
 def rate_limit(
-	key: str = None,
+	key: str | None = None,
 	limit: int | Callable = 5,
 	seconds: int = 24 * 60 * 60,
 	methods: str | list = "ALL",
@@ -137,7 +137,7 @@ def rate_limit(
 			if not identity:
 				frappe.throw(_("Either key or IP flag is required."))
 
-			cache_key = f"rl:{frappe.form_dict.cmd}:{identity}"
+			cache_key = frappe.cache.make_key(f"rl:{frappe.form_dict.cmd}:{identity}")
 
 			value = frappe.cache.get(cache_key) or 0
 			if not value:

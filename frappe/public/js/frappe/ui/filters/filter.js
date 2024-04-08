@@ -420,7 +420,7 @@ frappe.ui.filter_utils = {
 	get_selected_value(field, condition) {
 		if (!field) return;
 
-		let val = field.get_value() || field.value;
+		let val = field.get_value() ?? field.value;
 
 		if (typeof val === "string") {
 			val = strip(val);
@@ -454,7 +454,7 @@ frappe.ui.filter_utils = {
 	},
 
 	get_selected_label(field) {
-		if (in_list(["Link", "Dynamic Link"], field.df.fieldtype)) {
+		if (["Link", "Dynamic Link"].includes(field.df.fieldtype)) {
 			return field.get_label_value();
 		}
 	},
@@ -476,6 +476,7 @@ frappe.ui.filter_utils = {
 
 		df.description = "";
 		df.reqd = 0;
+		df.length = 1000; // this won't be saved, no need to apply 140 character limit here
 		df.ignore_link_validation = true;
 
 		// given

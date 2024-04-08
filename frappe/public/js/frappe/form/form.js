@@ -1369,7 +1369,7 @@ frappe.ui.form.Form = class FrappeForm {
 
 	is_form_builder() {
 		return (
-			in_list(["DocType", "Customize Form"], this.doctype) &&
+			["DocType", "Customize Form"].includes(this.doctype) &&
 			this.get_active_tab().label == "Form"
 		);
 	}
@@ -1468,7 +1468,10 @@ frappe.ui.form.Form = class FrappeForm {
 		$.each(fields_list, function (i, fname) {
 			var docfield = frappe.meta.docfield_map[doctype][fname];
 			if (docfield) {
-				var label = __(docfield.label || "").replace(/\([^\)]*\)/g, ""); // eslint-disable-line
+				var label = __(docfield.label || "", null, docfield.parent).replace(
+					/\([^\)]*\)/g,
+					""
+				); // eslint-disable-line
 				if (parentfield) {
 					grid_field_label_map[doctype + "-" + fname] =
 						label.trim() + " (" + __(currency) + ")";

@@ -121,9 +121,7 @@ def _create_app_boilerplate(dest, hooks, no_git=False):
 		os.path.join(dest, hooks.app_name, hooks.app_name, frappe.scrub(hooks.app_title)),
 		with_init=True,
 	)
-	frappe.create_folder(
-		os.path.join(dest, hooks.app_name, hooks.app_name, "templates"), with_init=True
-	)
+	frappe.create_folder(os.path.join(dest, hooks.app_name, hooks.app_name, "templates"), with_init=True)
 	frappe.create_folder(os.path.join(dest, hooks.app_name, hooks.app_name, "www"))
 	frappe.create_folder(
 		os.path.join(dest, hooks.app_name, hooks.app_name, "templates", "pages"), with_init=True
@@ -147,9 +145,7 @@ def _create_app_boilerplate(dest, hooks, no_git=False):
 	with open(os.path.join(dest, hooks.app_name, "README.md"), "w") as f:
 		f.write(
 			frappe.as_unicode(
-				"## {}\n\n{}\n\n#### License\n\n{}".format(
-					hooks.app_title, hooks.app_description, hooks.app_license
-				)
+				f"## {hooks.app_title}\n\n{hooks.app_description}\n\n#### License\n\n{hooks.app_license}"
 			)
 		)
 	license_body = get_license_text(license_name=hooks.app_license)
@@ -274,7 +270,7 @@ class PatchCreator:
 			raise Exception(f"Patch {self.patch_file} already exists")
 
 		*path, _filename = self.patch_file.relative_to(self.app_dir.parents[0]).parts
-		dotted_path = ".".join(path + [self.patch_file.stem])
+		dotted_path = ".".join([*path, self.patch_file.stem])
 
 		patches_txt = self.app_dir / "patches.txt"
 		existing_patches = patches_txt.read_text()
@@ -303,9 +299,7 @@ class PatchCreator:
 		init_py.touch()
 
 
-init_template = """
-__version__ = '0.0.1'
-
+init_template = """__version__ = "0.0.1"
 """
 
 pyproject_template = """[project]
@@ -378,7 +372,7 @@ app_license = "{app_license}"
 
 # website user home page (by Role)
 # role_home_page = {{
-#	"Role": "home_page"
+# 	"Role": "home_page"
 # }}
 
 # Generators
@@ -392,8 +386,8 @@ app_license = "{app_license}"
 
 # add methods and filters to jinja environment
 # jinja = {{
-#	"methods": "{app_name}.utils.jinja_methods",
-#	"filters": "{app_name}.utils.jinja_filters"
+# 	"methods": "{app_name}.utils.jinja_methods",
+# 	"filters": "{app_name}.utils.jinja_filters"
 # }}
 
 # Installation
@@ -435,11 +429,11 @@ app_license = "{app_license}"
 # Permissions evaluated in scripted ways
 
 # permission_query_conditions = {{
-#	"Event": "frappe.desk.doctype.event.event.get_permission_query_conditions",
+# 	"Event": "frappe.desk.doctype.event.event.get_permission_query_conditions",
 # }}
 #
 # has_permission = {{
-#	"Event": "frappe.desk.doctype.event.event.has_permission",
+# 	"Event": "frappe.desk.doctype.event.event.has_permission",
 # }}
 
 # DocType Class
@@ -447,7 +441,7 @@ app_license = "{app_license}"
 # Override standard doctype classes
 
 # override_doctype_class = {{
-#	"ToDo": "custom_app.overrides.CustomToDo"
+# 	"ToDo": "custom_app.overrides.CustomToDo"
 # }}
 
 # Document Events
@@ -455,32 +449,32 @@ app_license = "{app_license}"
 # Hook on document methods and events
 
 # doc_events = {{
-#	"*": {{
-#		"on_update": "method",
-#		"on_cancel": "method",
-#		"on_trash": "method"
-#	}}
+# 	"*": {{
+# 		"on_update": "method",
+# 		"on_cancel": "method",
+# 		"on_trash": "method"
+# 	}}
 # }}
 
 # Scheduled Tasks
 # ---------------
 
 # scheduler_events = {{
-#	"all": [
-#		"{app_name}.tasks.all"
-#	],
-#	"daily": [
-#		"{app_name}.tasks.daily"
-#	],
-#	"hourly": [
-#		"{app_name}.tasks.hourly"
-#	],
-#	"weekly": [
-#		"{app_name}.tasks.weekly"
-#	],
-#	"monthly": [
-#		"{app_name}.tasks.monthly"
-#	],
+# 	"all": [
+# 		"{app_name}.tasks.all"
+# 	],
+# 	"daily": [
+# 		"{app_name}.tasks.daily"
+# 	],
+# 	"hourly": [
+# 		"{app_name}.tasks.hourly"
+# 	],
+# 	"weekly": [
+# 		"{app_name}.tasks.weekly"
+# 	],
+# 	"monthly": [
+# 		"{app_name}.tasks.monthly"
+# 	],
 # }}
 
 # Testing
@@ -492,14 +486,14 @@ app_license = "{app_license}"
 # ------------------------------
 #
 # override_whitelisted_methods = {{
-#	"frappe.desk.doctype.event.event.get_events": "{app_name}.event.get_events"
+# 	"frappe.desk.doctype.event.event.get_events": "{app_name}.event.get_events"
 # }}
 #
 # each overriding function accepts a `data` argument;
 # generated from the base implementation of the doctype dashboard,
 # along with any modifications made in other Frappe apps
 # override_doctype_dashboards = {{
-#	"Task": "{app_name}.task.get_dashboard_data"
+# 	"Task": "{app_name}.task.get_dashboard_data"
 # }}
 
 # exempt linked doctypes from being automatically cancelled
@@ -525,32 +519,40 @@ app_license = "{app_license}"
 # --------------------
 
 # user_data_fields = [
-#	{{
-#		"doctype": "{{doctype_1}}",
-#		"filter_by": "{{filter_by}}",
-#		"redact_fields": ["{{field_1}}", "{{field_2}}"],
-#		"partial": 1,
-#	}},
-#	{{
-#		"doctype": "{{doctype_2}}",
-#		"filter_by": "{{filter_by}}",
-#		"partial": 1,
-#	}},
-#	{{
-#		"doctype": "{{doctype_3}}",
-#		"strict": False,
-#	}},
-#	{{
-#		"doctype": "{{doctype_4}}"
-#	}}
+# 	{{
+# 		"doctype": "{{doctype_1}}",
+# 		"filter_by": "{{filter_by}}",
+# 		"redact_fields": ["{{field_1}}", "{{field_2}}"],
+# 		"partial": 1,
+# 	}},
+# 	{{
+# 		"doctype": "{{doctype_2}}",
+# 		"filter_by": "{{filter_by}}",
+# 		"partial": 1,
+# 	}},
+# 	{{
+# 		"doctype": "{{doctype_3}}",
+# 		"strict": False,
+# 	}},
+# 	{{
+# 		"doctype": "{{doctype_4}}"
+# 	}}
 # ]
 
 # Authentication and authorization
 # --------------------------------
 
 # auth_hooks = [
-#	"{app_name}.auth.validate"
+# 	"{app_name}.auth.validate"
 # ]
+
+# Automatically update python controller files with type annotations for this app.
+# export_python_type_annotations = True
+
+# default_log_clearing_doctypes = {{
+# 	"Logging DocType Name": 30  # days to retain logs
+# }}
+
 """
 
 gitignore_template = """.DS_Store

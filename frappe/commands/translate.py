@@ -37,14 +37,8 @@ def new_language(context, lang_code, app):
 	frappe.connect(site=context["sites"][0])
 	frappe.translate.write_translations_file(app, lang_code)
 
-	print(
-		"File created at ./apps/{app}/{app}/translations/{lang_code}.csv".format(
-			app=app, lang_code=lang_code
-		)
-	)
-	print(
-		"You will need to add the language in frappe/geo/languages.json, if you haven't done it already."
-	)
+	print(f"File created at ./apps/{app}/{app}/translations/{lang_code}.csv")
+	print("You will need to add the language in frappe/geo/languages.json, if you haven't done it already.")
 
 
 @click.command("get-untranslated")

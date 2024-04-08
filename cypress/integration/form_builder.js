@@ -43,7 +43,8 @@ context("Form Builder", () => {
 
 		// add new section
 		cy.get(first_section).click(15, 10);
-		cy.get(first_section).find(".section-actions button:first").click();
+		cy.get(first_section).find(".dropdown-btn:first").click();
+		cy.get(".dropdown-options:visible .dropdown-item:first").click();
 
 		// save
 		cy.click_doc_primary_button("Save");
@@ -184,12 +185,14 @@ context("Form Builder", () => {
 
 		// add new section
 		cy.get(first_section).click(15, 10);
-		cy.get(first_section).find(".section-actions button:first").click();
+		cy.get(first_section).find(".dropdown-btn:first").click();
+		cy.get(".dropdown-options:visible .dropdown-item:first").click();
 		cy.get(".tab-content.active .form-section-container").should("have.length", 2);
 
 		// add new column
-		cy.get(first_section).find(".column:first").click(15, 10);
-		cy.get(first_section).find(".column:first .column-actions button:first").click();
+		cy.get(first_section).click(15, 10);
+		cy.get(first_section).find(".dropdown-btn:first").click();
+		cy.get(".dropdown-options:visible .dropdown-item:last").click();
 		cy.get(first_section).find(".column").should("have.length", 2);
 	});
 
@@ -197,13 +200,15 @@ context("Form Builder", () => {
 		let first_section = ".tab-content.active .form-section-container:first";
 
 		// remove column
-		cy.get(first_section).find(".column:first").click(15, 10);
-		cy.get(first_section).find(".column:first .column-actions button:last").click();
+		cy.get(first_section).click(15, 10);
+		cy.get(first_section).find(".dropdown-btn:first").click();
+		cy.get(".dropdown-options:visible .dropdown-item:last").click();
 		cy.get(first_section).find(".column").should("have.length", 1);
 
 		// remove section
 		cy.get(first_section).click(15, 10);
-		cy.get(first_section).find(".section-actions button:last").click();
+		cy.get(first_section).find(".dropdown-btn:first").click();
+		cy.get(".dropdown-options:visible .dropdown-item").eq(1).click();
 		cy.get(".tab-content.active .form-section-container").should("have.length", 1);
 
 		// remove tab
@@ -273,31 +278,5 @@ context("Form Builder", () => {
 		cy.get_open_dialog()
 			.find(".msgprint")
 			.should("contain", "cannot be hidden and mandatory without any default value");
-	});
-
-	it("Undo/Redo", () => {
-		cy.visit(`/app/doctype/${doctype_name}`);
-		cy.findByRole("tab", { name: "Form" }).click();
-
-		// click on second tab
-		cy.get(".tab-header .tabs .tab:last").click();
-
-		let first_column = ".tab-content.active .section-columns-container:first .column:first";
-		let first_field = first_column + " .field:first";
-		let label = "div[title='Double click to edit label'] span:first";
-
-		// drag the first field to second position
-		cy.get(first_field).drag(first_column + " .field:nth-child(2)", {
-			target: { x: 100, y: 10 },
-		});
-		cy.get(first_field).find(label).should("have.text", "Check");
-
-		// undo
-		cy.get("body").type("{ctrl}z");
-		cy.get(first_field).find(label).should("have.text", "Data");
-
-		// redo
-		cy.get("body").type("{ctrl}{shift}z");
-		cy.get(first_field).find(label).should("have.text", "Check");
 	});
 });

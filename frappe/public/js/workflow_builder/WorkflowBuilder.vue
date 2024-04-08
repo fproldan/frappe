@@ -128,6 +128,7 @@ onConnect((edge) => {
 		data: {
 			action: "",
 			allowed: "All",
+			allow_self_approval: 1,
 			from: source_node.data.state,
 			to: target_node.data.state,
 			from_id: source_node.id,
@@ -292,14 +293,16 @@ onMounted(() => store.fetch());
 							:draggable="true"
 							@dragstart="onDragStart"
 						>
-							Drag to add state
+							{{ __("Drag to add state") }}
 						</div>
 					</div>
 				</Panel>
 				<Panel :position="PanelPosition.BottomLeft">
 					<button class="btn btn-sm btn-default mr-2" @click="zoomIn">+</button>
 					<button class="btn btn-sm btn-default mr-2" @click="zoomOut">-</button>
-					<button class="btn btn-sm btn-default" @click="fitView()">Fit</button>
+					<button class="btn btn-sm btn-default" @click="fitView()">
+						{{ __("Fit") }}
+					</button>
 				</Panel>
 				<template #node-state="node">
 					<StateNode :node="node" />

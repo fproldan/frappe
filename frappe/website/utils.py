@@ -166,11 +166,13 @@ def get_home_page_via_hooks():
 
 def get_boot_data():
 	return {
-		"lang": "en",
+		"lang": frappe.local.lang or "en",
 		"sysdefaults": {
 			"float_precision": cint(frappe.get_system_settings("float_precision")) or 3,
 			"date_format": frappe.get_system_settings("date_format") or "yyyy-mm-dd",
 			"time_format": frappe.get_system_settings("time_format") or "HH:mm:ss",
+			"first_day_of_the_week": frappe.get_system_settings("first_day_of_the_week") or "Sunday",
+			"number_format": frappe.get_system_settings("number_format") or "#,###.##",
 		},
 		"time_zone": {
 			"system": get_system_timezone(),
@@ -317,9 +319,9 @@ def extract_title(source, path):
 		# make title from name
 		title = (
 			os.path.basename(
-				path.rsplit(".",)[
-					0
-				].rstrip("/")
+				path.rsplit(
+					".",
+				)[0].rstrip("/")
 			)
 			.replace("_", " ")
 			.replace("-", " ")
@@ -365,7 +367,6 @@ def clear_cache(path=None):
 		"website_generator_routes",
 		"website_pages",
 		"website_full_index",
-		"sitemap_routes",
 		"languages_with_name",
 		"languages",
 	):
@@ -571,19 +572,16 @@ def set_content_type(response, data, path):
 def add_preload_for_bundled_assets(response):
 	links = [f"<{css}>; rel=preload; as=style" for css in frappe.local.preload_assets["style"]]
 	links.extend(f"<{js}>; rel=preload; as=script" for js in frappe.local.preload_assets["script"])
-	links.extend(_preload_svg_headers())
+
+	version = get_build_version()
+	# include_icons = frappe.get_hooks().get("app_include_icons", [])
+	links.extend(
+		f"</assets/{svg}?v={version}>; rel=preload; as=fetch; crossorigin"
+		for svg in frappe.local.preload_assets["icons"]
+	)
 
 	if links:
 		response.headers["Link"] = ",".join(links)
-
-
-def _preload_svg_headers():
-	include_icons = frappe.get_hooks().get("app_include_icons", [])
-
-	version = get_build_version()
-	return [
-		f"</assets/{svg}?v={version}>; rel=preload; as=fetch; crossorigin" for svg in include_icons
-	]
 
 
 @lru_cache

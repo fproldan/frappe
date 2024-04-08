@@ -25,7 +25,7 @@
 					v-slot="{ active }"
 				>
 					<li :class="['combo-box-option', active ? 'active' : '']">
-						{{ field.label }}
+						{{ __(field.label) }}
 					</li>
 				</ComboboxOption>
 			</div>
@@ -113,10 +113,11 @@ watch(showOptions, (val) => {
 
 .combo-box-options {
 	width: 100%;
-	background-color: var(--white);
+	background-color: var(--fg-color);
 	border-radius: var(--border-radius-lg);
 	box-shadow: var(--shadow-2xl);
 	padding: 0;
+	border: 1px solid var(--subtle-accent);
 }
 
 .combo-box-option {

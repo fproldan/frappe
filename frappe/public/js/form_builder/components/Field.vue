@@ -30,7 +30,7 @@ const label_input = ref(null);
 const hovered = ref(false);
 const selected = computed(() => store.selected(props.field.df.name));
 const component = computed(() => {
-	return props.field.df.fieldtype.replace(" ", "") + "Control";
+	return props.field.df.fieldtype.replaceAll(" ", "") + "Control";
 });
 
 function remove_field() {
@@ -166,7 +166,7 @@ onMounted(() => selected.value && label_input.value.focus_on_label());
 
 	&.hovered,
 	&.selected {
-		border-color: var(--primary);
+		border-color: var(--border-primary);
 		.btn.btn-icon {
 			opacity: 1 !important;
 		}

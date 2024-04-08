@@ -23,11 +23,13 @@ class NotificationSettings(Document):
 		enable_email_mention: DF.Check
 		enable_email_notifications: DF.Check
 		enable_email_share: DF.Check
+		enable_email_threads_on_assigned_document: DF.Check
 		enabled: DF.Check
 		energy_points_system_notifications: DF.Check
 		seen: DF.Check
 		subscribed_documents: DF.TableMultiSelect[NotificationSubscribedDocument]
 		user: DF.Link | None
+
 	# end: auto-generated types
 	def on_update(self):
 		from frappe.desk.notifications import clear_notification_config

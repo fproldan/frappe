@@ -107,11 +107,7 @@ def is_static_file(path):
 
 	for app in frappe.get_installed_apps():
 		file_path = frappe.get_app_path(app, 'www') + '/' + path
-<<<<<<< HEAD
-		if os.path.isfile(file_path) and (extn or is_binary_file(file_path)):
-=======
 		if os.path.exists(file_path) and (extn or is_binary_file(file_path)):
->>>>>>> e8d699d40e (fix: Check if binary file before not handling static file)
 			frappe.flags.file_path = file_path
 			return True
 

@@ -59,7 +59,7 @@
  ],
  "in_create": 1,
  "links": [],
- "modified": "2021-05-12 20:00:17.988404",
+ "modified": "2021-05-13 20:00:17.988404",
  "modified_by": "Administrator",
  "module": "Website",
  "name": "Web Page View",
@@ -83,6 +83,5 @@
  "restrict_to_domain": "Website",
  "sort_field": "modified",
  "sort_order": "DESC",
- "title_field": "path",
- "track_changes": 1
+ "title_field": "path"
 }

@@ -4,6 +4,7 @@
 @import "../common/mixins";
 @import "../common/global";
 @import "../common/icons";
+@import "../common/alert";
 @import 'base';
 @import "../common/flex";
 @import "../common/buttons";
@@ -26,6 +27,7 @@
 @import 'doc';
 @import 'navbar';
 @import 'footer';
+@import 'error-state';
 
 .ql-editor.read-mode {
 	padding: 0;
@@ -189,11 +191,14 @@ h5.modal-title {
 
 .btn-xs {
 	@extend .btn-sm;
+
 }
 
 .hidden-xs {
-	@extend .d-none;
-	@extend .d-sm-block;
+	@extend .d-block;
+	@include media-breakpoint-between(xs, sm) {
+		display: none !important;
+	}
 }
 
 .visible-xs {
@@ -214,6 +219,10 @@ h5.modal-title {
 
 .pull-right {
 	float: right;
+}
+
+.pull-left {
+	float: left;
 }
 
 .image-with-blur {

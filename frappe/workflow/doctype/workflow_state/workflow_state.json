@@ -36,15 +36,23 @@
    "label": "Style",
    "options": "\nPrimary\nInfo\nSuccess\nWarning\nDanger\nInverse"
   }
- ],
- "icon": "fa fa-flag",
- "idx": 1,
- "links": [],
- "modified": "2021-05-13 20:00:28.954701",
- "modified_by": "Administrator",
- "module": "Workflow",
- "name": "Workflow State",
- "owner": "Administrator",
+ ], 
+ "hide_heading": 0, 
+ "hide_toolbar": 0, 
+ "icon": "fa fa-flag", 
+ "idx": 1, 
+ "image_view": 0, 
+ "in_create": 0, 
+
+ "is_submittable": 0, 
+ "issingle": 0, 
+ "istable": 0, 
+ "max_attachments": 0, 
+ "modified": "2021-11-22 17:56:40.495232", 
+ "modified_by": "Administrator", 
+ "module": "Workflow", 
+ "name": "Workflow State", 
+ "owner": "Administrator", 
  "permissions": [
   {
    "create": 1,

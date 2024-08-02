@@ -473,6 +473,7 @@ frappe.ui.form.ControlLink = frappe.ui.form.ControlData.extend({
 		return this.validate_link_and_fetch(this.df, this.get_options(),
 			this.docname, value);
 	},
+
 	validate_link_and_fetch(df, options, docname, value) {
 		if (!options) return;
 

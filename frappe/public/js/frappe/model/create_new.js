@@ -178,7 +178,7 @@ $.extend(frappe.model, {
 						user_default = user_defaults[0];
 					}
 				}
-				
+
 				if (!user_default) {
 					user_default = frappe.defaults.get_user_default(df.fieldname);
 				} else if (

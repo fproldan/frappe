@@ -48,8 +48,8 @@ frappe.ui.form.PrintView = class {
 			':Print Settings',
 			'Print Settings'
 		);
-		this.setup_toolbar();
 		this.setup_menu();
+		this.setup_toolbar();
 		this.setup_sidebar();
 		this.setup_keyboard_shortcuts();
 	}
@@ -77,8 +77,9 @@ frappe.ui.form.PrintView = class {
 		);
 
 		this.page.add_button(
-			frappe.utils.icon('refresh'),
-			() => this.refresh_print_format()
+			__('Refresh'),
+			() => this.refresh_print_format(),
+			{ icon: 'refresh' }
 		);
 	}
 
@@ -134,7 +135,7 @@ frappe.ui.form.PrintView = class {
 
 	add_sidebar_item(df, is_dynamic) {
 		if (df.fieldtype == 'Select') {
-			df.input_class = 'btn btn-default btn-sm';
+			df.input_class = 'btn btn-default btn-sm text-left';
 		}
 
 		let field = frappe.ui.form.make_control({
@@ -177,7 +178,7 @@ frappe.ui.form.PrintView = class {
 			);
 		}
 
-		if (this.print_settings.enable_print_server) {
+		if (cint(this.print_settings.enable_print_server)) {
 			this.page.add_menu_item(__('Select Network Printer'), () =>
 				this.network_printer_setting_dialog()
 			);

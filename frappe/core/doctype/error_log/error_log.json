@@ -31,15 +31,23 @@
    "label": "Error",
    "read_only": 1
   }
- ],
- "icon": "fa fa-warning-sign",
- "idx": 1,
- "links": [],
- "modified": "2021-07-27 09:43:00.016040",
- "modified_by": "Administrator",
- "module": "Core",
- "name": "Error Log",
- "owner": "Administrator",
+ ], 
+ "has_web_view": 0, 
+ "hide_heading": 0, 
+ "hide_toolbar": 0, 
+ "icon": "fa fa-warning-sign", 
+ "idx": 1, 
+ "image_view": 0, 
+ "in_create": 0, 
+ "is_submittable": 0, 
+ "issingle": 0, 
+ "istable": 0, 
+ "max_attachments": 0, 
+ "modified": "2021-10-25 12:21:44.292471", 
+ "modified_by": "Administrator", 
+ "module": "Core", 
+ "name": "Error Log", 
+ "owner": "Administrator", 
  "permissions": [
   {
    "create": 1,
@@ -52,9 +60,11 @@
    "share": 1,
    "write": 1
   }
- ],
- "quick_entry": 1,
- "sort_field": "modified",
- "sort_order": "ASC",
- "track_changes": 1
+ ], 
+ "quick_entry": 1, 
+ "read_only": 0, 
+ "read_only_onload": 0, 
+ "show_name_in_global_search": 0, 
+ "sort_order": "ASC", 
+ "track_seen": 0
 }

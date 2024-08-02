@@ -130,7 +130,6 @@
   },
   {
    "default": "0",
-   "description": "Comments on this blog post will be disabled if checked.",
    "fieldname": "disable_comments",
    "fieldtype": "Check",
    "label": "Disable Comments"
@@ -195,7 +194,6 @@
   },
   {
    "default": "0",
-   "description": "Feedback on this blog post will be disabled if checked.",
    "fieldname": "disable_feedback",
    "fieldtype": "Check",
    "label": "Disable Feedback"
@@ -208,7 +206,7 @@
  "is_published_field": "published",
  "links": [],
  "max_attachments": 0,
- "modified": "2021-06-15 13:50:02.109719",
+ "modified": "2021-06-16 13:50:02.109719",
  "modified_by": "Administrator",
  "module": "Website",
  "name": "Blog Post",

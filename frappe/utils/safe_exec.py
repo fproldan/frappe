@@ -14,6 +14,9 @@ from frappe.www.printview import get_visible_columns
 import frappe.exceptions
 import frappe.integrations.utils
 from frappe.frappeclient import FrappeClient
+from frappe.handler import execute_cmd
+from frappe.utils.background_jobs import enqueue, get_jobs
+
 
 class ServerScriptNotEnabled(frappe.PermissionError):
 	pass
@@ -67,7 +70,9 @@ def get_safe_globals():
 
 	add_data_utils(datautils)
 
-	if "_" in getattr(frappe.local, 'form_dict', {}):
+	form_dict = getattr(frappe.local, 'form_dict', frappe._dict())
+
+	if "_" in form_dict:
 		del frappe.local.form_dict["_"]
 
 	user = getattr(frappe.local, "session", None) and frappe.local.session.user or "Guest"
@@ -80,6 +85,7 @@ def get_safe_globals():
 		dict=dict,
 		log=frappe.log,
 		_dict=frappe._dict,
+		args=form_dict,
 		frappe=NamespaceDict(
 			flags=frappe._dict(),
 			format=frappe.format_value,
@@ -87,7 +93,7 @@ def get_safe_globals():
 			date_format=date_format,
 			time_format=time_format,
 			format_date=frappe.utils.data.global_date_format,
-			form_dict=getattr(frappe.local, 'form_dict', {}),
+			form_dict=form_dict,
 			bold=frappe.bold,
 			copy_doc=frappe.copy_doc,
 			errprint=frappe.errprint,
@@ -123,6 +129,7 @@ def get_safe_globals():
 			make_post_request = frappe.integrations.utils.make_post_request,
 			socketio_port=frappe.conf.socketio_port,
 			get_hooks=frappe.get_hooks,
+			enqueue=safe_enqueue,
 			sanitize_html=frappe.utils.sanitize_html,
 			log_error=frappe.log_error
 		),
@@ -138,7 +145,8 @@ def get_safe_globals():
 		guess_mimetype=mimetypes.guess_type,
 		html2text=html2text,
 		dev_server=1 if frappe._dev_server else 0,
-		run_script=run_script
+		run_script=run_script,
+		is_job_queued=is_job_queued,
 	)
 
 	add_module_properties(frappe.exceptions, out.frappe, lambda obj: inspect.isclass(obj) and issubclass(obj, Exception))
@@ -179,16 +187,60 @@ def get_safe_globals():
 
 	return out
 
+def is_job_queued(job_name, queue="default"):
+	'''
+	:param job_name: used to identify a queued job, usually dotted path to function
+	:param queue: should be either long, default or short
+	'''
+
+	site = frappe.local.site
+	queued_jobs = get_jobs(site=site, queue=queue, key='job_name').get(site)
+	return queued_jobs and job_name in queued_jobs
+
+def safe_enqueue(function, **kwargs):
+	'''
+		Enqueue function to be executed using a background worker
+		Accepts frappe.enqueue params like job_name, queue, timeout, etc.
+		in addition to params to be passed to function
+		:param function: whitelised function or API Method set in Server Script
+	'''
+
+	return enqueue(
+		'frappe.utils.safe_exec.call_whitelisted_function',
+		function=function,
+		**kwargs
+	)
+
+def call_whitelisted_function(function, **kwargs):
+	'''Executes a whitelisted function or Server Script of type API'''
+
+	return call_with_form_dict(lambda: execute_cmd(function), kwargs)
+
+def run_script(script, **kwargs):
+	'''run another server script'''
+
+	return call_with_form_dict(
+		lambda: frappe.get_doc('Server Script', script).execute_method(),
+		kwargs
+	)
+
+def call_with_form_dict(function, kwargs):
+	# temporarily update form_dict, to use inside below call
+	form_dict = getattr(frappe.local, 'form_dict', frappe._dict())
+	if kwargs:
+		frappe.local.form_dict = form_dict.copy().update(kwargs)
+
+	try:
+		return function()
+	finally:
+		frappe.local.form_dict = form_dict
+
 def read_sql(query, *args, **kwargs):
 	'''a wrapper for frappe.db.sql to allow reads'''
 	query = str(query)
 	if frappe.flags.in_safe_exec and not query.strip().lower().startswith('select'):
 		raise frappe.PermissionError('Only SELECT SQL allowed in scripting')
 	return frappe.db.sql(query, *args, **kwargs)
-
-def run_script(script):
-	'''run another server script'''
-	return frappe.get_doc('Server Script', script).execute_method()
 
 def _getitem(obj, key):
 	# guard function for RestrictedPython

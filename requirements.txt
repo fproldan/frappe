@@ -27,6 +27,7 @@ html2text==2020.1.16
 html5lib~=1.1
 jedi==0.17.2  # not directly required. Pinned to fix upstream IPython issue (https://github.com/ipython/ipython/issues/12740)
 Jinja2~=3.0.3
+ipython~=7.31.1
 ldap3~=2.9
 markdown2~=2.4.0
 maxminddb-geolite2==2018.703
@@ -34,6 +35,7 @@ ndg-httpsclient~=0.5.1
 num2words~=0.5.10
 oauthlib~=3.1.0
 openpyxl~=3.0.7
+parse~=1.19.0
 passlib~=1.7.4
 paytmchecksum~=1.7.0
 pdfkit~=0.6.1

@@ -16,6 +16,7 @@
   "aggregate_function_based_on",
   "column_break_2",
   "document_type",
+  "parent_document_type",
   "report_field",
   "report_function",
   "is_public",
@@ -191,10 +192,17 @@
    "label": "Function",
    "mandatory_depends_on": "eval: doc.type == 'Report'",
    "options": "Sum\nAverage\nMinimum\nMaximum"
+  },
+  {
+   "description": "The document type selected is a child table, so the parent document type is required.",
+   "fieldname": "parent_document_type",
+   "fieldtype": "Link",
+   "label": "Parent Document Type",
+   "options": "DocType"
   }
  ],
  "links": [],
- "modified": "2021-12-01 14:14:55.885274",
+ "modified": "2021-12-02 14:14:55.885274",
  "modified_by": "Administrator",
  "module": "Desk",
  "name": "Number Card",
@@ -260,6 +268,7 @@
  "search_fields": "label, document_type",
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "title_field": "label",
  "track_changes": 1
 }

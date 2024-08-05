@@ -485,6 +485,11 @@ frappe.views.BaseList = class BaseList {
 		this.start = 0;
 	}
 
+	reset_defaults() {
+		this.page_length = this.page_length + this.start;
+		this.start = 0;
+	}
+
 	freeze() {
 		// show a freeze message while data is loading
 	}

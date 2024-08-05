@@ -13,12 +13,6 @@ context('Report View', () => {
 			'enabled': 0,
 			'docstatus': 1 // submit document
 		}, true);
-<<<<<<< HEAD
-		return cy.window().its('frappe').then(frappe => {
-			return frappe.call("frappe.tests.ui_test_helpers.create_multiple_contact_records");
-		});
-=======
->>>>>>> tags/v13.23.0
 	});
 
 	it('Field with enabled allow_on_submit should be editable.', () => {

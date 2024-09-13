@@ -73,6 +73,11 @@ class AutoEmailReport(Document):
 					'<br><br><ul><li>' + ' <li>'.join(throw_list) + '</ul>',
 			)
 
+		if not self.email_to and not self.recipients:
+			frappe.throw(
+				title= _('Datos Requeridos'),
+				msg= _('Debe especificar <b>Email Para</b> o <b>Tercero</b>.')
+			)
 	def get_report_content(self):
 		'''Returns file in for the report in given format'''
 		report = frappe.get_doc('Report', self.report)

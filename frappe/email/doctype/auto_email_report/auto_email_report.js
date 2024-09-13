@@ -31,6 +31,13 @@ frappe.ui.form.on('Auto Email Report', {
 				frm.set_value('email_to', frappe.session.user);
 			}
 		}
+		frm.trigger('setup_queries');
+	},
+	onload: function(frm) {
+		frm.trigger('setup_queries');
+	},
+	party: function(frm) {
+		frm.trigger('clear_recipients_table');
 	},
 	report: function(frm) {
 		frm.set_value('filters', '');
@@ -135,5 +142,40 @@ frappe.ui.form.on('Auto Email Report', {
 			frm.set_df_property('to_date_field', 'options', date_fields);
 			frm.toggle_display('dynamic_report_filters_section', date_fields.length > 0);
 		}
+	},
+	setup_queries: function(frm) {
+		frm.set_query("party", function() {
+			return {
+				query: "frappe.contacts.address_and_contact.filter_dynamic_link_doctypes",
+				filters: {
+					fieldtype: ["in", ["HTML", "Text Editor"]],
+					fieldname: ["in", ["contact_html", "company_description"]],
+				}
+			};
+		});
+		frm.fields_dict['recipients'].grid.get_field('link_doctype').get_query = function() {
+			return {
+				filters: {
+					name: frm.doc.party
+				}
+			};
+		};
+	},
+	clear_recipients_table: function(frm) {
+		let party_value = frm.doc.party;
+		if (party_value) {
+			frm.clear_table('recipients');
+			frm.refresh_field('recipients');
+		}
 	}
+});
+
+
+frappe.ui.form.on('Auto Email Report Party', {
+    recipients_add: function(frm, cdt, cdn) {
+        let party_value = frm.doc.party;
+        if (party_value) {
+            frappe.model.set_value(cdt, cdn, 'link_doctype', party_value);
+        }
+    }
 });

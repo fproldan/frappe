@@ -174,23 +174,24 @@ frappe.ui.form.on('Auto Email Report', {
 		}
 	},
 	populate_filter_to_override_options: function(frm) {
-		if (!frm.doc.filters) {
-			frm.fields_dict['filter_to_override'].df.options = '';
-        	frm.fields_dict['filter_to_override'].refresh();
-		} else {
-			let report_filters;
-			if (frm.doc.report_type === 'Custom Report'
-				&& frappe.query_reports[frm.doc.reference_report]
-				&& frappe.query_reports[frm.doc.reference_report].filters) {
-				report_filters = frappe.query_reports[frm.doc.reference_report].filters;
-			} else {
-				report_filters = frappe.query_reports[frm.doc.report].filters;
-			}
-			const keys = report_filters.map(item => item.fieldname);
-			keys.unshift('');
-			frm.fields_dict['filter_to_override'].df.options = keys.join('\n');
-			frm.fields_dict['filter_to_override'].refresh();
+		if (!frm.doc.report_type) {
+			return
 		}
+		let report_filters;
+		if (frm.doc.report_type === 'Custom Report'
+			&& frappe.query_reports[frm.doc.reference_report]
+			&& frappe.query_reports[frm.doc.reference_report].filters) {
+			report_filters = frappe.query_reports[frm.doc.reference_report].filters;
+		} else {
+			report_filters = frappe.query_reports[frm.doc.report].filters;
+		}
+		if (!report_filters) {
+			return
+		}
+		const keys = report_filters.filter(item => item.fieldname).map(item => item.fieldname);
+		keys.unshift('');
+		frm.fields_dict['filter_to_override'].df.options = keys.join('\n');
+		frm.fields_dict['filter_to_override'].refresh();
 	}
 });
 

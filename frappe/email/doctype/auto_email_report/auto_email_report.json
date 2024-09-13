@@ -33,6 +33,8 @@
   "format",
   "recipients_section",
   "party",
+  "filter_to_override",
+  "filter_list",
   "recipients",
   "section_break_15",
   "description"
@@ -218,10 +220,20 @@
    "fieldname": "recipients",
    "fieldtype": "Table",
    "options": "Auto Email Report Party"
+  },
+  {
+   "fieldname": "filter_to_override",
+   "fieldtype": "Select",
+   "label": "Envio Individual"
+  },
+  {
+   "fieldname": "filter_list",
+   "fieldtype": "HTML",
+   "label": "Filter List"
   }
  ],
  "links": [],
- "modified": "2024-09-13 08:16:29.570029",
+ "modified": "2024-09-13 09:31:59.679531",
  "modified_by": "Administrator",
  "module": "Email",
  "name": "Auto Email Report",

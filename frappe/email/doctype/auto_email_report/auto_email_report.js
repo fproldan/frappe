@@ -38,6 +38,27 @@ frappe.ui.form.on('Auto Email Report', {
 	onload: function(frm) {
 		frm.trigger('setup_queries');
 	},
+	before_save: function(frm) {
+		if ((frm.doc.party || (frm.doc.recipients && frm.doc.recipients.length > 0)) && !frm.doc.filter_to_override ) {
+			if (!frm.confirmation_shown) {
+				frappe.validated = false;
+				frappe.confirm(
+					'Especificó <b>Tercero</b> sin completar <b>Envio Personalizado</b>, por lo que se enviará el mismo corro a todos los destinatarios. ¿Está seguro de guardar?',
+					function() {
+						frm.confirmation_shown = true;
+						frappe.validated = true;
+						frm.save();
+					},
+					function() {
+						frappe.validated = false;
+					}
+				);
+			}
+		}
+    },
+	after_save: function(frm) {
+        frm.confirmation_shown = false;
+    },
 	party: function(frm) {
 		frm.trigger('clear_recipients_table');
 		manage_filters(frm);

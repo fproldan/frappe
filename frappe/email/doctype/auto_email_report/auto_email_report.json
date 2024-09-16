@@ -224,7 +224,7 @@
   {
    "fieldname": "filter_to_override",
    "fieldtype": "Select",
-   "label": "Envio Individual"
+   "label": "Env\u00edo Personalizado"
   },
   {
    "fieldname": "filter_list",
@@ -233,7 +233,7 @@
   }
  ],
  "links": [],
- "modified": "2024-09-13 09:31:59.679531",
+ "modified": "2024-09-16 09:59:33.415769",
  "modified_by": "Administrator",
  "module": "Email",
  "name": "Auto Email Report",

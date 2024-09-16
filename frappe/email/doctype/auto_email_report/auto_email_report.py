@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 
 import calendar
 from datetime import timedelta
+from json import JSONDecodeError
 
 import frappe
 from frappe import _
@@ -94,8 +95,15 @@ class AutoEmailReport(Document):
 		if self.report_type != 'Report Builder' and self.dynamic_date_filters_set():
 			self.prepare_dynamic_filters()
 
-		columns, data = report.get_data(limit=self.no_of_rows or 100, user = self.user,
+		try:
+			columns, data = report.get_data(limit=self.no_of_rows or 100, user = self.user,
 			filters = self.filters, as_dict=True, ignore_prepared_report=True)
+		except JSONDecodeError:
+			if self.filter_to_override and filter_to_override_data:
+				self.filters[self.filter_to_override] = f'["{filter_to_override_data}"]'
+			columns, data = report.get_data(limit=self.no_of_rows or 100, user = self.user,
+			filters = self.filters, as_dict=True, ignore_prepared_report=True)
+		
 
 		# add serial numbers
 		columns.insert(0, frappe._dict(fieldname='idx', label='', width='30px'))
@@ -340,8 +348,8 @@ def update_field_types(columns):
 @frappe.whitelist()
 def get_recipients_by_filter(doctype, filters):
 	import ast
-	filters = ast.literal_eval(filters)
-	if not filters:
+	filters_list = ast.literal_eval(filters)
+	if not filters_list:
 		return []
 	recipients = frappe.get_list(doctype, filters=filters, limit_page_length=None, order_by="name", pluck="name")
 	return recipients

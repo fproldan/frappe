@@ -348,7 +348,10 @@ def update_field_types(columns):
 @frappe.whitelist()
 def get_recipients_by_filter(doctype, filters):
 	import ast
-	filters_list = ast.literal_eval(filters)
+	try:
+		filters_list = ast.literal_eval(filters)
+	except:
+		return []
 	if not filters_list:
 		return []
 	recipients = frappe.get_list(doctype, filters=filters, limit_page_length=None, order_by="name", pluck="name")

@@ -103,7 +103,7 @@ frappe.ui.form.on('Auto Email Report', {
 			var report_filters_list = []
 			$.each(report_filters, function(key, val){
 				// Remove break fieldtype from the filters
-				if(val.fieldtype != 'Break') {
+				if(val.fieldtype != 'Break' && val.hidden != 1) {
 					report_filters_list.push(val)
 				}
 			})

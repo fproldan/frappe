@@ -208,7 +208,7 @@ class AutoEmailReport(Document):
 		elif self.party and self.recipients:
 			for recipient in self.recipients:
 				
-				email_to = self.get_primary_contact(recipient.link_name)
+				email_to = self.get_primary_contacts(recipient.link_name)
 				if not email_to:
 					continue
 				
@@ -233,7 +233,7 @@ class AutoEmailReport(Document):
 					}]
 
 				frappe.sendmail(
-					recipients = [email_to],
+					recipients = email_to,
 					subject = self.name,
 					message = message,
 					attachments = attachments,
@@ -244,8 +244,8 @@ class AutoEmailReport(Document):
 	def dynamic_date_filters_set(self):
 		return self.dynamic_date_period and self.from_date_field and self.to_date_field
 	
-	def get_primary_contact(self, party_name):
-		primary_contact = frappe.db.sql(
+	def get_primary_contacts(self, party_name):
+		primary_contacts = frappe.db.sql(
 			"""
 			SELECT 
 				con.email_id
@@ -257,15 +257,13 @@ class AutoEmailReport(Document):
 				link.link_doctype = %s
 				AND link.link_name = %s 
 				AND con.is_primary_contact = 1
-			LIMIT 1
 			""",
 			(self.party, party_name),
 			as_dict=True
 		)
-	
-		if not primary_contact or not primary_contact[0].get("email_id"):
+		if not primary_contacts:
 			return None
-		return primary_contact[0].get("email_id")
+		return [contact.get("email_id") for contact in primary_contacts if contact.get("email_id")]
 
 
 @frappe.whitelist()

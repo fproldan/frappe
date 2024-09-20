@@ -73,11 +73,11 @@ class AutoEmailReport(Document):
 				msg= _('Following Report Filters have missing values:') +
 					'<br><br><ul><li>' + ' <li>'.join(throw_list) + '</ul>',
 			)
-
-		if not self.email_to and not self.recipients:
+		print(self.recipients)
+		if not self.email_to and (not self.recipients or not self.filter_to_override or not self.recipients):
 			frappe.throw(
 				title= _('Datos Requeridos'),
-				msg= _('Debe especificar <b>Email Para</b> o <b>Tercero</b>.')
+				msg= _('Debe especificar <b>Email Para</b> o <b>Destinatarios</b>.')
 			)
 
 	def get_report_content(self, filter_to_override_data=None):

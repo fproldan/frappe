@@ -28,7 +28,7 @@ from frappe.utils.background_jobs import enqueue
 def make(doctype=None, name=None, content=None, subject=None, sent_or_received = "Sent",
 	sender=None, sender_full_name=None, recipients=None, communication_medium="Email", send_email=False,
 	print_html=None, print_format=None, attachments='[]', send_me_a_copy=False, cc=None, bcc=None,
-	flags=None, read_receipt=None, print_letterhead=True, email_template=None, communication_type=None,
+	flags=None, read_receipt=None, print_letterhead=True, email_template=None, communication_type=None, add_signature=True,
 	ignore_permissions=False):
 	"""Make a new communication.
 

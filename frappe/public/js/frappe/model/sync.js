@@ -31,6 +31,10 @@ Object.assign(frappe.model, {
 					frappe.meta.sync(d);
 				}
 
+				if (d._draft_name) {
+					d.localname = d._draft_name;
+				}
+
 				if (d.localname) {
 					frappe.model.rename_after_save(d, i);
 				}

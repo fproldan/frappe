@@ -85,6 +85,13 @@ class DBTable:
 			# add _seen column if track_seen
 			if self.meta.get("track_seen"):
 				fields.append({"fieldname": "_seen", "fieldtype": "Text"})
+			
+			# add _draft_name column if set_name_after_submit
+			if getattr(self.meta, "name", "") == "Sales Invoice":
+				fields.append({
+					'fieldname': '_draft_name',
+					'fieldtype': 'Data'
+				})
 
 		for field in fields:
 			if field.get("is_virtual"):

@@ -131,7 +131,7 @@ class NamingSeries:
 		return cint(frappe.db.get_value("Series", prefix, "current", order_by="name"))
 
 
-def set_new_name(doc):
+def set_new_name(doc, draft_name=False):
 	"""
 	Sets the `name` property for the document based on various rules.
 
@@ -148,45 +148,50 @@ def set_new_name(doc):
 	meta = frappe.get_meta(doc.doctype)
 	autoname = meta.autoname or ""
 
-	if autoname.lower() not in ("prompt", "uuid") and not frappe.flags.in_import:
-		doc.name = None
+	if draft_name:
+		doc.name = "({0})".format(make_autoname('hash', doc.doctype))
+	else:
+		autoname = meta.autoname or ""
 
-	if is_autoincremented(doc.doctype, meta):
-		doc.name = frappe.db.get_next_sequence_val(doc.doctype)
-		return
+		if autoname.lower() not in ("prompt", "uuid") and not frappe.flags.in_import:
+			doc.name = None
 
-	if meta.autoname == "UUID":
-		if not doc.name:
-			doc.name = str(uuid_utils.uuid7())
-		elif isinstance(doc.name, UUID | uuid_utils.UUID):
-			doc.name = str(doc.name)
-		elif isinstance(doc.name, str):  # validate
-			try:
-				UUID(doc.name)
-			except ValueError:
-				frappe.throw(_("Invalid value specified for UUID: {}").format(doc.name), InvalidUUIDValue)
-		return
-
-	if getattr(doc, "amended_from", None):
-		_set_amended_name(doc)
-		if doc.name:
+		if is_autoincremented(doc.doctype, meta):
+			doc.name = frappe.db.get_next_sequence_val(doc.doctype)
 			return
 
-	elif getattr(doc.meta, "issingle", False):
-		doc.name = doc.doctype
+		if meta.autoname == "UUID":
+			if not doc.name:
+				doc.name = str(uuid_utils.uuid7())
+			elif isinstance(doc.name, UUID | uuid_utils.UUID):
+				doc.name = str(doc.name)
+			elif isinstance(doc.name, str):  # validate
+				try:
+					UUID(doc.name)
+				except ValueError:
+					frappe.throw(_("Invalid value specified for UUID: {}").format(doc.name), InvalidUUIDValue)
+			return
 
-	if not doc.name:
-		set_naming_from_document_naming_rule(doc)
+		if getattr(doc, "amended_from", None):
+			_set_amended_name(doc)
+			if doc.name:
+				return
 
-	if not doc.name:
-		doc.run_method("autoname")
+		elif getattr(doc.meta, "issingle", False):
+			doc.name = doc.doctype
 
-	if not doc.name and autoname:
-		set_name_from_naming_options(autoname, doc)
+		if not doc.name:
+			set_naming_from_document_naming_rule(doc)
 
-	# at this point, we fall back to name generation with the hash option
-	if not doc.name:
-		doc.name = make_autoname("hash", doc.doctype)
+		if not doc.name:
+			doc.run_method("autoname")
+
+		if not doc.name and autoname:
+			set_name_from_naming_options(autoname, doc)
+
+		# at this point, we fall back to name generation with the hash option
+		if not doc.name:
+			doc.name = make_autoname("hash", doc.doctype)
 
 	doc.name = validate_name(doc.doctype, doc.name)
 

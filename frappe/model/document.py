@@ -28,6 +28,7 @@ from frappe.utils import compare, cstr, date_diff, file_lock, flt, now
 from frappe.utils.data import get_absolute_url, get_datetime, get_timedelta, getdate
 from frappe.utils.global_search import update_global_search
 
+
 if TYPE_CHECKING:
 	from typing_extensions import Self
 
@@ -169,6 +170,7 @@ class Document(BaseDocument, DocRef):
 		"""
 		self.doctype = None
 		self.name = None
+		self._draft_name = None
 		self.flags = frappe._dict()
 		if args:
 			self._init_dispatch(args[0], *args[1:], **kwargs)
@@ -365,7 +367,7 @@ class Document(BaseDocument, DocRef):
 		self._validate_links()
 		self.check_permission("create")
 		self.run_method("before_insert")
-		self.set_new_name(set_name=set_name, set_child_names=set_child_names)
+		self.set_new_name(draft_name=getattr(self.meta, "name", "") == "Sales Invoice" and not self._action == "submit", set_name=set_name, set_child_names=set_child_names)
 		self.set_parent_in_children()
 		self.validate_higher_perm_levels()
 
@@ -430,6 +432,8 @@ class Document(BaseDocument, DocRef):
 
 		:param ignore_permissions: Do not check permissions if True.
 		:param ignore_version: Do not save version if True."""
+		from frappe.model.rename_doc import rename_doc
+
 		if self.flags.in_print:
 			return self
 
@@ -472,6 +476,12 @@ class Document(BaseDocument, DocRef):
 			self.db_update()
 
 		self.update_children()
+
+		if self._action == "submit" and getattr(self.meta, "name", "") == "Sales Invoice":
+			self._draft_name = self.name
+			self.set_new_name()
+			rename_doc(self.doctype, self._draft_name, self.name, ignore_permissions=True, force=True, show_alert=False)
+
 		self.run_post_save_methods()
 
 		# clear unsaved flag
@@ -574,10 +584,12 @@ class Document(BaseDocument, DocRef):
 			return
 		return previous.get(fieldname)
 
-	def set_new_name(self, force=False, set_name=None, set_child_names=True):
+	def set_new_name(self, draft_name=False, force=False, set_name=None, set_child_names=True):
 		"""Calls `frappe.naming.set_new_name` for parent and child docs."""
 
-		if self.flags.name_set and not force:
+		if draft_name and self.flags.draft_name_set and not force and not set_name:
+			return
+		elif not draft_name and self.flags.name_set and not force and not set_name:
 			return
 
 		autoname = self.meta.autoname or ""
@@ -591,14 +603,20 @@ class Document(BaseDocument, DocRef):
 		if set_name:
 			self.name = validate_name(self.doctype, set_name)
 		else:
-			set_new_name(self)
+			set_new_name(self, draft_name=draft_name)
+		
+		if draft_name and getattr(self.meta, "name") == "Sales Invoice":
+			frappe.db.set_value(self.doctype, self.name, "_draft_name", self.name, update_modified=False)
 
 		if set_child_names:
 			# set name for children
 			for d in self.get_all_children():
 				set_new_name(d)
 
-		self.flags.name_set = True
+		if draft_name:
+			self.flags.draft_name_set = True
+		else:
+			self.flags.name_set = True
 
 	def get_title(self):
 		"""Get the document title based on title_field or `title` or `name`"""

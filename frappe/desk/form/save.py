@@ -75,6 +75,8 @@ def send_updated_docs(doc):
 
 	get_docinfo(doc)
 
+	doc.route = doc.get_url()
+
 	d = doc.as_dict()
 	if hasattr(doc, "localname"):
 		d["localname"] = doc.localname

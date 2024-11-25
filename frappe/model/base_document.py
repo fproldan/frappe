@@ -532,6 +532,7 @@ class BaseDocument:
 				"_liked_by",
 				"__run_link_triggers",
 				"__unsaved",
+				"_draft_name",
 			):
 				if value := getattr(self, key, None):
 					doc[key] = value

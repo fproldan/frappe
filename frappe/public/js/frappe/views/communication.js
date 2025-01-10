@@ -34,7 +34,7 @@ frappe.views.CommunicationComposer = class {
 			minimizable: true
 		});
 
-		this.dialog.sections[0].wrapper.addClass('to_section');
+		$(this.dialog.$wrapper.find(".form-section").get(0)).addClass('to_section');
 
 		this.prepare();
 		this.dialog.show();
@@ -95,7 +95,7 @@ frappe.views.CommunicationComposer = class {
 				fieldname: "content",
 				onchange: frappe.utils.debounce(
 					this.save_as_draft.bind(this),
-					500
+					300
 				)
 			},
 			{
@@ -103,11 +103,11 @@ frappe.views.CommunicationComposer = class {
 				label: __("Add Signature"),
 				fieldname: 'add_signature',
 				hidden: 1,
-				click: async function() {
+				click: async function () {
 					let sender_email = this.dialog.get_value('sender') || "";
 					this.content_set = false;
 					await this.set_content(sender_email);
-				}
+				}.bind(this)
 			},
 			{ fieldtype: "Section Break" },
 			{
@@ -166,6 +166,10 @@ frappe.views.CommunicationComposer = class {
 				fieldname: "sender",
 				options: this.user_email_accounts
 			});
+			//Preselect email senders if there is only one
+			if (this.user_email_accounts.length==1) {
+				this['sender'] = this.user_email_accounts
+			}
 		}
 
 		return fields;
@@ -193,8 +197,8 @@ frappe.views.CommunicationComposer = class {
 	}
 
 	setup_add_signature_button() {
-		let is_sender = this.dialog.has_field('sender');
-		this.dialog.set_df_property('add_signature', 'hidden', !is_sender);
+		let has_sender = this.dialog.has_field('sender');
+		this.dialog.set_df_property('add_signature', 'hidden', !has_sender);
 	}
 
 	setup_multiselect_queries() {
@@ -282,7 +286,6 @@ frappe.views.CommunicationComposer = class {
 				const subject_field = me.dialog.fields_dict.subject;
 
 				let content = content_field.get_value() || "";
-				content = content.split('<!-- salutation-ends -->')[1] || content;
 
 				content_field.set_value(`${reply.message}<br>${content}`);
 				subject_field.set_value(reply.subject);
@@ -744,15 +747,6 @@ frappe.views.CommunicationComposer = class {
 
 		message += await this.get_signature(sender_email || null);
 
-		const SALUTATION_END_COMMENT = "<!-- salutation-ends -->";
-		if (this.real_name && !message.includes(SALUTATION_END_COMMENT)) {
-			message = `
-				<p>${__('Dear {0},', [this.real_name], 'Salutation in new email')},</p>
-				${SALUTATION_END_COMMENT}<br>
-				${message}
-			`;
-		}
-
 		if (this.is_a_reply && !this.reply_set) {
 			message += this.get_earlier_reply();
 		}
@@ -774,17 +768,23 @@ frappe.views.CommunicationComposer = class {
 				filters['default_outgoing'] = 1;
 			}
 
-			const email = await frappe.db.get_list("Email Account", {
+			const email_accounts = await frappe.db.get_list("Email Account", {
 				filters: filters,
 				fields: ['signature', 'email_id'],
 				limit: 1
 			});
 
-			signature = email && email[0].signature;
+			let filtered_email = null;
+			if (email_accounts.length) {
+				signature = email_accounts[0].signature;
+				filtered_email = email_accounts[0].email_id;
+			}
 
-			if (this.user_email_accounts &&
-				this.user_email_accounts.includes(email[0].email_id)) {
-				this.dialog.set_value('sender', email[0].email_id);
+			if (!sender_email && filtered_email) {
+				if (this.user_email_accounts &&
+					this.user_email_accounts.includes(filtered_email)) {
+					this.dialog.set_value('sender', filtered_email);
+				}
 			}
 		}
 
@@ -794,7 +794,7 @@ frappe.views.CommunicationComposer = class {
 			signature = signature.replace(/\n/g, "<br>");
 		}
 
-		return "<br><!-- signature-included -->" + signature;
+		return "<br>" + signature;
 	}
 
 	get_earlier_reply() {
@@ -839,12 +839,12 @@ frappe.views.CommunicationComposer = class {
 
 	html2text(html) {
 		// convert HTML to text and try and preserve whitespace
-		const d = document.createElement( 'div' );
-		d.innerHTML = html.replace(/<\/div>/g, '<br></div>')  // replace end of blocks
-			.replace(/<\/p>/g, '<br></p>') // replace end of paragraphs
-			.replace(/<br>/g, '\n');
+		html = html
+			.replace(/<\/div>/g, "<br></div>") // replace end of blocks
+			.replace(/<\/p>/g, "<br></p>") // replace end of paragraphs
+			.replace(/<br>/g, "\n");
 
-		// replace multiple empty lines with just one
-		return d.textContent.replace(/\n{3,}/g, '\n\n');
+		const text = frappe.utils.html2text(html);
+		return text.replace(/\n{3,}/g, "\n\n");
 	}
 };

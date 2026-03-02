@@ -123,7 +123,7 @@ class Report(Document):
 
 	def execute_script_report(self, filters):
 		# save the timestamp to automatically set to prepared
-		threshold = 120
+		threshold = 500
 		res = []
 
 		start_time = datetime.datetime.now()

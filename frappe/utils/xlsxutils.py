@@ -14,6 +14,20 @@ from frappe import _
 from frappe.utils.html_utils import unescape_html
 
 ILLEGAL_CHARACTERS_RE = re.compile(r'[\000-\010]|[\013-\014]|[\016-\037]')
+INVALID_TITLE_REGEX = re.compile(r'[/\\*?\[\]:]') 
+
+def sanitize_sheet_title(title):
+    """
+    Remove invalid characters from Excel sheet title.
+    Excel sheet names cannot contain: / \\ * ? [ ] :
+    Excel sheet names are limited to 31 characters.
+    """
+    if not title:
+        return "Sheet1"
+    # Replace invalid characters with underscore
+    title = INVALID_TITLE_REGEX.sub('_', str(title))
+    # Excel sheet names are limited to 31 characters
+    return title[:31]
 
 
 # return xlsx file object
@@ -22,7 +36,7 @@ def make_xlsx(data, sheet_name, wb=None, column_widths=None, translate=True):
 	if wb is None:
 		wb = openpyxl.Workbook(write_only=True)
 
-	ws = wb.create_sheet(sheet_name, 0)
+	ws = wb.create_sheet(sanitize_sheet_title(sheet_name), 0)
 
 	for i, column_width in enumerate(column_widths):
 		if column_width:

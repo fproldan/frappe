@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 
 import calendar
 from datetime import timedelta
+from json import JSONDecodeError
 
 import frappe
 from frappe import _
@@ -72,8 +73,14 @@ class AutoEmailReport(Document):
 				msg= _('Following Report Filters have missing values:') +
 					'<br><br><ul><li>' + ' <li>'.join(throw_list) + '</ul>',
 			)
+		print(self.recipients)
+		if not self.email_to and (not self.recipients or not self.filter_to_override or not self.recipients):
+			frappe.throw(
+				title= _('Datos Requeridos'),
+				msg= _('Debe especificar <b>Email Para</b> o <b>Destinatarios</b>.')
+			)
 
-	def get_report_content(self):
+	def get_report_content(self, filter_to_override_data=None):
 		'''Returns file in for the report in given format'''
 		report = frappe.get_doc('Report', self.report)
 
@@ -81,12 +88,22 @@ class AutoEmailReport(Document):
 
 		if self.report_type=='Report Builder' and self.data_modified_till:
 			self.filters['modified'] = ('>', now_datetime() - timedelta(hours=self.data_modified_till))
+		
+		if self.filter_to_override and filter_to_override_data:
+			self.filters[self.filter_to_override] = filter_to_override_data
 
 		if self.report_type != 'Report Builder' and self.dynamic_date_filters_set():
 			self.prepare_dynamic_filters()
 
-		columns, data = report.get_data(limit=self.no_of_rows or 100, user = self.user,
+		try:
+			columns, data = report.get_data(limit=self.no_of_rows or 100, user = self.user,
 			filters = self.filters, as_dict=True, ignore_prepared_report=True)
+		except JSONDecodeError:
+			if self.filter_to_override and filter_to_override_data:
+				self.filters[self.filter_to_override] = f'["{filter_to_override_data}"]'
+			columns, data = report.get_data(limit=self.no_of_rows or 100, user = self.user,
+			filters = self.filters, as_dict=True, ignore_prepared_report=True)
+		
 
 		# add serial numbers
 		columns.insert(0, frappe._dict(fieldname='idx', label='', width='30px'))
@@ -162,33 +179,92 @@ class AutoEmailReport(Document):
 		if self.filter_meta and not self.filters:
 			frappe.throw(_("Please set filters value in Report Filter table."))
 
-		data = self.get_report_content()
-		if not data:
-			return
+		if self.email_to:
+			data = self.get_report_content()
+			if not data:
+				return
 
-		attachments = None
-		if self.format == "HTML":
-			message = data
-		else:
-			message = self.get_html_table()
+			attachments = None
+			if self.format == "HTML":
+				message = data
+			else:
+				message = self.get_html_table()
 
-		if not self.format=='HTML':
-			attachments = [{
-				'fname': self.get_file_name(),
-				'fcontent': data
-			}]
+			if not self.format=='HTML':
+				attachments = [{
+					'fname': self.get_file_name(),
+					'fcontent': data
+				}]
 
-		frappe.sendmail(
-			recipients = self.email_to.split(),
-			subject = self.name,
-			message = message,
-			attachments = attachments,
-			reference_doctype = self.doctype,
-			reference_name = self.name
-		)
+			frappe.sendmail(
+				recipients = self.email_to.split(),
+				subject = self.name,
+				message = message,
+				attachments = attachments,
+				reference_doctype = self.doctype,
+				reference_name = self.name
+			)
+		
+		elif self.party and self.recipients:
+			for recipient in self.recipients:
+				
+				email_to = self.get_primary_contacts(recipient.link_name)
+				if not email_to:
+					continue
+				
+				filter_to_override_data = None
+				if self.filter_to_override:
+					filter_to_override_data = recipient.link_name
+				
+				data = self.get_report_content(filter_to_override_data=filter_to_override_data)
+				if not data:
+					return
+
+				attachments = None
+				if self.format == "HTML":
+					message = data
+				else:
+					message = self.get_html_table()
+
+				if not self.format=='HTML':
+					attachments = [{
+						'fname': self.get_file_name(),
+						'fcontent': data
+					}]
+
+				frappe.sendmail(
+					recipients = email_to,
+					subject = self.name,
+					message = message,
+					attachments = attachments,
+					reference_doctype = self.doctype,
+					reference_name = self.name
+				)
 
 	def dynamic_date_filters_set(self):
 		return self.dynamic_date_period and self.from_date_field and self.to_date_field
+	
+	def get_primary_contacts(self, party_name):
+		primary_contacts = frappe.db.sql(
+			"""
+			SELECT 
+				con.email_id
+			FROM 
+				`tabContact` con
+			JOIN 
+				`tabDynamic Link` link ON link.parent = con.name
+			WHERE 
+				link.link_doctype = %s
+				AND link.link_name = %s 
+				AND con.is_primary_contact = 1
+			""",
+			(self.party, party_name),
+			as_dict=True
+		)
+		if not primary_contacts:
+			return None
+		return [contact.get("email_id") for contact in primary_contacts if contact.get("email_id")]
+
 
 @frappe.whitelist()
 def download(name):
@@ -265,3 +341,16 @@ def update_field_types(columns):
 			col.fieldtype = "Data"
 			col.options = ""
 	return columns
+
+
+@frappe.whitelist()
+def get_recipients_by_filter(doctype, filters):
+	import ast
+	try:
+		filters_list = ast.literal_eval(filters)
+	except:
+		return []
+	if not filters_list:
+		return []
+	recipients = frappe.get_list(doctype, filters=filters, limit_page_length=None, order_by="name", pluck="name")
+	return recipients

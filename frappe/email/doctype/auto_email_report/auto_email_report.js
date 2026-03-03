@@ -31,6 +31,16 @@ frappe.ui.form.on('Auto Email Report', {
 				frm.set_value('email_to', frappe.session.user);
 			}
 		}
+		frm.trigger('setup_queries');
+		manage_filters(frm);
+		
+	},
+	onload: function(frm) {
+		frm.trigger('setup_queries');
+	},
+	party: function(frm) {
+		frm.trigger('clear_recipients_table');
+		manage_filters(frm);
 	},
 	report: function(frm) {
 		frm.set_value('filters', '');
@@ -50,10 +60,12 @@ frappe.ui.form.on('Auto Email Report', {
 					frappe.dom.eval(r.message.script || "");
 					frm.script_setup_for = frm.doc.report;
 					frm.trigger('show_filters');
+					frm.trigger('populate_filter_to_override_options');
 				}
 			});
 		} else {
 			frm.trigger('show_filters');
+			frm.trigger('populate_filter_to_override_options');
 		}
 	},
 	show_filters: function(frm) {
@@ -91,7 +103,7 @@ frappe.ui.form.on('Auto Email Report', {
 			var report_filters_list = []
 			$.each(report_filters, function(key, val){
 				// Remove break fieldtype from the filters
-				if(val.fieldtype != 'Break') {
+				if(val.fieldtype != 'Break' && val.hidden != 1) {
 					report_filters_list.push(val)
 				}
 			})
@@ -135,5 +147,114 @@ frappe.ui.form.on('Auto Email Report', {
 			frm.set_df_property('to_date_field', 'options', date_fields);
 			frm.toggle_display('dynamic_report_filters_section', date_fields.length > 0);
 		}
+	},
+	setup_queries: function(frm) {
+		frm.set_query("party", function() {
+			return {
+				query: "frappe.contacts.address_and_contact.filter_dynamic_link_doctypes",
+				filters: {
+					fieldtype: ["in", ["HTML", "Text Editor"]],
+					fieldname: ["in", ["contact_html", "company_description"]],
+				}
+			};
+		});
+		frm.fields_dict['recipients'].grid.get_field('link_doctype').get_query = function() {
+			return {
+				filters: {
+					name: frm.doc.party
+				}
+			};
+		};
+	},
+	clear_recipients_table: function(frm) {
+		let party_value = frm.doc.party;
+		if (party_value) {
+			frm.clear_table('recipients');
+			frm.refresh_field('recipients');
+		}
+	},
+	populate_filter_to_override_options: function(frm) {
+		if (!frm.doc.report_type) {
+			return
+		}
+		let report_filters;
+		if (frm.doc.report_type === 'Custom Report'
+			&& frappe.query_reports[frm.doc.reference_report]
+			&& frappe.query_reports[frm.doc.reference_report].filters) {
+			report_filters = frappe.query_reports[frm.doc.reference_report].filters;
+		} else {
+			report_filters = frappe.query_reports[frm.doc.report].filters;
+		}
+		if (!report_filters) {
+			return
+		}
+		const keys = report_filters.filter(item => item.fieldname).map(item => item.fieldname);
+		keys.unshift('');
+		frm.fields_dict['filter_to_override'].df.options = keys.join('\n');
+		frm.fields_dict['filter_to_override'].refresh();
 	}
 });
+
+
+frappe.ui.form.on('Auto Email Report Party', {
+    recipients_add: function(frm, cdt, cdn) {
+        let party_value = frm.doc.party;
+        if (party_value) {
+            frappe.model.set_value(cdt, cdn, 'link_doctype', party_value);
+        }
+    }
+});
+
+const manage_filters = (frm) => {
+	if (frm.doc.party) {
+		frappe.model.with_doctype(frm.doc.party, () => set_field_options(frm));
+	} else {
+		reset_filter_and_field(frm);
+	}
+}
+
+const reset_filter_and_field = (frm) => {
+	const filter_wrapper = frm.fields_dict.filter_list.$wrapper;
+	filter_wrapper.empty();
+	frm.filter_list = [];
+};
+
+const set_field_options = (frm) => {
+	const filter_wrapper = frm.fields_dict.filter_list.$wrapper;
+	filter_wrapper.empty();
+	frm.filter_list = new frappe.ui.FilterGroup({
+		parent: filter_wrapper,
+		doctype: frm.doc.party,
+		on_change: () => { 
+			frm.call({
+				method: 'frappe.email.doctype.auto_email_report.auto_email_report.get_recipients_by_filter',
+				args: {
+					doctype: frm.doc.party,
+					filters: get_filters(frm),
+				},
+				callback: function(response) {
+					if (response.message) {
+						frm.clear_table('recipients');
+						let names = response.message;
+						names.forEach(name => {
+							frm.add_child('recipients', {
+								link_doctype: frm.doc.party,
+								link_name: name,
+							});
+						});
+						frm.refresh_field('recipients');
+					} else {
+						frm.clear_table('recipients');
+						frm.refresh_field('recipients');
+					}
+				}
+			});
+		},
+	});
+};
+
+const get_filters = (frm) => {
+	return frm.filter_list.get_filters().map(filter => {
+		return filter.slice(0, 4);
+	});
+}

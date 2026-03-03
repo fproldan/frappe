@@ -670,8 +670,10 @@ def floor(s):
 		number representing the largest integer less than or equal to the specified number
 
 	"""
-	try: num = cint(math.floor(flt(s)))
-	except: num = 0
+	try:
+		num = cint(math.floor(flt(s)))
+	except Exception:
+		num = 0
 	return num
 
 def ceil(s):
@@ -689,8 +691,10 @@ def ceil(s):
 		smallest integer greater than or equal to the given number
 
 	"""
-	try: num = cint(math.ceil(flt(s)))
-	except: num = 0
+	try:
+		num = cint(math.ceil(flt(s)))
+	except Exception:
+		num = 0
 	return num
 
 def cstr(s, encoding='utf-8'):
@@ -1456,6 +1460,26 @@ def unique(seq):
 def strip(val, chars=None):
 	# \ufeff is no-width-break, \u200b is no-width-space
 	return (val or "").replace("\ufeff", "").replace("\u200b", "").strip(chars)
+
+
+def get_string_between(start, string, end):
+	if not string:
+		return ""
+
+	regex = "{0}(.*){1}".format(start, end)
+	out = re.search(regex, string)
+
+	return out.group(1) if out else string
+
+
+def to_markdown(html):
+	from html.parser import HTMLParser
+
+	regex = "{0}(.*){1}".format(start, end)
+	out = re.search(regex, string)
+
+	return out.group(1) if out else string
+
 
 def to_markdown(html):
 	from html2text import html2text

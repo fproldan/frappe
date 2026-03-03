@@ -3,12 +3,17 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-from datetime import timedelta
+
+from datetime import datetime, timedelta
+
+import pytz
 
 import frappe
 from frappe import _
 from frappe.utils import cstr, cint
 from frappe.model.document import Document
+from frappe.utils import cint, cstr, get_time_zone
+
 
 class TokenCache(Document):
 
@@ -52,16 +57,19 @@ class TokenCache(Document):
 		return self
 
 	def get_expires_in(self):
-		expiry_time = frappe.utils.get_datetime(self.modified) + timedelta(seconds=self.expires_in)
-		return (expiry_time - frappe.utils.now_datetime()).total_seconds()
+		system_timezone = pytz.timezone(get_time_zone())
+		modified = system_timezone.localize(frappe.utils.get_datetime(self.modified))
+		expiry_utc = modified.astimezone(pytz.utc) + timedelta(seconds=self.expires_in)
+		now_utc = datetime.utcnow().replace(tzinfo=pytz.utc)
+		return cint((expiry_utc - now_utc).total_seconds())
 
 	def is_expired(self):
 		return self.get_expires_in() < 0
 
 	def get_json(self):
 		return {
-			'access_token': self.get_password('access_token', ''),
-			'refresh_token': self.get_password('refresh_token', ''),
-			'expires_in': self.get_expires_in(),
-			'token_type': self.token_type
+			"access_token": self.get_password("access_token", False),
+			"refresh_token": self.get_password("refresh_token", False),
+			"expires_in": self.get_expires_in(),
+			"token_type": self.token_type,
 		}

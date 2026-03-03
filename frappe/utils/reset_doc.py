@@ -30,8 +30,8 @@ def reset_doc(doctype):
 		git_link = '/'.join(['https://raw.githubusercontent.com/frappe',\
 			app, branch, doc_path.split('apps/'+app)[1]])
 		original_file = urlopen(git_link).read()
-	except:
-		print('Did not find {0} in {1}'.format(doctype, app))
+	except Exception:
+		print("Did not find {0} in {1}".format(doctype, app))
 		return
 
 	# load local and original json objects

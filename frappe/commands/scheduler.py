@@ -10,8 +10,10 @@ def _is_scheduler_enabled():
 	enable_scheduler = False
 	try:
 		frappe.connect()
-		enable_scheduler = cint(frappe.db.get_single_value("System Settings", "enable_scheduler")) and True or False
-	except:
+		enable_scheduler = (
+			cint(frappe.db.get_single_value("System Settings", "enable_scheduler")) and True or False
+		)
+	except Exception:
 		pass
 	finally:
 		frappe.db.close()

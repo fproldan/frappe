@@ -17,10 +17,22 @@ from email_reply_parser import EmailReplyParser
 
 import frappe
 from frappe import _, safe_decode, safe_encode
-from frappe.core.doctype.file.file import (MaxFileSizeReachedError,
-	get_random_filename)
-from frappe.utils import (cint, convert_utc_to_user_timezone, cstr,
-	extract_email_id, markdown, now, parse_addr, strip)
+from frappe.core.doctype.file.file import MaxFileSizeReachedError, get_random_filename
+from frappe.email.oauth import Oauth
+from frappe.utils import (
+	cint,
+	convert_utc_to_user_timezone,
+	cstr,
+	extract_email_id,
+	get_string_between,
+	markdown,
+	now,
+	parse_addr,
+	strip,
+)
+
+# fix due to a python bug in poplib that limits it to 2048
+poplib._MAXLINE = 20480
 
 
 class EmailSizeExceededError(frappe.ValidationError): pass
@@ -47,10 +59,7 @@ class EmailServer:
 
 	def connect(self):
 		"""Connect to **Email Account**."""
-		if cint(self.settings.use_imap):
-			return self.connect_imap()
-		else:
-			return self.connect_pop()
+		return self.connect_imap() if cint(self.settings.use_imap) else self.connect_pop()
 
 	def connect_imap(self):
 		"""Connect to IMAP"""
@@ -58,8 +67,23 @@ class EmailServer:
 			if cint(self.settings.use_ssl):
 				self.imap = Timed_IMAP4_SSL(self.settings.host, self.settings.incoming_port, timeout=frappe.conf.get("pop_timeout"))
 			else:
-				self.imap = Timed_IMAP4(self.settings.host, self.settings.incoming_port, timeout=frappe.conf.get("pop_timeout"))
-			self.imap.login(self.settings.username, self.settings.password)
+				self.imap = Timed_IMAP4(
+					self.settings.host, self.settings.incoming_port, timeout=frappe.conf.get("pop_timeout")
+				)
+				if self.settings.use_starttls:
+					self.imap.starttls()
+
+			if self.settings.use_oauth:
+				Oauth(
+					self.imap,
+					self.settings.email_account,
+					self.settings.username,
+					self.settings.access_token,
+				).connect()
+
+			else:
+				self.imap.login(self.settings.username, self.settings.password)
+
 			# connection established!
 			return True
 
@@ -76,8 +100,17 @@ class EmailServer:
 			else:
 				self.pop = Timed_POP3(self.settings.host, self.settings.incoming_port, timeout=frappe.conf.get("pop_timeout"))
 
-			self.pop.user(self.settings.username)
-			self.pop.pass_(self.settings.password)
+			if self.settings.use_oauth:
+				Oauth(
+					self.pop,
+					self.settings.email_account,
+					self.settings.username,
+					self.settings.access_token,
+				).connect()
+
+			else:
+				self.pop.user(self.settings.username)
+				self.pop.pass_(self.settings.password)
 
 			# connection established!
 			return True
@@ -326,8 +359,8 @@ class EmailServer:
 		if not incoming_mail:
 			try:
 				# retrieve headers
-				incoming_mail = Email(b'\n'.join(self.pop.top(msg_num, 5)[1]))
-			except:
+				incoming_mail = Email(b"\n".join(self.pop.top(msg_num, 5)[1]))
+			except Exception:
 				pass
 
 		if incoming_mail:
@@ -377,14 +410,16 @@ class Email:
 		self.set_content_and_type()
 		self.set_subject()
 		self.set_from()
-		self.message_id = (self.mail.get('Message-ID') or "").strip(" <>")
+
+		message_id = self.mail.get("Message-ID") or ""
+		self.message_id = get_string_between("<", message_id, ">")
 
 		if self.mail["Date"]:
 			try:
 				utc = email.utils.mktime_tz(email.utils.parsedate_tz(self.mail["Date"]))
 				utc_dt = datetime.datetime.utcfromtimestamp(utc)
-				self.date = convert_utc_to_user_timezone(utc_dt).strftime('%Y-%m-%d %H:%M:%S')
-			except:
+				self.date = convert_utc_to_user_timezone(utc_dt).strftime("%Y-%m-%d %H:%M:%S")
+			except Exception:
 				self.date = now()
 		else:
 			self.date = now()
@@ -508,7 +543,7 @@ class Email:
 				try:
 					fname = fname.replace('\n', ' ').replace('\r', '')
 					fname = cstr(decode_header(fname)[0][0])
-				except:
+				except Exception:
 					fname = get_random_filename(content_type=content_type)
 			else:
 				fname = get_random_filename(content_type=content_type)

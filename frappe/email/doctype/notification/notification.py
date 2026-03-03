@@ -136,8 +136,8 @@ def get_context(context):
 			if self.channel == 'System Notification' or self.send_system_notification:
 				self.create_system_notification(doc, context)
 
-		except:
-			frappe.log_error(title='Failed to send notification', message=frappe.get_traceback())
+		except Exception:
+			frappe.log_error(title="Failed to send notification", message=frappe.get_traceback())
 
 		if self.set_property_after_alert:
 			allow_update = True
@@ -190,7 +190,7 @@ def get_context(context):
 
 	def send_an_email(self, doc, context):
 		from email.utils import formataddr
-		from frappe.core.doctype.communication.email import make as make_communication
+		from frappe.core.doctype.communication.email import _make as make_communication
 		subject = self.subject
 		if "{" in subject:
 			subject = frappe.render_template(self.subject, context)
@@ -220,7 +220,8 @@ def get_context(context):
 		# Add mail notification to communication list
 		# No need to add if it is already a communication.
 		if doc.doctype != 'Communication':
-			make_communication(doctype=doc.doctype,
+			make_communication(
+				doctype=doc.doctype,
 				name=doc.name,
 				content=message,
 				subject=subject,
@@ -232,7 +233,7 @@ def get_context(context):
 				cc=cc,
 				bcc=bcc,
 				communication_type='Automated Message',
-				ignore_permissions=True)
+			)
 
 	def send_a_slack_msg(self, doc, context):
 		send_slack_message(

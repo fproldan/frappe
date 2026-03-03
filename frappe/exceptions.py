@@ -113,8 +113,29 @@ class AttachmentLimitReached(ValidationError): pass
 class QueryTimeoutError(ValidationError): pass
 class QueryDeadlockError(ValidationError): pass
 # OAuth exceptions
-class InvalidAuthorizationHeader(CSRFTokenError): pass
-class InvalidAuthorizationPrefix(CSRFTokenError): pass
-class InvalidAuthorizationToken(CSRFTokenError): pass
-class InvalidDatabaseFile(ValidationError): pass
-class ExecutableNotFound(FileNotFoundError): pass
+class InvalidAuthorizationHeader(CSRFTokenError):
+	pass
+
+
+class InvalidAuthorizationPrefix(CSRFTokenError):
+	pass
+
+
+class InvalidAuthorizationToken(CSRFTokenError):
+	pass
+
+
+class InvalidDatabaseFile(ValidationError):
+	pass
+
+
+class ExecutableNotFound(FileNotFoundError):
+	pass
+
+
+class LinkExpiredError(ValidationError):
+	pass
+
+
+class InvalidKey(ValidationError):
+	pass

@@ -741,6 +741,12 @@ class DatabaseQuery(object):
 				if meta.is_submittable:
 					args.order_by = "`tab{0}`.docstatus asc, {1}".format(self.doctype, args.order_by)
 
+		# desempate único para paginación determinista (LIMIT/OFFSET) DIAMOERP
+		if (args.order_by and self.limit_page_length and not self.group_by
+				and not self.distinct
+				and not re.search(r"[`\.\s]name[`\s]", args.order_by)):
+			args.order_by += ", `tab{0}`.`name` asc".format(self.doctype)
+
 	def validate_order_by_and_group_by(self, parameters):
 		"""Check order by, group by so that atleast one column is selected and does not have subquery"""
 		if not parameters:
